@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <title>jQuip - jQuery in parts</title>
+    <script type="text/javascript" src="jquip.min.js"></script>
+    <script type="text/javascript" src="jquip.docready.min.js"></script>
+    <script type="text/javascript" src="jquip.css.min.js"></script>
+    <script type="text/javascript" src="jquip.ajax.min.js"></script>
+    <script type="text/javascript" src="jquip.custom.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $(document.body).append("<p>This message added on document ready</p>");
+            $(".attrs button").click(function ()
+            {
+            	var $dl = $(this).next();
+                $.each($(this).parent().data(), function (name, val)
+                {
+                    $dl.append("<dt>" + name + "</dt>").append("<dd>" + val + "</dd>");
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    
+    <h2>Simple Demo</h2>
+
+    <div class="attrs" data-one="uno" data-two="due" data-three="tre">
+       <button>Print Data Attributes</button>
+       <dl></dl>
+    </div>
+
+</body>
+</html>
