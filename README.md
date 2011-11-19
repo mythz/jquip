@@ -147,4 +147,4 @@ I'd love help with this so pull requests are more than welcome!
 The main task that needs doing is to get all the missing jQuery parts in as plugins 
 and a comprehensive test suite so we can properly identify the parts of jQuery supported.
 
-Feedback is welcome, drop me a line on twitter at [@demisbellot](http://twitter.com/demisbellot).
+Feedback is welcome, drop me a line on [@demisbellot](http://twitter.com/demisbellot).
