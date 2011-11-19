@@ -8,7 +8,8 @@ The core **jquip.js** is only **4.28KB** (minified and gzipped) only **13%** of 
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
-Includes 7-8x Faster DOM traversal for <= IE7. (i.e. where there's no querySelector) *see limitations
+Includes 7-8x Faster DOM traversal for <= IE7. (i.e. where there's no querySelector) *see limitations below.
+
 Most code has been ported from jQuery and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
 Licence: http://www.opensource.org/licenses/mit-license.php
