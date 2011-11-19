@@ -5,7 +5,7 @@ jQuery getting too big?
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
-The core **jquip.js** is only **4.28KB minified and gzipped** only **13% the size of jQuery**.
+The core **jquip.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
 
 Includes 7-8x Faster DOM traversal for <= IE7. (i.e. where there's no querySelector) *see limitations
 Most code has been ported from jQuery and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
@@ -16,7 +16,7 @@ Licence: http://www.opensource.org/licenses/mit-license.php
 
 Methods marked with * are only partially implemented.
 
-  - [$()](http://api.jquery.com/jQuery/) 
+  - [$(selector)](http://api.jquery.com/jQuery/) 
 	- $(selector, context), $(element), $(array)
 	- $(callback) requires **docready** plugin.
 
@@ -32,14 +32,14 @@ Methods marked with * are only partially implemented.
   - before
   - after
   - toggle*
-  - hide, show, fadeIn and fadeOut * does so without animation, consider using [enhances animaiton plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)
+  - hide, show, fadeIn and fadeOut *does so without animation, consider using [enhances animaiton plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
   - eq
   - first
   - last
   - slice
   - find*
   - remove
-  - val * does not do checkbox, select, etc.
+  - val - *does not do checkbox, select, etc.*
   - html
   - addClass
   - removeClass
