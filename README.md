@@ -140,6 +140,8 @@ At the moment this only gets thrown for complex filters that filter on more than
    - TBODY INPUT[name='chkProcess']
    - TBODY INPUT[type='text']
 
+Events passed to your event handers are the 'real' browser DOM events. 
+You can use the jquip.custom $.namedKey() feature for cross-browser key detection.
 
 ### Contributing
 
