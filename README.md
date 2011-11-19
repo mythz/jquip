@@ -132,6 +132,7 @@ At the moment this only gets thrown for complex filters that filter on more than
 * For <= IE7 all selectors require an Id (i.e. #) or Tag Name (e.g. INPUT) in each child selector.
  
  Valid Examples:
+
    - TBODY TD.c1 INPUT
    - TH.c1 STRONG
    - #btnSubmit SPAN
