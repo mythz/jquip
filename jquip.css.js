@@ -128,7 +128,7 @@ $.addPlugin("css", function ($) {
         }
         return l ? fn(els[0], key) : undefined;
     };
-    $.each(["Height", "Width"], function (name, i) {
+    $._each(["Height", "Width"], function (name, i) {
         var type = name.toLowerCase();
         $.fn["inner" + name] = function () {
             var el = this[0];

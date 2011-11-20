@@ -77,8 +77,8 @@ change select submit keydown keypress keyup error
 
 ### static methods off $
   
-  - $.each and Underscore's faster [_.each](http://documentcloud.github.com/underscore/#each)
-  - [_.select](http://documentcloud.github.com/underscore/#select)
+  - $.each and Underscore's faster [$._each](http://documentcloud.github.com/underscore/#each)
+  - [$._select](http://documentcloud.github.com/underscore/#select)
   - $.filter
   - $.dir
   - $.nth

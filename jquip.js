@@ -35,7 +35,8 @@ var $ = (function ()
 		var parts = tagSel.split('.'), tag = parts[0], cls = parts.length == 2 && parts[1];
 		var el = $el(rootEl);
 		var fPos = tag.indexOf('['), fName, fValue;
-		if (fPos != -1) {
+		if (fPos != -1)
+		{
 			parts = tag.substring(fPos + 1, tag.length - 1).split('=');
 			fName = parts[0], fValue = parts.length == 2 && parts[1];
 			if (fValue && fValue.charAt(0) == "'")
@@ -45,10 +46,12 @@ var $ = (function ()
 		var els = el.getElementsByTagName(tag);
 		if (!cls && !fName) return els;
 		var ret = [];
-		for (var i = 0, l = els.length; i < l; i++) {
+		for (var i = 0, l = els.length; i < l; i++)
+		{
 			var childEl = els[i];
 			if ((!cls || (childEl.className && childEl.className.indexOf(cls) != -1))
-                    && (!fName || childEl[fName] == fValue)) {
+                    && (!fName || childEl[fName] == fValue))
+			{
 				ret.push(childEl);
 			}
 		}
@@ -64,7 +67,7 @@ var $ = (function ()
 
 	$.fn = $.prototype = {
 		constructor: $,
-		init: function (selector, ctx) 
+		init: function (selector, ctx)
 		{
 			for (var i = 0, l = $.constructors.length; i < l; i++)
 				if ($.constructors[i].apply(this, arguments)) return this;
@@ -74,20 +77,23 @@ var $ = (function ()
 			{
 				console.warn("handling $(onDocumentReadyFn) not registerd. ignoring...");
 				return this;
-			} else if ($.isArray(selector)) return this.make(selector);			
+			} else if ($.isArray(selector)) return this.make(selector);
 			if (selector.nodeType || $.isWindow(selector)) return this.make([selector]);
 			if (doc.querySelectorAll) return this.make((ctx || doc).querySelectorAll(selector));
 
 			var els, resSet = [[(ctx || doc)]], args = selector.split(' ');
-			for (var i = 0, l = args.length; i < l; i++) {
+			for (var i = 0, l = args.length; i < l; i++)
+			{
 				var parentSet = resSet[i];
 				if (parentSet.length == 0) return this.make([]); //short-circuit
 				var sel = args[i], res = [];
-				if (sel.charAt(0) === '#') {
+				if (sel.charAt(0) === '#')
+				{
 					resSet.push([(ctx || doc).getElementById(sel.substring(1))]);
 					continue;
 				}
-				for (var j = 0, jlen = parentSet.length; j < jlen; j++) {
+				for (var j = 0, jlen = parentSet.length; j < jlen; j++)
+				{
 					els = $find(parentSet[j], sel);
 					for (var k = 0, klen = els.length; k < klen; k++)
 						res.push(els[k]);
@@ -129,29 +135,34 @@ var $ = (function ()
 		},
 		append: function ()
 		{
-			return this.domManip(arguments, true, function (el) {
-				if (this.nodeType === 1) 
-					this.appendChild(el);				
+			return this.domManip(arguments, true, function (el)
+			{
+				if (this.nodeType === 1)
+					this.appendChild(el);
 			});
 		},
 		prepend: function ()
 		{
-			return this.domManip(arguments, true, function (el) {
+			return this.domManip(arguments, true, function (el)
+			{
 				if (this.nodeType === 1)
 					this.insertBefore(el, this.firstChild);
 			});
 		},
 		before: function ()
 		{
-			this.domManip(arguments, false, function (el) {
+			this.domManip(arguments, false, function (el)
+			{
 				this.parentNode.insertBefore(el, this);
 			});
 			return this;
 		},
 		after: function ()
 		{
-			if (this[0] && this[0].parentNode) {
-				return this.domManip(arguments, false, function (el) {
+			if (this[0] && this[0].parentNode)
+			{
+				return this.domManip(arguments, false, function (el)
+				{
 					this.parentNode.insertBefore(el, this.nextSibling);
 				});
 			}
@@ -161,7 +172,8 @@ var $ = (function ()
 		{
 			var value = args[0];
 			if (typeof value != "string") throw "Not supported: " + value;
-			return this.each(function () {
+			return this.each(function ()
+			{
 				var frag = $.fromHtml(value);
 				cb.call(this, frag);
 			});
@@ -202,17 +214,21 @@ var $ = (function ()
 		find: function (sel)
 		{
 			var self = this, i, l;
-			if (typeof sel !== "string") {
-				return $(sel).filter(function () {
+			if (typeof sel !== "string")
+			{
+				return $(sel).filter(function ()
+				{
 					for (i = 0, l = self.length; i < l; i++)
 						if ($.contains(self[i], this)) return true;
 				});
 			}
 			var ret = this.pushStack("", "find", sel), len, n, r;
-			for (i = 0, l = this.length; i < l; i++) {
+			for (i = 0, l = this.length; i < l; i++)
+			{
 				len = ret.len;
 				$.merge(ret, $(sel, this[i]));
-				if (i == 0) {
+				if (i == 0)
+				{
 					for (n = len; n < ret.length; n++)
 						for (r = 0; r < len; r++)
 							if (ret[r] === ret[n]) { ret.splice(n--, 1); break; }
@@ -239,19 +255,25 @@ var $ = (function ()
 		{
 			var cls, i, l, el, setClass, c, cl;
 			if ($.isFunction(value))
-				return this.each(function (j) {
+				return this.each(function (j)
+				{
 					$(this).addClass(value.call(this, j, this.className));
 				});
-			if (value && typeof value === "string") {
+			if (value && typeof value === "string")
+			{
 				cls = value.split(rspace);
-				for (i = 0, l = this.length; i < l; i++) {
+				for (i = 0, l = this.length; i < l; i++)
+				{
 					el = this[i];
-					if (el.nodeType === 1) {
+					if (el.nodeType === 1)
+					{
 						if (!el.className && cls.length === 1)
 							el.className = value;
-						else {
+						else
+						{
 							setClass = " " + el.className + " ";
-							for (c = 0, cl = cls.length; c < cl; c++) {
+							for (c = 0, cl = cls.length; c < cl; c++)
+							{
 								if (! ~setClass.indexOf(" " + cls[c] + " "))
 									setClass += cls[c] + " ";
 							}
@@ -266,18 +288,24 @@ var $ = (function ()
 		{
 			var clss, i, l, el, cls, c, cl;
 			if ($.isFunction(value))
-				return this.each(function (j) {
+				return this.each(function (j)
+				{
 					$(this).removeClass(value.call(this, j, this.className));
 				});
 
-			if ((value && typeof value === "string") || value === undefined) {
+			if ((value && typeof value === "string") || value === undefined)
+			{
 				clss = (value || "").split(rspace);
-				for (i = 0, l = this.length; i < l; i++) {
+				for (i = 0, l = this.length; i < l; i++)
+				{
 					el = this[i];
-					if (el.nodeType === 1 && el.className) {
-						if (value) {
+					if (el.nodeType === 1 && el.className)
+					{
+						if (value)
+						{
 							cls = (" " + el.className + " ").replace(rclass, " ");
-							for (c = 0, cl = clss.length; c < cl; c++) {
+							for (c = 0, cl = clss.length; c < cl; c++)
+							{
 								cls = cls.replace(" " + clss[c] + " ", " ");
 							}
 							el.className = $.trim(cls);
@@ -296,15 +324,17 @@ var $ = (function ()
 					return true;
 			return false;
 		},
-		fadeIn: function () 
+		fadeIn: function ()
 		{
-			this.each(function () {
+			this.each(function ()
+			{
 				$(this).show();
 			});
 		},
 		fadeOut: function ()
 		{
-			this.each(function () {
+			this.each(function ()
+			{
 				$(this).hide();
 			});
 		}
@@ -318,7 +348,8 @@ var $ = (function ()
         nativeMap = ArrayProto.map,
         nativeFilter = ArrayProto.filter;
 
-	$.each = function (o, cb, args) {
+	$.each = function (o, cb, args)
+	{
 		var k, i = 0, l = o.length, isObj = l === undefined || $.isFunction(o);
 		if (args)
 		{
@@ -328,7 +359,8 @@ var $ = (function ()
 					else
 						for (; i < l; )
 							if (cb.apply(o[i++], args) === false) break;
-		} else {
+		} else
+		{
 			if (isObj)
 				for (k in o)
 					if (cb.call(o[k], k, o[k]) === false) break;
@@ -356,23 +388,25 @@ var $ = (function ()
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	};
+	$._each = _.each;
 	if (!_.select) _.select = function (o, fn, ctx)
 	{
 		var results = [];
 		if (o == null) return results;
 		if (nativeFilter && o.filter === nativeFilter) return o.filter(fn, ctx);
-		_.each(o, function (value, index, list)
+		$._each(o, function (value, index, list)
 		{
 			if (fn.call(ctx, value, index, list)) results[results.length] = value;
 		});
 		return results;
 	};
+	$._select = _.select;
 	$.filter = function (expr, els, not)
 	{
 		var ret = [], isTagOnly = (expr.indexOf(' ') === -1);
 		if (isTagOnly)
 		{
-			_.each(els, function (el)
+			$._each(els, function (el)
 			{
 				if (el.tagName == expr) ret.push(el);
 			});
@@ -409,7 +443,7 @@ var $ = (function ()
 		var results = [];
 		if (o == null) return results;
 		if (nativeMap && o.map === nativeMap) return o.map(fn, ctx);
-		_.each(o, function (value, index, list)
+		$._each(o, function (value, index, list)
 		{
 			results.push(fn.call(ctx, value, index, list));
 		});
@@ -443,7 +477,7 @@ var $ = (function ()
 			return null;
 		}
 		var o = {};
-		_.each($.attrs(el), function (val, aName)
+		$._each($.attrs(el), function (val, aName)
 		{
 			if (aName.indexOf("data-") !== 0 || !val) return;
 			o[aName.substr("data-".length)] = val;
@@ -451,7 +485,8 @@ var $ = (function ()
 		if (typeof name == "string") return o[name];
 		return o;
 	};
-	$.attrs = function (el) {
+	$.attrs = function (el)
+	{
 		var o = {};
 		for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++)
 			o[attrs.item(i).nodeName] = attrs.item(i).nodeValue;
@@ -460,7 +495,8 @@ var $ = (function ()
 	$.trim = trim
         ? function (text) { return text == null ? "" : trim.call(text); }
         : function (text) { return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
-	$.indexOf = function (el, arr) {
+	$.indexOf = function (el, arr)
+	{
 		if (!arr) return -1;
 		if (indexOf) return indexOf.call(arr, el);
 
@@ -469,7 +505,8 @@ var $ = (function ()
 				return i;
 		return -1;
 	};
-	$.fn.trigger = function(name) {
+	$.fn.trigger = function (name)
+	{
 		var $this = this;
 		return this.each(function (i)
 		{
@@ -479,7 +516,8 @@ var $ = (function ()
 			return $this;
 		});
 	};
-	_.each("Boolean Number String Function Array Date RegExp Object".split(" "), function (name, i) {
+	$._each("Boolean Number String Function Array Date RegExp Object".split(" "), function (name, i)
+	{
 		class2type["[object " + name + "]"] = name.toLowerCase();
 		return this;
 	});
@@ -488,7 +526,8 @@ var $ = (function ()
 	$.isArray = Array.isArray || function (o) { return $.type(o) === "array"; };
 	$.isWindow = function (o) { return o && typeof o === "object" && "setInterval" in o; };
 	$.isNaN = function (obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); };
-	$.merge = function (a1, a2) {
+	$.merge = function (a1, a2)
+	{
 		var i = a1.length, j = 0;
 		if (typeof a2.length === "number")
 			for (var l = a2.length; j < l; j++)
@@ -499,8 +538,10 @@ var $ = (function ()
 		a1.length = i;
 		return a1;
 	};
-	$.extend = function (o) {
-		_.each(slice.call(arguments, 1), function (a) {
+	$.extend = function (o)
+	{
+		$._each(slice.call(arguments, 1), function (a)
+		{
 			for (var p in a) if (a[p] !== void 0) o[p] = a[p];
 		});
 		return o;
@@ -508,20 +549,25 @@ var $ = (function ()
 	$.makeArray = function (arr, results)
 	{
 		var ret = results || [];
-		if (arr != null) {
+		if (arr != null)
+		{
 			var type = $.type(arr);
-			if (arr.length == null || type === "string" || type === "function" || type === "regexp" || $.isWindow(arr)) {
+			if (arr.length == null || type === "string" || type === "function" || type === "regexp" || $.isWindow(arr))
+			{
 				push.call(ret, arr);
-			} else {
+			} else
+			{
 				$.merge(ret, arr);
 			}
 		}
 		return ret;
 	};
-	var sibChk = function (a, b, ret) {
+	var sibChk = function (a, b, ret)
+	{
 		if (a === b) return ret;
 		var cur = a.nextSibling;
-		while (cur) {
+		while (cur)
+		{
 			if (cur === b) return -1;
 			cur = cur.nextSibling;
 		}
@@ -558,7 +604,8 @@ var $ = (function ()
         };
 	$.unique = function (results)
 	{
-		if (sortOrder) {
+		if (sortOrder)
+		{
 			hasDuplicate = baseHasDuplicate;
 			results.sort(sortOrder);
 			if (hasDuplicate)
@@ -568,12 +615,15 @@ var $ = (function ()
 		return results;
 	};
 
-	_.each(("blur focus focusin focusout load resize scroll unload click dblclick " +
+	$._each(("blur focus focusin focusout load resize scroll unload click dblclick " +
             "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
             "change select submit keydown keypress keyup error").split(" "),
-        function (name, i) {
-        	$.fn[name] = function (data, fn) {
-        		if (fn == null) {
+        function (name, i)
+        {
+        	$.fn[name] = function (data, fn)
+        	{
+        		if (fn == null)
+        		{
         			fn = data;
         			data = null;
         		}
@@ -581,7 +631,7 @@ var $ = (function ()
         	};
         }
     );
-	_.each({
+	$._each({
 		parent: function (el) { var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
 		parents: function (el) { return $.dir(el, "parentNode"); },
 		parentsUntil: function (el, i, until) { return $.dir(el, "parentNode", until); },
@@ -593,11 +643,14 @@ var $ = (function ()
 		prevUntil: function (el, i, until) { return $.dir(el, "previousSibling", until); },
 		siblings: function (el) { return $.sibling(el.parentNode.firstChild, el); },
 		children: function (el) { return $.sibling(el.firstChild); },
-		contents: function (el) {
+		contents: function (el)
+		{
 			return $.nodeName(el, "iframe") ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
 		}
-	}, function (fn, name) {
-		$.fn[name] = function (until, sel) {
+	}, function (fn, name)
+	{
+		$.fn[name] = function (until, sel)
+		{
 			var ret = $.map(this, fn, until), args = slice.call(arguments);
 			if (!runtil.test(name)) sel = until;
 			if (sel && typeof sel === "string") ret = $.filter(sel, ret);
@@ -607,9 +660,12 @@ var $ = (function ()
 		};
 	});
 
-	function boxmodel() {
-		if (!doc.body) {
-			$(window).bind("load", function() {
+	function boxmodel()
+	{
+		if (!doc.body)
+		{
+			$(window).bind("load", function ()
+			{
 				$.support = boxmodel();
 			});
 			return null;
@@ -622,7 +678,8 @@ var $ = (function ()
 		doc.body.removeChild(d);
 		return w == 40;
 	}
-	(function () {
+	(function ()
+	{
 		var div = document.createElement("div");
 		div.style.display = "none";
 		div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -634,12 +691,15 @@ var $ = (function ()
 		};
 	})();
 
-	function getWindow(el) {
+	function getWindow(el)
+	{
 		return $.isWindow(el) ? el : el.nodeType === 9 ? el.defaultView || el.parentWindow : false;
 	}
-	_.each(["Left", "Top"], function (name, i) {
+	$._each(["Left", "Top"], function (name, i)
+	{
 		var method = "scroll" + name;
-		$.fn[method] = function (val) {
+		$.fn[method] = function (val)
+		{
 			var el, win;
 			if (val === undefined)
 			{
