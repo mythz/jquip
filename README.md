@@ -4,7 +4,8 @@ The primary goal of this project would be for the feedback/demand to kickstart j
 re-organizing its code-base so it's more modular since we believe we've proved the most useful parts of jQuery 
 is a fraction of its code-base. 
 
-To this end, follow this project if you want jquery.com to measure the demand for this.
+To this end, follow this project if you want jquery.com to measure the demand for this. Another project with 
+similar goals is http://ender.no.de/ - for node.js.
 
 
 # Introducing jquip - aka jQuery-in-parts.

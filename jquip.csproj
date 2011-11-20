@@ -34,10 +34,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="default.htm" />
+    <Content Include="jquip.ajax.js" />
+    <Content Include="jquip.ajax.min.js" />
     <Content Include="jquip.css.js" />
+    <Content Include="jquip.css.min.js" />
     <Content Include="jquip.custom.js" />
+    <Content Include="jquip.custom.min.js" />
     <Content Include="jquip.docready.js" />
+    <Content Include="jquip.docready.min.js" />
     <Content Include="jquip.js" />
+    <Content Include="jquip.min.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
