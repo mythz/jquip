@@ -39,9 +39,9 @@ task :concat, [:addons] => :whitespace do |task, args|
   end
 
   File.open(File.join(JQUIP_DIST_DIR, 'jquip.js'), 'w') do |f|
-    f.puts components.map do |component|
+    f.puts components.map { |component|
       File.read File.join(JQUIP_SRC_DIR, "#{component}.js")
-    end
+    }
   end
 end
 
