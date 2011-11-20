@@ -1,8 +1,10 @@
 jQuery getting too big? 
 
-The primary projects goals would be for the feedback/demand of this project to kickstart jquery.com into
-re-organizing its code-base so it's more modular since we believe that the most useful parts of jQuery is a
-fraction of its code-base.
+The primary goal of this project would be for the feedback/demand to kickstart jquery.com into
+re-organizing its code-base so it's more modular since we believe we've proved the most useful parts of jQuery 
+is a fraction of its code-base. 
+
+To this end, follow this project if you want jquery.com to measure the demand for this.
 
 
 # Introducing jquip - aka jQuery-in-parts.
