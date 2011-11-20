@@ -42,7 +42,7 @@ Methods marked with * are only partially implemented.
   - before
   - after
   - toggle*
-  - hide, show, fadeIn and fadeOut - does so without animation, consider using [enhances animaiton plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
+  - hide, show, fadeIn and fadeOut - does so without animation, consider using [jquery.animate-enhanced plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
   - eq
   - first
   - last
@@ -78,7 +78,7 @@ change select submit keydown keypress keyup error
 ### static methods off $
   
   - $.each and Underscore's faster [$._each](http://documentcloud.github.com/underscore/#each)
-  - [$._select](http://documentcloud.github.com/underscore/#select)
+  - [$._select](http://documentcloud.github.com/underscore/#filter)
   - $.filter
   - $.dir
   - $.nth
