@@ -12,7 +12,7 @@ similar goals is http://ender.no.de/ - for node.js.
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
-The core **jquip.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
+The core **jquip.core.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
@@ -103,22 +103,22 @@ change select submit keydown keypress keyup error
 Pick and choose the parts of jQuery when and add you use them.
 
 Other parts of jQuery can be Added via Plugins which is simply a matter of copying or including the 
-script after the core `jquip.js`.
+script after the core `jquip.core.js`.
 
-### [documentReady](https://github.com/mythz/jquip/blob/master/jquip.docready.js)
+### [documentReady](https://github.com/mythz/jquip/blob/master/src/jquip.docready.js)
 yep, it's a plugin!
 
   - [$(function())](http://api.jquery.com/ready/)
   - [$.ready](http://api.jquery.com/ready/)
 
-### [css](https://github.com/mythz/jquip/blob/master/jquip.css.js)
+### [css](https://github.com/mythz/jquip/blob/master/src/jquip.css.js)
 
   - [$.css](http://api.jquery.com/css/)
   - [$.Width](http://api.jquery.com/width/)
   - [$.Height](http://api.jquery.com/height/)
   - $.camelCase
 
-### [ajax](https://github.com/mythz/jquip/blob/master/jquip.ajax.js)
+### [ajax](https://github.com/mythz/jquip/blob/master/src/jquip.ajax.js)
 based on [David Flanagan HttpUtils](http://www.davidflanagan.com/javascript5/display.php?n=20-1&f=20/01.js) 
 modfied to work like jQuery's ajax.
 
@@ -126,7 +126,7 @@ modfied to work like jQuery's ajax.
   - [$.ajax](http://api.jquery.com/jQuery.ajax/)
   - [$.getJSON](http://api.jquery.com/jQuery.getJSON/)
 
-### [custom](https://github.com/mythz/jquip/blob/master/jquip.custom.js)
+### [custom](https://github.com/mythz/jquip/blob/master/src/jquip.custom.js)
 
   - $.queryString - cached map of queryString variables 
   - $.is[Tab|Enter|Shift|...] - static functions to detect named keys pressed, e.g. `if ($.isEnter(e)) console.log("pressed enter")`
