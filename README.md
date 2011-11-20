@@ -85,7 +85,7 @@ change select submit keydown keypress keyup error
   - $.isFunction
   - $.isArray
   - $.isWindow
-  - $isNaN
+  - $.isNaN
   - $.merge
   - $.extend
   - $.unique
