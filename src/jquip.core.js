@@ -1,4 +1,5 @@
-var $ = (function ()
+var jQuery, $;
+jQuery = $ = (function ()
 {
 	var doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
         $tag = function (tag) { return doc.getElementsByTagName(tag); },
