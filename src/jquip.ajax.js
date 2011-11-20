@@ -1,4 +1,4 @@
-﻿$.addPlugin("ajax", function ($) {
+$.addPlugin("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -65,7 +65,6 @@
 		var isPost = o.type == "POST" || o.type == "PUT";
 		if (!isPost && o.data) url += "?" + $._formData(o.data);
 		xhr.open(o.type, url);
-
 		if (isPost) {
 			var isJson = o.dataType.indexOf("json") >= 0;
 			data = isJson ? JSON.stringify(o.data) : $._formData(o.data);

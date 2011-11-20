@@ -3,7 +3,6 @@ var $ = (function ()
 	var doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
         $tag = function (tag) { return doc.getElementsByTagName(tag); },
         notImplemented = "Not Implemented";
-
 	var runtil = /Until$/, rmultiselector = /,/,
         slice = Array.prototype.slice, push = Array.prototype.push, indexOf = Array.prototype.indexOf,
         rparentsprev = /^(?:parents|prevUntil|prevAll)/,

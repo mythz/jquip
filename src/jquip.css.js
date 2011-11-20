@@ -10,7 +10,6 @@ $.addPlugin("css", function ($) {
         getComputedStyle,
         currentStyle,
         fcamelCase = function (all, l) { return l.toUpperCase(); };
-    
     $.cssHooks = {
         opacity: {
             get: function (el, comp) {
@@ -24,7 +23,7 @@ $.addPlugin("css", function ($) {
         $.cssHooks.opacity = {
             get: function (el, computed) {
                 return ropacity.test((computed && el.currentStyle ? el.currentStyle.filter : el.style.filter) || "")
-                    ? (parseFloat(RegExp.$1) / 100) + "" 
+                    ? (parseFloat(RegExp.$1) / 100) + ""
                     : computed ? "1" : "";
             },
             set: function (el, value) {
@@ -36,7 +35,7 @@ $.addPlugin("css", function ($) {
 			    s.filter + ' ' + opacity;
             }
         };
-    }        
+    }
     if (doc.defaultView && doc.defaultView.getComputedStyle) {
         getComputedStyle = function (el, newName, name) {
             var ret, defaultView, computedStyle;

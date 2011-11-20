@@ -1,5 +1,5 @@
 $.addPlugin("documentReady", function ($) {
-    var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
+    var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;
     $.addConstructor(function (selector, ctx) {
         if (typeof selector == "function") {
             this.ready(selector);

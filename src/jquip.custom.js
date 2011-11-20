@@ -8,7 +8,7 @@ $.addPlugin("custom", function($){
     $.queryString = function (name) { return qsMap[name]; };
     $.Key = function (keyCode) { this.keyCode = keyCode; };
     $.Key.namedKeys = {
-        Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, Pause: 19, Capslock: 20, Escape: 27, PageUp: 33, 
+        Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, Pause: 19, Capslock: 20, Escape: 27, PageUp: 33,
         PageDown: 34, End: 35, Home: 36, LeftArrow: 37, UpArrow: 38, RightArrow: 39, DownArrow: 40, Insert: 45, Delete: 46
     };
     $._each($.Key.namedKeys, function (val, key) {
