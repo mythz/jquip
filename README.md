@@ -12,7 +12,7 @@ similar goals is http://ender.no.de/ - for node.js.
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
-The core **jquip.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
+The core **jquip.core.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
@@ -103,7 +103,7 @@ change select submit keydown keypress keyup error
 Pick and choose the parts of jQuery when and add you use them.
 
 Other parts of jQuery can be Added via Plugins which is simply a matter of copying or including the 
-script after the core `jquip.js`.
+script after the core `jquip.core.js`.
 
 ### [documentReady](https://github.com/mythz/jquip/blob/master/jquip.docready.js)
 yep, it's a plugin!
