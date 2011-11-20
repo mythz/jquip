@@ -1,4 +1,9 @@
-jQuery getting too big?
+jQuery getting too big? 
+
+The primary projects goals would be for the feedback/demand of this project to kickstart jquery.com into
+re-organizing its code-base so it's more modular since we believe that the most useful parts of jQuery is a
+fraction of its code-base.
+
 
 # Introducing jquip - aka jQuery-in-parts.
 
@@ -34,14 +39,14 @@ Methods marked with * are only partially implemented.
   - before
   - after
   - toggle*
-  - hide, show, fadeIn and fadeOut *does so without animation, consider using [enhances animaiton plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
+  - hide, show, fadeIn and fadeOut - does so without animation, consider using [enhances animaiton plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
   - eq
   - first
   - last
   - slice
   - find*
   - remove
-  - val - *does not do checkbox, select, etc.*
+  - val - does not do checkbox, select, etc.
   - html
   - addClass
   - removeClass
