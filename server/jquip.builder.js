@@ -44,7 +44,7 @@ http.createServer(function (req, res) {
 	if (fileContents) {
 		var ext = path == "/" ? "htm" : getExt(path);
 		var contentType = contentTypes[ext];
-		res.writeHead(200, {'Content-Type': contentType, 'Expires': 'Fri, 31 Dec 2020 12:00:00 GMT'});
+		res.writeHead(200, {'Content-Type': contentType });
 		var isPlugin = ext == "js" && path.startsWith("/jquip.") && !isCore[path];
 		if (isPlugin) {
 			var coreJs = path.indexOf("min") != -1 
@@ -75,7 +75,7 @@ http.createServer(function (req, res) {
 				if (jsFile)
 					js += ";" + jsFile;
 			});
-			res.writeHead(200, {'Content-Type': 'text/javascript', 'Expires': 'Fri, 31 Dec 2020 12:00:00 GMT'});
+			res.writeHead(200, {'Content-Type': 'text/javascript' });
 			res.end(js);		
 			return;
 		}
