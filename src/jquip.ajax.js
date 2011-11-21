@@ -1,4 +1,4 @@
-﻿$.addPlugin("ajax", function ($) {
+$.addPlugin("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -25,8 +25,9 @@
 		}
 		return function () { };
 	};
-	$._xhrResp = function (xhr) {
-		switch (xhr.getResponseHeader("Content-Type").split(";")[0]) {
+	$._xhrResp = function (xhr, dataType) {
+		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
+		switch (dataType) {
 			case "text/xml":
 				return xhr.responseXML;
 			case "text/json":
@@ -54,7 +55,7 @@
 				if (timer) clearTimeout(timer);
 				if (xhr.status < 300)
 				{
-					if (o.success) o.success($._xhrResp(xhr));
+					if (o.success) o.success($._xhrResp(xhr, o.dataType));
 				}
 				else if (o.error) o.error(xhr, xhr.status, xhr.statusText);
 				if (o.complete) o.complete(xhr, xhr.statusText);
@@ -81,5 +82,13 @@
 			data = null;
 		}
 		$.ajax({ url: url, dataType: "json", data: data, success: success, error: error });
+	};
+	$.get = function (url, data, success, dataType) {
+		if ($.isFunction(data)) {
+			dataType = success;
+			success = data;
+			data = null;
+		}
+		$.ajax({url: url, data: data, success: success, dataType: dataType});
 	};
 });

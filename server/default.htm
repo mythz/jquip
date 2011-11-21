@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<title>jQuip - jQuery in parts :: Builder</title>
+<style type="text/css">
+    BODY {
+        font: 14px Verdana, Arial;
+        color: #444;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        overflow-y: scroll;
+    }
+    H1 {
+      margin:0;
+      font: 24px Helvetica, Verdana, Arial;
+      padding: 20px 0 10px 0;
+      background: #FBFBFB;
+      border-bottom: solid 1px #fff;
+    }
+    A {
+      color: #093;
+      text-decoration: none;
+    }
+    A:hover {
+      text-decoration: underline;
+    }
+    #usage {
+        border-top: solid 1px #dfdfdf;
+        border-bottom: solid 1px #dfdfdf;
+        margin: 0 0 10px 0;
+        padding: 5px;
+        background: #f1f1f1;
+        line-height: 20px;
+        text-align: center;
+    }
+    BUTTON {
+        margin: 20px;
+        padding: 4px 8px;
+    }
+    #plugins {
+        clear: both;
+        margin: auto;
+        width: 980px;
+    }
+    TABLE {
+    	text-align: left;
+    }
+    TD LABEL {
+    	line-height: 20px;
+    	padding-left: 5px;
+    }
+    TFOOT {
+    	background: #f1f1f1;
+    	text-align: center;
+    }
+    TEXTAREA {
+        width: 990px;
+        height: 300px;
+    }
+
+</style>
+</head>
+<body>
+    
+    <h1><a href="https://github.com/mythz/jquip">jquip</a> Library Builder</h1>
+    <div id="usage">
+    	This page will generate a single JavaScript file, with the selected plugins.
+    </div>
+    <table id="plugins">
+    	<thead>
+    	<tr><th>Plugin</th><th>Provides</th><th>Description</th></tr>
+    	</thead>
+    	<tbody></tbody>
+    	<tfoot>
+    		<tr><td colspan="3">	
+    		<input type="checkbox" id="min" checked />
+    		<label for="min">Minify with UglifyJS</label>
+    		</td></tr>
+    	</tfoot>    	
+    </table>
+    <h4 id="url"></h4>
+    <textarea placeholder="copy and paste output"></textarea>
+    <h5 id="len"></h5>
+
+<!-- eating our own dogfood :) -->
+<script type="text/javascript" src="jquip.ajax.min.js"></script>
+<script type="text/javascript">
+
+var plugins = [
+	['jquip', '$', 'The jquip core, required.'],	
+	['docready', '$(callback) $.ready()', 'Register callbacks to be called DOMContentLoaded'],	
+	['css', '().css Height Width', 'Get and set CSS properties'],	
+	['ajax', '$.ajax $.xhr $.getJSON $.get', 'Make ajax calls'],	
+	['custom', '$.queryString $.key $.is[NamedKey] $.cancelEvent', 'Useful extensions to core']
+];
+var html = "";
+$._each(plugins, function(row){
+	html += "<tr><td><input type='checkbox' id='" + row[0] + "' /> "
+	+ "<label for='" + row[0] + "'>" + row[0] + "</label></td><td>" 
+	+ row[1] + "</td><td>" 
+	+ row[2] + "</td></tr>";
+});
+
+$("tbody").html(html);
+var input = $("#jquip")[0]; 
+input.checked = input.disabled = true;
+$("INPUT[type='checkbox']").click(generate);
+$("textarea").focus(function(){
+	var txt=this;
+	setTimeout(function(){txt.select();},0);
+});
+
+var baseUrl = location.href;
+function generate() {
+	var qs = "";
+	$("INPUT[type='checkbox']").each(function(){
+		if (!this.checked) return;
+		if (qs) qs += ".";
+		qs += this.id;
+	});
+	var url = baseUrl + qs + ".js";
+	$("#url").html("Url: <a href='" + url + "'>" + url + "</a>");		
+	$.get(url, function(data){
+		$("textarea").val(data);
+		var l = data.length + "";		
+		var txtLen = data.length >= 1000 
+			? l.substring(0, l.length - 3) + "," + l.substring(l.length - 3) : l;
+		$("#len").html(txtLen + " chars");
+	});
+}
+generate();
+</script>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7722718-8']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+</body>
+</html>

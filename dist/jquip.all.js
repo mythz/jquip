@@ -756,7 +756,7 @@ var $ = (function ()
 
 	return $;
 })();
-﻿$.addPlugin("ajax", function ($) {
+;$.addPlugin("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -783,8 +783,9 @@ var $ = (function ()
 		}
 		return function () { };
 	};
-	$._xhrResp = function (xhr) {
-		switch (xhr.getResponseHeader("Content-Type").split(";")[0]) {
+	$._xhrResp = function (xhr, dataType) {
+		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
+		switch (dataType) {
 			case "text/xml":
 				return xhr.responseXML;
 			case "text/json":
@@ -812,7 +813,7 @@ var $ = (function ()
 				if (timer) clearTimeout(timer);
 				if (xhr.status < 300)
 				{
-					if (o.success) o.success($._xhrResp(xhr));
+					if (o.success) o.success($._xhrResp(xhr, o.dataType));
 				}
 				else if (o.error) o.error(xhr, xhr.status, xhr.statusText);
 				if (o.complete) o.complete(xhr, xhr.statusText);
@@ -839,6 +840,14 @@ var $ = (function ()
 			data = null;
 		}
 		$.ajax({ url: url, dataType: "json", data: data, success: success, error: error });
+	};
+	$.get = function (url, data, success, dataType) {
+		if ($.isFunction(data)) {
+			dataType = success;
+			success = data;
+			data = null;
+		}
+		$.ajax({url: url, data: data, success: success, dataType: dataType});
 	};
 });
 $.addPlugin("css", function ($) {
@@ -1007,7 +1016,8 @@ $.addPlugin("css", function ($) {
             else return this.css(type, typeof size === "string" ? size : size + "px");
         };
     });
-});$.addPlugin("custom", function($){
+});
+$.addPlugin("custom", function($){
     var win=window, doc=document, qsMap = {};
     var vars = win.location.search.substring(1).split("&");
     for (var i = 0; i < vars.length; i++) {
@@ -1038,7 +1048,8 @@ $.addPlugin("css", function ($) {
         }
         return false;
     };
-});$.addPlugin("documentReady", function ($) {
+});
+$.addPlugin("docready", function ($) {
     var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
     $.addConstructor(function (selector, ctx) {
         if (typeof selector == "function") {
