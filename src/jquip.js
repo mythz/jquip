@@ -562,6 +562,12 @@ var $ = (function ()
 		}
 		return ret;
 	};
+    $.fromHtml = function (html) {
+        var frag = doc.createDocumentFragment(), div = doc.createElement('div');
+        div.innerHTML = html;
+        while (div.firstChild) frag.appendChild(div.firstChild);
+        return frag;
+    };
 	var sibChk = function (a, b, ret)
 	{
 		if (a === b) return ret;

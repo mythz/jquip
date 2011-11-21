@@ -19,12 +19,6 @@ $.addPlugin("custom", function($){
         e = e || window.event;
         return new $.Key(e.keyCode || e.which);
     };
-    $.fromHtml = function (html) {
-        var frag = doc.createDocumentFragment(), div = doc.createElement('div');
-        div.innerHTML = html;
-        while (div.firstChild) frag.appendChild(div.firstChild);
-        return frag;
-    };
     $.cancelEvent = function (e) {
         if (!e) e = window.event;
         e.cancelBubble = true;
