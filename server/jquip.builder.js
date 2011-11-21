@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 var http = require('http');
 var fs = require("fs");
 var url = require("url");
@@ -46,7 +47,6 @@ http.createServer(function (req, res) {
 		res.writeHead(200, {'Content-Type': contentType, 'Expires': 'Fri, 31 Dec 2020 12:00:00 GMT'});
 		var isPlugin = ext == "js" && path.startsWith("/jquip.") && !isCore[path];
 		if (isPlugin) {
-			console.log("isPlugin", path, path.indexOf("min"));
 			var coreJs = path.indexOf("min") != -1 
 				? staticFiles["/jquip.min.js"]
 				: staticFiles["/jquip.js"];
