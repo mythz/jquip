@@ -1,0 +1,1 @@
+To build on Windows copy node.exe into this folder.
