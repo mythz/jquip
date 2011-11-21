@@ -1,4 +1,4 @@
-var $ = (function ()
+var $ = jQuery = (function ()
 {
 	var doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
         $tag = function (tag) { return doc.getElementsByTagName(tag); },
@@ -756,7 +756,7 @@ var $ = (function ()
 
 	return $;
 })();
-;$.addPlugin("ajax", function ($) {
+$.addPlugin("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
