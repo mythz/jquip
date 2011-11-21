@@ -7,6 +7,11 @@ is a fraction of its code-base.
 To this end, follow this project if you want jquery.com to measure the demand for this. Another project with 
 similar goals is http://ender.no.de/ - for node.js.
 
+## News
+
+  - **New!** - Build customizable jquip packages with the new 
+  [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/).  
+  - Node js build scripts added to minify jquip with UglifyJS.
 
 # Introducing jquip - aka jQuery-in-parts.
 
@@ -151,9 +156,14 @@ At the moment this only gets thrown for complex filters that filter on more than
 Events passed to your event handers are the 'real' browser DOM events. 
 You can use the jquip.custom $.namedKey() feature for cross-browser key detection.
 
+### jquip Library Builder Service
+
+The project now includes the node.js **/server/jquip.builder.js**
+so you can host your own jquip Library builder service internally.
+
 ### Contributing
 
-I'd love help with this so pull requests are more than welcome!
+I'd love help with this so Contributors and pull requests are very welcome!
 
 The main task that needs doing is to get all the missing jQuery parts in as plugins 
 and a comprehensive test suite so we can properly identify the parts of jQuery supported.
