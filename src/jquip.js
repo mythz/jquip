@@ -7,6 +7,7 @@ var $ = (function ()
 	var runtil = /Until$/, rmultiselector = /,/,
         slice = Array.prototype.slice, push = Array.prototype.push, indexOf = Array.prototype.indexOf,
         rparentsprev = /^(?:parents|prevUntil|prevAll)/,
+        rtagname = /<([\w:]+)/,
         rclass = /[\n\t\r]/g,
         rspace = /\s+/,
         rdigit = /\d/,
@@ -17,7 +18,17 @@ var $ = (function ()
         guaranteedUnique = { children: true, contents: true, next: true, prev: true },
         toString = Object.prototype.toString,
         class2type = {},
-        hasDuplicate = false, baseHasDuplicate = true;
+        hasDuplicate = false, baseHasDuplicate = true,
+        wrapMap = {
+          option: [1, "<select multiple='multiple'>", "</select>"],
+          legend: [1, "<fieldset>", "</fieldset>"],
+          thead: [1, "<table>", "</table>"],
+          tr: [2, "<table><tbody>", "</tbody></table>"],
+          td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+          col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+          area: [1, "<map>", "</map>"],
+          _default: [0, "", ""]
+        };
 
 	if (rnotwhite.test("\xA0"))
 	{
@@ -563,8 +574,14 @@ var $ = (function ()
 		return ret;
 	};
     $.fromHtml = function (html) {
-        var frag = doc.createDocumentFragment(), div = doc.createElement('div');
-        div.innerHTML = html;
+        var frag = doc.createDocumentFragment(),
+            div = doc.createElement('div'),
+            tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
+            wrap = wrapMap[tag] || wrapMap._default,
+            depth = wrap[0];
+
+        div.innerHTML = wrap[1] + html + wrap[2];
+        while (depth--) { div = div.lastChild; }
         while (div.firstChild) frag.appendChild(div.firstChild);
         return frag;
     };
