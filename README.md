@@ -141,7 +141,7 @@ modfied to work like jQuery's ajax.
 ### Limitations
 
 Parts of jQuery that aren't ported over (because of code size) throw a "not implemented exception".
-At the moment this only gets thrown for complex filters that filter on more than a tagName.
+At the moment this only gets thrown for complex filters that filter (i.e $().find) on more than a tagName.
 
 * For <= IE7 all selectors require an Id (i.e. #) or Tag Name (e.g. INPUT) in each child selector.
  
