@@ -874,7 +874,15 @@ $.addPlugin("ajax", function ($) {
 			success = data;
 			data = null;
 		}
-		$.ajax({url: url, data: data, success: success, dataType: dataType});
+		$.ajax({url: url, type: "GET", data: data, success: success, dataType: dataType || "text/plain"});
+	};
+	$.post = function (url, data, success, dataType) {
+		if ($.isFunction(data)) {
+			dataType = success;
+			success = data;
+			data = null;
+		}
+		$.ajax({url: url, type: "POST", data: data, success: success, dataType: dataType || "text/plain"});
 	};
 });
 $.addPlugin("css", function ($) {
