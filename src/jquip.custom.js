@@ -1,6 +1,7 @@
 $.addPlugin("custom", function($){
-    var win=window, doc=document, qsMap = {};
-    var vars = win.location.search.substring(1).split("&");
+    var win=window, doc=document, qsMap = {}, 
+        vars = win.location.search.substring(1).split("&");
+
     for (var i = 0; i < vars.length; i++) {
         var kvp = vars[i].split("=");
         qsMap[kvp[0]] = unescape(kvp[1]);
@@ -28,5 +29,33 @@ $.addPlugin("custom", function($){
             e.preventDefault();
         }
         return false;
+    };
+    $.templateSettings = {
+      evaluate    : /<%([\s\S]+?)%>/g,
+      interpolate : /<%=([\s\S]+?)%>/g,
+      escape      : /<%-([\s\S]+?)%>/g
+    };
+    $.template = function(str, data) {
+        var c  = _.templateSettings;
+        var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
+          'with(obj||{}){__p.push(\'' +
+          str.replace(/\\/g, '\\\\')
+             .replace(/'/g, "\\'")
+             .replace(c.escape, function(match, code) {
+               return "',_.escape(" + code.replace(/\\'/g, "'") + "),'";
+             })
+             .replace(c.interpolate, function(match, code) {
+               return "'," + code.replace(/\\'/g, "'") + ",'";
+             })
+             .replace(c.evaluate || null, function(match, code) {
+               return "');" + code.replace(/\\'/g, "'")
+                                  .replace(/[\r\n\t]/g, ' ') + ";__p.push('";
+             })
+             .replace(/\r/g, '\\r')
+             .replace(/\n/g, '\\n')
+             .replace(/\t/g, '\\t')
+             + "');}return __p.join('');";
+        var func = new Function('obj', '_', tmpl);
+        return data ? func(data, _) : function(data) { return func(data, _) };
     };
 });

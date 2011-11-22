@@ -1,4 +1,4 @@
-var $ = jQuery = (function ()
+window.$ = window.jQuery = (function ()
 {
 	var doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
         $tag = function (tag) { return doc.getElementsByTagName(tag); },
@@ -73,15 +73,14 @@ var $ = jQuery = (function ()
 	{
 		return new $.fn.init(selector, ctx);
 	}
-	$.constructors = [];
-	$.plugins = {};
+	var ctors = [], plugins = {};
 
 	$.fn = $.prototype = {
 		constructor: $,
 		init: function (selector, ctx)
 		{
-			for (var i = 0, l = $.constructors.length; i < l; i++)
-				if ($.constructors[i].apply(this, arguments)) return this;
+			for (var i = 0, l = ctors.length; i < l; i++)
+				if (ctors[i].apply(this, arguments)) return this;
 
 			if (!selector) return this;
 			if (typeof selector == "function")
@@ -89,7 +88,9 @@ var $ = jQuery = (function ()
 				console.warn("handling $(onDocumentReadyFn) not registerd. ignoring...");
 				return this;
 			} else if ($.isArray(selector)) return this.make(selector);
-			if (selector.nodeType || $.isWindow(selector)) return this.make([selector]);
+			if (selector.nodeType || $.isWindow(selector)) return this.make([selector]);			
+			if (!selector.split) return;
+			if (selector.charAt(0) == "<") return this.make($.fromHtml(selector));
 			if (doc.querySelectorAll) return this.make((ctx || doc).querySelectorAll(selector));
 
 			var els, resSet = [[(ctx || doc)]], args = selector.split(' ');
@@ -120,6 +121,9 @@ var $ = jQuery = (function ()
 			for (var i = 0, l = els.length; i < l; i++)
 				this[i] = els[i];
 			return this;
+		},
+		get: function(idx) {
+			return this[idx];	
 		},
 		each: function (fn)
 		{
@@ -182,7 +186,9 @@ var $ = jQuery = (function ()
 		domManip: function (args, table, cb)
 		{
 			var value = args[0];
-			if (typeof value != "string") throw "Not supported: " + value;
+			if (!value) return;
+			if (typeof value != "string") 
+				throw "Not supported: " + value;
 			return this.each(function ()
 			{
 				var frag = $.fromHtml(value);
@@ -276,7 +282,7 @@ var $ = jQuery = (function ()
 				for (i = 0, l = this.length; i < l; i++)
 				{
 					el = this[i];
-					if (el.nodeType === 1)
+					if (el && el.nodeType === 1)
 					{
 						if (!el.className && cls.length === 1)
 							el.className = value;
@@ -506,7 +512,7 @@ var $ = jQuery = (function ()
 	$.trim = trim
         ? function (text) { return text == null ? "" : trim.call(text); }
         : function (text) { return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
-	$.indexOf = function (el, arr)
+	$.indexOf = $.inArray = function (el, arr)
 	{
 		if (!arr) return -1;
 		if (indexOf) return indexOf.call(arr, el);
@@ -515,7 +521,7 @@ var $ = jQuery = (function ()
 			if (arr[i] === el)
 				return i;
 		return -1;
-	};
+	};	
 	$.fn.trigger = function (name)
 	{
 		var $this = this;
@@ -549,13 +555,33 @@ var $ = jQuery = (function ()
 		a1.length = i;
 		return a1;
 	};
-	$.extend = function (o)
-	{
-		$._each(slice.call(arguments, 1), function (a)
-		{
-			for (var p in a) if (a[p] !== void 0) o[p] = a[p];
-		});
-		return o;
+	$.extend = $.fn.extend = function() {
+		var opt, name, src, copy, copyIsArray, clone,
+			target = arguments[0] || {}, i = 1,	length = arguments.length, deep = false;
+		if (typeof target === "boolean") 
+			deep = target, target = arguments[1] || {}, i = 2;	
+		if (typeof target !== "object" && !$.isFunction(target)) target = {};
+		if (length === i) { target = this; --i;	}
+		for (; i < length; i++) {
+			if ((opt = arguments[i]) != null) {
+				for (name in opt) {
+					src = target[name];
+					copy = opt[name];
+					if (target === copy) 
+						continue;
+					if (deep && copy && ($.isPlainObject(copy) || (copyIsArray = $.isArray(copy)))) {
+						if (copyIsArray) {
+							copyIsArray = false;
+							clone = src && $.isArray(src) ? src : [];
+						} else 
+							clone = src && $.isPlainObject(src) ? src : {};						
+						target[name] = $.extend(deep, clone, copy);
+					} else if (copy !== undefined) 
+						target[name] = copy;
+				}
+			}
+		}
+		return target;
 	};
 	$.makeArray = function (arr, results)
 	{
@@ -744,13 +770,13 @@ var $ = jQuery = (function ()
 		};
 	});
 
-	$.addConstructor = function (fn) { $.constructors.push(fn); };
+	$.addConstructor = function (fn) { ctors.push(fn); };
 	$.addPlugin = function (meta, fn)
 	{
 		var name = typeof meta == "string" ? meta : meta['name'];
 		fn = typeof meta == "function" ? meta : fn;
-		if (typeof fn != "function") throw "Plugin function required";
-		if (name && fn) $.plugins[name] = fn;
+		if (typeof fn != "function") throw "Plugin fn required";
+		if (name && fn) plugins[name] = fn;
 		fn($);
 	};
 
