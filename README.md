@@ -8,6 +8,7 @@ similar goals is http://ender.no.de/ - for node.js.
 Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although instead of just giving a trim, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) sound promising. 
 
 **Disclaimer:** This is **NOT** an official [jQuery.com](http://jquery.com/) project.
+Also some things are not fully implemented, please report back issues so we can measure the API popularity of missing pieces.
 
 ## News
 
