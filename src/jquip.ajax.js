@@ -30,6 +30,7 @@ $.addPlugin("ajax", function ($) {
 		switch (dataType) {
 			case "text/xml":
 				return xhr.responseXML;
+			case "json":
 			case "text/json":
 			case "application/json":
 			case "text/javascript":
@@ -47,7 +48,7 @@ $.addPlugin("ajax", function ($) {
 	};
 	$.ajax = function (o) {
 		var xhr = $.xhr(), timer, n = 0;
-		o = $.extend({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, dataType: "application/x-www-form-urlencoded" }, o);
+		o = $.extend({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" }, o);
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4)
