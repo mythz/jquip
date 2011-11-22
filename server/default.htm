@@ -111,7 +111,7 @@ $("textarea").focus(function(){
 	setTimeout(function(){txt.select();},0);
 });
 
-var baseUrl = location.href;
+var baseUrl = location.href.split('?')[0];
 function generate() {
 	var qs = "";
 	$("INPUT[type='checkbox']").each(function(){
