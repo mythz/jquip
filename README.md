@@ -148,6 +148,8 @@ modfied to work like jQuery's ajax.
   - $.xhr (cross-browser XHR Native Object)
   - [$.ajax](http://api.jquery.com/jQuery.ajax/)
   - [$.getJSON](http://api.jquery.com/jQuery.getJSON/)
+  - $.get
+  - $.post
 
 ### [custom](https://github.com/mythz/jquip/blob/master/src/jquip.custom.js)
 
@@ -160,7 +162,7 @@ modfied to work like jQuery's ajax.
 Parts of jQuery that aren't ported over (because of code size) throw a "not implemented exception".
 At the moment this only gets thrown for complex filters that filter (i.e $().find) on more than a tagName.
 
-* For <= IE7 all selectors require an Id (i.e. #) Tag or class name (e.g. INPUT) in each child selector.
+* For <= IE7 all selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each child selector.
  
  Valid Examples:
 
