@@ -640,7 +640,7 @@ window.$ = window.jQuery = (function ()
 		siblings: function (el) { return $.sibling(el.parentNode.firstChild, el); },
 		children: function (el) { return $.sibling(el.firstChild); },
 		contents: function (el) {
-			return $.nodeName(el, "iframe") ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
+			return el.nodeName === "iframe" ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
 		}
 	}, function (fn, name) {
 		$.fn[name] = function (until, sel) {
