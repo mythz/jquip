@@ -177,6 +177,8 @@ At the moment this only gets thrown for complex filters that filter (i.e $().fin
    - .a.b.c
    - .a 
 
+For optimal performance in <= IE7 have the first child selector be a tag or an #id which cuts down the amount of DOM traversing needed to be done in JavaScript.
+
 Events passed to your event handers are the 'real' browser DOM events. 
 You can use the jquip.custom $.namedKey() feature for cross-browser key detection.
 
