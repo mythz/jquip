@@ -1,10 +1,9 @@
 window.$ = window.jQuery = (function ()
 {
-	var doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
-        $tag = function (tag) { return doc.getElementsByTagName(tag); },
-        notImplemented = "Not Implemented";
-
-	var runtil = /Until$/, rmultiselector = /,/,
+	var win = window, doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
+        $tag = function (tag, ctx) { return (ctx || doc).getElementsByTagName(tag); },
+        notImplemented = "Not Implemented",
+	    runtil = /Until$/, rmultiselector = /,/,
         slice = Array.prototype.slice, push = Array.prototype.push, indexOf = Array.prototype.indexOf,
         rparentsprev = /^(?:parents|prevUntil|prevAll)/,
         rtagname = /<([\w:]+)/,
@@ -12,68 +11,47 @@ window.$ = window.jQuery = (function ()
         rspace = /\s+/,
         rdigit = /\d/,
         rnotwhite = /\S/,
-        trim = String.prototype.trim,
+        strim = String.prototype.trim, trim,
         trimLeft = /^\s+/,
         trimRight = /\s+$/,
         guaranteedUnique = { children: true, contents: true, next: true, prev: true },
         toString = Object.prototype.toString,
         class2type = {},
-        hasDuplicate = false, baseHasDuplicate = true,
+        hasDup = false, baseHasDup = true,
         wrapMap = {
-          option: [1, "<select multiple='multiple'>", "</select>"],
-          legend: [1, "<fieldset>", "</fieldset>"],
-          thead: [1, "<table>", "</table>"],
-          tr: [2, "<table><tbody>", "</tbody></table>"],
-          td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
-          col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
-          area: [1, "<map>", "</map>"],
-          _default: [0, "", ""]
-        };
+        	option: [1, "<select multiple='multiple'>", "</select>"],
+        	legend: [1, "<fieldset>", "</fieldset>"],
+        	thead: [1, "<table>", "</table>"],
+        	tr: [2, "<table><tbody>", "</tbody></table>"],
+        	td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+        	col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+        	area: [1, "<map>", "</map>"],
+        	_default: [0, "", ""]
+        },
+        $qs,
+		breaker = {},
+		ArrayProto = Array.prototype, ObjProto = Object.prototype,
+		hasOwn = ObjProto.hasOwnProperty,
+        nativeForEach = ArrayProto.forEach,
+        nativeMap = ArrayProto.map;
 
 	if (rnotwhite.test("\xA0"))
-	{
-		trimLeft = /^[\s\xA0]+/;
-		trimRight = /[\s\xA0]+$/;
-	}
-	function $el(sel)
-	{
-		if (typeof sel == 'string')
-			return sel.charAt(0) == '#' ? $id(sel.substring(1)) : $tag(sel)[0];
-		return sel;
-	}
-	function $find(rootEl, tagSel)
-	{
-		var parts = tagSel.split('.'), tag = parts[0], cls = parts.length == 2 && parts[1];
-		var el = $el(rootEl);
-		var fPos = tag.indexOf('['), fName, fValue;
-		if (fPos != -1)
-		{
-			parts = tag.substring(fPos + 1, tag.length - 1).split('=');
-			fName = parts[0], fValue = parts.length == 2 && parts[1];
-			if (fValue && fValue.charAt(0) == "'")
-				fValue = fValue.substring(1, fValue.length - 1);
-			tag = tag.substring(0, fPos);
-		}
-		var els = el.getElementsByTagName(tag);
-		if (!cls && !fName) return els;
-		var ret = [];
-		for (var i = 0, l = els.length; i < l; i++)
-		{
-			var childEl = els[i];
-			if ((!cls || (childEl.className && childEl.className.indexOf(cls) != -1))
-                    && (!fName || childEl[fName] == fValue))
-			{
-				ret.push(childEl);
-			}
-		}
-		return ret;
-	}
+		trimLeft = /^[\s\xA0]+/, trimRight = /[\s\xA0]+$/;
 
 	function $(selector, ctx)
 	{
 		return new $.fn.init(selector, ctx);
 	}
 	var ctors = [], plugins = {};
+
+	function $el(sel)
+	{
+		if (isS(sel))
+			return sel.charAt(0) == '#' ? $id(sel.substring(1)) : $tag(sel)[0];
+		return sel;
+	}
+
+	function warn() { console && console.warn(arguments) }
 
 	$.fn = $.prototype = {
 		constructor: $,
@@ -85,56 +63,37 @@ window.$ = window.jQuery = (function ()
 			if (!selector) return this;
 			if (typeof selector == "function")
 			{
-				console.warn("handling $(onDocumentReadyFn) not registerd. ignoring...");
+				warn("require docready");
 				return this;
-			} else if ($.isArray(selector)) return this.make(selector);
-			if (selector.nodeType || $.isWindow(selector)) return this.make([selector]);			
-			if (!selector.split) return;
-			if (selector.charAt(0) == "<") return this.make($.fromHtml(selector));
-			if (doc.querySelectorAll) return this.make((ctx || doc).querySelectorAll(selector));
-
-			var els, resSet = [[(ctx || doc)]], args = selector.split(' ');
-			for (var i = 0, l = args.length; i < l; i++)
-			{
-				var parentSet = resSet[i];
-				if (parentSet.length == 0) return this.make([]); //short-circuit
-				var sel = args[i], res = [];
-				if (sel.charAt(0) === '#')
-				{
-					resSet.push([(ctx || doc).getElementById(sel.substring(1))]);
-					continue;
-				}
-				for (var j = 0, jlen = parentSet.length; j < jlen; j++)
-				{
-					els = $find(parentSet[j], sel);
-					for (var k = 0, klen = els.length; k < klen; k++)
-						res.push(els[k]);
-				}
-				resSet.push(res);
-			}
-			return resSet.length > 1 ? this.make(resSet.pop()) : this.make([]);
+			} else if (isA(selector)) return this.make(selector);
+			if (selector.nodeType || isWin(selector)) return this.make([selector]);
+			if (!selector.split) return this;
+			if (selector.charAt(0) === "<") return this.make(fromHtml(selector));
+			return this.make($qs(selector, ctx));
 		},
 		make: function (els)
 		{
-			this.length = (els && els.length || 0);
-			if (this.length == 0) return this;
-			for (var i = 0, l = els.length; i < l; i++)
-				this[i] = els[i];
+			make(this, els);
 			return this;
 		},
-		get: function(idx) {
-			return this[idx];	
+		get: function (idx)
+		{
+			return this[idx];
+		},
+		add: function (sel, ctx)
+		{
+			return this.make($(sel, ctx));
 		},
 		each: function (fn)
 		{
-			if (typeof fn != "function") return this;
+			if (!isF(fn)) return this;
 			for (var i = 0, l = this.length; i < l; i++)
 				fn.call(this[i], i, this[i]);
 			return this;
 		},
 		attr: function (name)
 		{
-			return this[0] && $.attrs(this[0])[name];
+			return this[0] && attrs(this[0])[name];
 		},
 		bind: function (type, data, fn)
 		{
@@ -150,7 +109,7 @@ window.$ = window.jQuery = (function ()
 		},
 		append: function ()
 		{
-			return this.domManip(arguments, true, function (el)
+			return this.dm(arguments, true, function (el)
 			{
 				if (this.nodeType === 1)
 					this.appendChild(el);
@@ -158,7 +117,7 @@ window.$ = window.jQuery = (function ()
 		},
 		prepend: function ()
 		{
-			return this.domManip(arguments, true, function (el)
+			return this.dm(arguments, true, function (el)
 			{
 				if (this.nodeType === 1)
 					this.insertBefore(el, this.firstChild);
@@ -166,33 +125,30 @@ window.$ = window.jQuery = (function ()
 		},
 		before: function ()
 		{
-			this.domManip(arguments, false, function (el)
+			return this.dm(arguments, false, function (el)
 			{
 				this.parentNode.insertBefore(el, this);
 			});
-			return this;
 		},
 		after: function ()
 		{
 			if (this[0] && this[0].parentNode)
 			{
-				return this.domManip(arguments, false, function (el)
+				this.dm(arguments, false, function (el)
 				{
 					this.parentNode.insertBefore(el, this.nextSibling);
 				});
 			}
 			return this;
 		},
-		domManip: function (args, table, cb)
+		dm: function (args, table, cb)
 		{
 			var value = args[0];
-			if (!value) return;
-			if (typeof value != "string") 
-				throw "Not supported: " + value;
+			if (!value) return this;
+			if (!isS(value)) throw "Not supported: " + value;
 			return this.each(function ()
 			{
-				var frag = $.fromHtml(value);
-				cb.call(this, frag);
+				cb.call(this, fromHtml(value));
 			});
 		},
 		hide: function ()
@@ -210,8 +166,8 @@ window.$ = window.jQuery = (function ()
 		pushStack: function (els, name, selector)
 		{
 			var ret = this.constructor();
-			if ($.isArray(els)) push.apply(ret, els);
-			else $.merge(ret, els);
+			if (isA(els)) push.apply(ret, els);
+			else merge(ret, els);
 			ret.prevObject = this;
 			ret.context = this.context;
 			if (name === "find")
@@ -231,7 +187,7 @@ window.$ = window.jQuery = (function ()
 		find: function (sel)
 		{
 			var self = this, i, l;
-			if (typeof sel !== "string")
+			if (!isS(sel))
 			{
 				return $(sel).filter(function ()
 				{
@@ -243,7 +199,7 @@ window.$ = window.jQuery = (function ()
 			for (i = 0, l = this.length; i < l; i++)
 			{
 				len = ret.len;
-				$.merge(ret, $(sel, this[i]));
+				merge(ret, $(sel, this[i]));
 				if (i == 0)
 				{
 					for (n = len; n < ret.length; n++)
@@ -271,12 +227,13 @@ window.$ = window.jQuery = (function ()
 		addClass: function (value)
 		{
 			var cls, i, l, el, setClass, c, cl;
-			if ($.isFunction(value))
+			if (isF(value))
 				return this.each(function (j)
 				{
 					$(this).addClass(value.call(this, j, this.className));
 				});
-			if (value && typeof value === "string")
+
+			if (value && isS(value))
 			{
 				cls = value.split(rspace);
 				for (i = 0, l = this.length; i < l; i++)
@@ -294,7 +251,7 @@ window.$ = window.jQuery = (function ()
 								if (! ~setClass.indexOf(" " + cls[c] + " "))
 									setClass += cls[c] + " ";
 							}
-							el.className = $.trim(setClass);
+							el.className = trim(setClass);
 						}
 					}
 				}
@@ -304,13 +261,12 @@ window.$ = window.jQuery = (function ()
 		removeClass: function (value)
 		{
 			var clss, i, l, el, cls, c, cl;
-			if ($.isFunction(value))
-				return this.each(function (j)
-				{
-					$(this).removeClass(value.call(this, j, this.className));
-				});
+			if (isF(value)) return this.each(function (j)
+			{
+				$(this).removeClass(value.call(this, j, this.className));
+			});
 
-			if ((value && typeof value === "string") || value === undefined)
+			if ((value && isS(value)) || value === undefined)
 			{
 				clss = (value || "").split(rspace);
 				for (i = 0, l = this.length; i < l; i++)
@@ -325,7 +281,7 @@ window.$ = window.jQuery = (function ()
 							{
 								cls = cls.replace(" " + clss[c] + " ", " ");
 							}
-							el.className = $.trim(cls);
+							el.className = trim(cls);
 						}
 						else el.className = "";
 					}
@@ -335,11 +291,7 @@ window.$ = window.jQuery = (function ()
 		},
 		hasClass: function (sel)
 		{
-			var cls = " " + sel + " ";
-			for (var i = 0, l = this.length; i < l; i++)
-				if (this[i].nodeType === 1 && (" " + this[i].className + " ").replace(rclass, " ").indexOf(cls) > -1)
-					return true;
-			return false;
+			return hasClass(this, sel);
 		},
 		fadeIn: function ()
 		{
@@ -358,16 +310,123 @@ window.$ = window.jQuery = (function ()
 	};
 	$.fn.init.prototype = $.fn;
 
-	var breaker = {};
-	var ArrayProto = Array.prototype, ObjProto = Object.prototype;
-	var hasOwnProperty = ObjProto.hasOwnProperty,
-        nativeForEach = ArrayProto.forEach,
-        nativeMap = ArrayProto.map,
-        nativeFilter = ArrayProto.filter;
+	//BeginQuery
+	function make(arr, els)
+	{
+		arr.length = (els && els.length || 0);
+		if (arr.length == 0) return arr;
+		for (var i = 0, l = els.length; i < l; i++)
+			arr[i] = els[i];
+		return arr;
+	}
+
+	function hasClass(els, cls)
+	{
+		var cls = " " + cls + " ";
+		for (var i = 0, l = els.length; i < l; i++)
+			if (els[i].nodeType === 1 && (" " + els[i].className + " ").replace(rclass, " ").indexOf(cls) > -1)
+				return true;
+		return false;
+	}
+
+	function $token(sel, ctx)
+	{
+		var el = $el(ctx), cls = sel.split('.'), tag = cls.shift(), fPos = tag.indexOf('['), fName, fValue, parts;
+		if (fPos >= 0)
+		{
+			parts = tag.substring(fPos + 1, tag.length - 1).split('=');
+			fName = parts[0], fValue = parts.length == 2 && parts[1];
+			if (fValue && fValue.charAt(0) == "'")
+				fValue = fValue.substring(1, fValue.length - 1);
+			tag = tag.substring(0, fPos);
+		}
+		var tagWithId = tag.split('#');
+		if (tagWithId.length == 2)
+		{
+			el = $id(tagWithId[1], el);
+			if (!el) return [];
+			if (!eq(el.tagName, tagWithId[0])) return [];
+			if (cls.length == 1) return [el];
+		}
+		var els = tag ? $tag(tag,el) : $cls(cls.shift(), el);
+		if (!cls.length && !fName) return els;
+		var ret = [];
+		for (var i = 0, l = els.length; i < l; i++)
+		{
+			var subEl = els[i], j = cls.length, matches = true;
+			if (cls.length) while (j--) if (!hasClass([subEl], cls[j])) matches = false;
+			if (matches && (!fName || (!fValue || subEl[fName] == fValue)))
+				ret.push(subEl);
+		}
+		return ret;
+	}
+
+	function walk(fn, ctx, ret)
+	{
+		ctx = ctx || doc, ret = ret || [];
+		if (ctx.nodeType == 1)
+			if (fn(ctx)) ret.push(ctx);
+		var els = ctx.childNodes;
+		for (var i = 0, l = els.length; i < l; i++) {
+			var subEl = els[i];
+			if (subEl.nodeType == 1) {
+				if (fn(subEl)) ret.push(subEl);
+				walk(fn, subEl, ret);
+			}
+		}
+		return ret;
+	} $.walk = walk;
+
+	var $cls = doc.getElementsByClassName //&& false
+            ? function (cls, ctx) { return (ctx || doc).getElementsByClassName(cls); }
+            : function (cls, ctx) {
+            	var ret = walk(function (el) {
+            		return el.className && el.className.indexOf(cls) >= 0;
+            	}, (ctx || doc));
+            	return unique(ret);
+            };
+	$qs = $.fn.qs = doc.querySelectorAll //&& false
+            ? function (sel, ctx) { return (ctx || doc).querySelectorAll(sel); }
+            : win.Sizzle || function (selector, ctx)
+            {
+            	var els, resSet = [[(ctx || doc)]], heir = selector.split(' '), ret = [];
+            	for (var i = 0, l = heir.length; i < l; i++)
+            	{
+            		var parentSet = resSet[i];
+            		if (parentSet.length == 0) return ret; //short-circuit
+            		var sel = heir[i], res = [], firstChar = sel.charAt(0);
+            		if (firstChar == '#')
+            		{
+            			resSet.push([(ctx || doc).getElementById(sel.substring(1))]);
+            		} else {
+            			for (var j = 0, jlen = parentSet.length; j < jlen; j++)
+            			{
+            				els = $token(sel, parentSet[j]);
+            				for (var k = 0, klen = els.length; k < klen; k++)
+            					res.push(els[k]);
+            			}
+            			resSet.push(res);
+            		}
+            	}
+            	return resSet.length > 1 ? resSet.pop() : [];
+            };
+	$.queryAll = $qs;
+
+	function $qsMany(els, sel)
+	{
+		var ret = [];
+		for (var i = 0, l = els.length; i < l; i++) {
+			var el = els[i];
+			merge(ret, $qs(sel, el));
+		}
+		unique(ret);
+		return ret;
+	};
+	//EndQuery
 
 	$.each = function (o, cb, args)
 	{
-		var k, i = 0, l = o.length, isObj = l === undefined || $.isFunction(o);
+		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
 		if (args)
 		{
 			if (isObj)
@@ -388,9 +447,7 @@ window.$ = window.jQuery = (function ()
 		return o;
 	};
 
-	var _ = _ || {}; //use underscore if exists
-	if (!_.each) _.each = function (o, fn, ctx)
-	{
+	function _each(o, fn, ctx) {
 		if (o == null) return;
 		if (nativeForEach && o.forEach === nativeForEach)
 			o.forEach(fn, ctx);
@@ -401,29 +458,17 @@ window.$ = window.jQuery = (function ()
 		} else
 		{
 			for (var key in o)
-				if (hasOwnProperty.call(o, key))
+				if (hasOwn.call(o, key))
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
-	};
-	$._each = _.each;
-	if (!_.select) _.select = function (o, fn, ctx)
-	{
-		var results = [];
-		if (o == null) return results;
-		if (nativeFilter && o.filter === nativeFilter) return o.filter(fn, ctx);
-		$._each(o, function (value, index, list)
-		{
-			if (fn.call(ctx, value, index, list)) results[results.length] = value;
-		});
-		return results;
-	};
-	$._select = _.select;
+	}; $._each = _each;
+
 	$.filter = function (expr, els, not)
 	{
 		var ret = [], isTagOnly = (expr.indexOf(' ') === -1);
 		if (isTagOnly)
 		{
-			$._each(els, function (el)
+			_each(els, function (el)
 			{
 				if (el.tagName == expr) ret.push(el);
 			});
@@ -431,6 +476,7 @@ window.$ = window.jQuery = (function ()
 		}
 		throw notImplemented;
 	};
+
 	$.dir = function (el, dir, until)
 	{
 		var matched = [], cur = el[dir];
@@ -460,18 +506,18 @@ window.$ = window.jQuery = (function ()
 		var results = [];
 		if (o == null) return results;
 		if (nativeMap && o.map === nativeMap) return o.map(fn, ctx);
-		$._each(o, function (value, index, list)
+		_each(o, function (value, index, list)
 		{
 			results.push(fn.call(ctx, value, index, list));
 		});
 		return results;
 	};
-	$.bind = function (o, type, fn, data)
+	$.bind = function (o, type, fn)
 	{
 		if (o.attachEvent)
 		{
 			o['e' + type + fn] = fn;
-			o[type + fn] = function () { o['e' + type + fn](window.event); };
+			o[type + fn] = function () { o['e' + type + fn](win.event); };
 			o.attachEvent('on' + type, o[type + fn]);
 		} else
 			o.addEventListener(type, fn, false);
@@ -494,23 +540,23 @@ window.$ = window.jQuery = (function ()
 			return null;
 		}
 		var o = {};
-		$._each($.attrs(el), function (val, aName)
+		_each(attrs(el), function (val, aName)
 		{
 			if (aName.indexOf("data-") !== 0 || !val) return;
 			o[aName.substr("data-".length)] = val;
 		});
-		if (typeof name == "string") return o[name];
+		if (isS(name)) return o[name];
 		return o;
 	};
-	$.attrs = function (el)
+	function attrs(el)
 	{
 		var o = {};
-		for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++)
-			o[attrs.item(i).nodeName] = attrs.item(i).nodeValue;
+		for (var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
+			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
-	};
-	$.trim = trim
-        ? function (text) { return text == null ? "" : trim.call(text); }
+	}; $.attrs = attrs;
+	trim = strim
+        ? function (text) { return text == null ? "" : strim.call(text); }
         : function (text) { return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
 	$.indexOf = $.inArray = function (el, arr)
 	{
@@ -521,29 +567,44 @@ window.$ = window.jQuery = (function ()
 			if (arr[i] === el)
 				return i;
 		return -1;
-	};	
+	};
 	$.fn.trigger = function (name)
 	{
 		var $this = this;
-		return this.each(function (i)
+		return this.each(function ()
 		{
 			var fn = this[name];
-			if ($.isFunction(fn))
+			if (isF(fn))
 				fn.call(this);
 			return $this;
 		});
 	};
-	$._each("Boolean Number String Function Array Date RegExp Object".split(" "), function (name, i)
+	_each("Boolean Number String Function Array Date RegExp Object".split(" "), function (name)
 	{
 		class2type["[object " + name + "]"] = name.toLowerCase();
 		return this;
 	});
-	$.type = function (o) { return o == null ? String(o) : class2type[toString.call(o)] || "object"; };
-	$.isFunction = function (o) { return typeof o === "function" || $.type(o) === "function"; };
-	$.isArray = Array.isArray || function (o) { return $.type(o) === "array"; };
-	$.isWindow = function (o) { return o && typeof o === "object" && "setInterval" in o; };
-	$.isNaN = function (obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); };
-	$.merge = function (a1, a2)
+
+	function typeOf(o) { return o == null ? String(o) : class2type[toString.call(o)] || "object"; }; $.type = typeOf;
+	function isS(o) { return typeof o === "string"; };
+	function isF(o) { return typeof o === "function" || typeOf(o) === "function"; }; $.isFunction = isF;
+	function isA(o) { return typeOf(o) === "array"; }; $.isArray = Array.isArray || isA;
+	function isWin(o) { return o && typeof o === "object" && "setInterval" in o; }; $.isWindow = isWin;
+	function isNan(obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); }; $.isNaN = isNan;
+	function eq(str1, str2) { return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() == str2.toLowerCase(); }
+	function isPlainObject(o)
+	{
+		if (!o || typeOf(o) !== "object" || o.nodeType || isWin(o)) return false;
+		try
+		{
+			if (o.constructor && !hasOwn.call(o, "constructor") && !hasOwn.call(o.constructor.prototype, "isPrototypeOf")) return false;
+		} catch (e) { return false; }
+		var key;
+		for (key in o) { }
+		return key === undefined || hasOwn.call(o, key);
+	}
+
+	function merge(a1, a2)
 	{
 		var i = a1.length, j = 0;
 		if (typeof a2.length === "number")
@@ -554,63 +615,68 @@ window.$ = window.jQuery = (function ()
 				a1[i++] = a2[j++];
 		a1.length = i;
 		return a1;
-	};
-	$.extend = $.fn.extend = function() {
-		var opt, name, src, copy, copyIsArray, clone,
-			target = arguments[0] || {}, i = 1,	length = arguments.length, deep = false;
-		if (typeof target === "boolean") 
-			deep = target, target = arguments[1] || {}, i = 2;	
-		if (typeof target !== "object" && !$.isFunction(target)) target = {};
-		if (length === i) { target = this; --i;	}
-		for (; i < length; i++) {
-			if ((opt = arguments[i]) != null) {
-				for (name in opt) {
-					src = target[name];
+	}; $.merge = merge;
+
+	$.extend = $.fn.extend = function ()
+	{
+		var opt, name, src, copy, copyIsArr, clone, args = arguments,
+			dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
+		if (typeof dst === "boolean")
+			deep = dst, dst = args[1] || {}, i = 2;
+		if (typeof dst !== "object" && !isF(dst)) dst = {};
+		if (aLen === i) { dst = this; --i; }
+		for (; i < aLen; i++)
+		{
+			if ((opt = args[i]) != null)
+			{
+				for (name in opt)
+				{
+					src = dst[name];
 					copy = opt[name];
-					if (target === copy) 
-						continue;
-					if (deep && copy && ($.isPlainObject(copy) || (copyIsArray = $.isArray(copy)))) {
-						if (copyIsArray) {
-							copyIsArray = false;
-							clone = src && $.isArray(src) ? src : [];
-						} else 
-							clone = src && $.isPlainObject(src) ? src : {};						
-						target[name] = $.extend(deep, clone, copy);
-					} else if (copy !== undefined) 
-						target[name] = copy;
+					if (dst === copy) continue;
+					if (deep && copy && (isPlainObject(copy) || (copyIsArr = isA(copy))))
+					{
+						if (copyIsArr)
+						{
+							copyIsArr = false;
+							clone = src && isA(src) ? src : [];
+						} else
+							clone = src && isPlainObject(src) ? src : {};
+						dst[name] = $.extend(deep, clone, copy);
+					} else if (copy !== undefined)
+						dst[name] = copy;
 				}
 			}
 		}
-		return target;
+		return dst;
 	};
 	$.makeArray = function (arr, results)
 	{
 		var ret = results || [];
-		if (arr != null)
-		{
-			var type = $.type(arr);
-			if (arr.length == null || type === "string" || type === "function" || type === "regexp" || $.isWindow(arr))
-			{
+		if (arr != null) {
+			var type = typeOf(arr);
+			if (arr.length == null || isS(type) || isF(type) || type === "regexp" || isWin(arr)) 
 				push.call(ret, arr);
-			} else
-			{
-				$.merge(ret, arr);
-			}
+			else 
+				merge(ret, arr);
 		}
 		return ret;
 	};
-    $.fromHtml = function (html) {
-        var frag = doc.createDocumentFragment(),
+
+	function fromHtml(html)
+	{
+		var frag = doc.createDocumentFragment(),
             div = doc.createElement('div'),
             tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
             wrap = wrapMap[tag] || wrapMap._default,
             depth = wrap[0];
 
-        div.innerHTML = wrap[1] + html + wrap[2];
-        while (depth--) { div = div.lastChild; }
-        while (div.firstChild) frag.appendChild(div.firstChild);
-        return frag;
-    };
+		div.innerHTML = wrap[1] + html + wrap[2];
+		while (depth--) { div = div.lastChild; }
+		while (div.firstChild) frag.appendChild(div.firstChild);
+		return frag;
+	}; $.fromHtml = fromHtml;
+
 	var sibChk = function (a, b, ret)
 	{
 		if (a === b) return ret;
@@ -627,7 +693,7 @@ window.$ = window.jQuery = (function ()
         {
         	if (a === b)
         	{
-        		hasDuplicate = true;
+        		hasDup = true;
         		return 0;
         	}
         	if (!a.compareDocumentPosition || !b.compareDocumentPosition)
@@ -636,7 +702,7 @@ window.$ = window.jQuery = (function ()
         }
         : function (a, b)
         {
-        	if (a === b) { hasDuplicate = true; return 0; }
+        	if (a === b) { hasDup = true; return 0; }
         	else if (a.sourceIndex && b.sourceIndex) return a.sourceIndex - b.sourceIndex;
         	var al, bl, ap = [], bp = [], aup = a.parentNode, bup = b.parentNode, cur = aup;
         	if (aup === bup) return sibChk(a, b);
@@ -651,23 +717,24 @@ window.$ = window.jQuery = (function ()
         		if (ap[i] !== bp[i]) return sibChk(ap[i], bp[i]);
         	return i === al ? sibChk(a, bp[i], -1) : sibChk(ap[i], b, 1);
         };
-	$.unique = function (results)
+
+	function unique(els)
 	{
 		if (sortOrder)
 		{
-			hasDuplicate = baseHasDuplicate;
-			results.sort(sortOrder);
-			if (hasDuplicate)
-				for (var i = 1; i < results.length; i++)
-					if (results[i] === results[i - 1]) results.splice(i--, 1);
+			hasDup = baseHasDup;
+			els.sort(sortOrder);
+			if (hasDup)
+				for (var i = 1; i < els.length; i++)
+					if (els[i] === els[i - 1]) els.splice(i--, 1);
 		}
-		return results;
-	};
+		return els;
+	}; $.unique = unique;
 
-	$._each(("blur focus focusin focusout load resize scroll unload click dblclick " +
+	_each(("blur focus focusin focusout load resize scroll unload click dblclick " +
             "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
             "change select submit keydown keypress keyup error").split(" "),
-        function (name, i)
+        function (name)
         {
         	$.fn[name] = function (data, fn)
         	{
@@ -680,7 +747,7 @@ window.$ = window.jQuery = (function ()
         	};
         }
     );
-	$._each({
+	_each({
 		parent: function (el) { var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
 		parents: function (el) { return $.dir(el, "parentNode"); },
 		parentsUntil: function (el, i, until) { return $.dir(el, "parentNode", until); },
@@ -692,28 +759,25 @@ window.$ = window.jQuery = (function ()
 		prevUntil: function (el, i, until) { return $.dir(el, "previousSibling", until); },
 		siblings: function (el) { return $.sibling(el.parentNode.firstChild, el); },
 		children: function (el) { return $.sibling(el.firstChild); },
-		contents: function (el)
-		{
+		contents: function (el) {
 			return $.nodeName(el, "iframe") ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
 		}
-	}, function (fn, name)
-	{
+	}, function (fn, name) {
 		$.fn[name] = function (until, sel)
 		{
 			var ret = $.map(this, fn, until), args = slice.call(arguments);
 			if (!runtil.test(name)) sel = until;
-			if (sel && typeof sel === "string") ret = $.filter(sel, ret);
+			if (sel && isS(sel)) ret = $.filter(sel, ret);
 			ret = this.length > 1 && !guaranteedUnique[name] ? $.unique(ret) : ret;
 			if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
 			return this.pushStack(ret, name, args.join(","));
 		};
 	});
 
-	function boxmodel()
-	{
+	function boxmodel() {
 		if (!doc.body)
-		{
-			$(window).bind("load", function ()
+		{ //in HEAD
+			$(win).bind("load", function ()
 			{
 				$.support = boxmodel();
 			});
@@ -727,8 +791,7 @@ window.$ = window.jQuery = (function ()
 		doc.body.removeChild(d);
 		return w == 40;
 	}
-	(function ()
-	{
+	(function () {
 		var div = document.createElement("div");
 		div.style.display = "none";
 		div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -740,11 +803,8 @@ window.$ = window.jQuery = (function ()
 		};
 	})();
 
-	function getWindow(el)
-	{
-		return $.isWindow(el) ? el : el.nodeType === 9 ? el.defaultView || el.parentWindow : false;
-	}
-	$._each(["Left", "Top"], function (name, i)
+	function getWin(el) { return isWin(el) ? el : el.nodeType === 9 ? el.defaultView || el.parentWindow : false; }
+	_each(["Left", "Top"], function (name, i)
 	{
 		var method = "scroll" + name;
 		$.fn[method] = function (val)
@@ -754,14 +814,14 @@ window.$ = window.jQuery = (function ()
 			{
 				el = this[0];
 				if (!el) return null;
-				win = getWindow(el);
+				win = getWin(el);
 				return win ? ("pageXOffset" in win)
                     ? win[i ? "pageYOffset" : "pageXOffset"]
                     : $.support.boxModel && win.document.documentElement[method] || win.document.body[method] : el[method];
 			}
 			return this.each(function ()
 			{
-				win = getWindow(this);
+				win = getWin(this);
 				if (win)
 					win.scrollTo(!i ? val : $(win).scrollLeft(), i ? val : $(win).scrollTop());
 				else
@@ -773,7 +833,7 @@ window.$ = window.jQuery = (function ()
 	$.addConstructor = function (fn) { ctors.push(fn); };
 	$.addPlugin = function (meta, fn)
 	{
-		var name = typeof meta == "string" ? meta : meta['name'];
+		var name = isS(meta) ? meta : meta['name'];
 		fn = typeof meta == "function" ? meta : fn;
 		if (typeof fn != "function") throw "Plugin fn required";
 		if (name && fn) plugins[name] = fn;
