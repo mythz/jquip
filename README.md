@@ -18,7 +18,9 @@ Also some things are not fully implemented, please report back issues so we can 
 
 ## Roadmap
 
-  - We want jquip core to work well Backbone.js and Spine.js as a minium baseline, we'll need:
+  - We want jquip core to work well 
+  [Backbone.js](http://documentcloud.github.com/backbone/) and 
+  [Spine.js](http://spinejs.com) so as a minium, we'll need:
     - Improved $().find
     - $().delegate
   - More plugins!
@@ -48,6 +50,8 @@ Methods marked with * are only partially implemented.
 ### Methods operating on a `$(selctor)`
   
   - each
+  - add
+  - get
   - attr
   - bind
   - unbind
