@@ -16,6 +16,13 @@ Also some things are not fully implemented, please report back issues so we can 
   [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/).  
   - Node js build scripts added to minify jquip with UglifyJS.
 
+## Roadmap
+
+  - We want jquip core to work well Backbone.js and Spine.js as a minium baseline, we'll need:
+    - Improved $().find
+    - $().delegate
+  - More plugins!
+
 # Introducing jquip - aka jQuery-in-parts.
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
@@ -77,7 +84,7 @@ Methods marked with * are only partially implemented.
   - scrollLeft
   - scrollTop
 
-### Events: 
+### Events
 
 blur focus focusin focusout load resize scroll unload click dblclick 
 mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
@@ -86,7 +93,6 @@ change select submit keydown keypress keyup error
 ### static methods off $
   
   - $.each and Underscore's faster [$._each](http://documentcloud.github.com/underscore/#each)
-  - [$._select](http://documentcloud.github.com/underscore/#filter)
   - $.filter
   - $.dir
   - $.nth
@@ -106,6 +112,10 @@ change select submit keydown keypress keyup error
   - $.extend
   - $.unique
   - $.fromHtml - creates a document fragment from a html string
+  - $.walk - traveres all descendents including self (predicateFn, [[, context], results])
+  - $.queryAll - querySelector || Sizzle if exists otherwise limitedQueryAll*
+  - $.attrs - an elements attributes
+  - $.unique - return a unique list of elements in document order
 
 ## Plugins
 
@@ -146,15 +156,20 @@ modfied to work like jQuery's ajax.
 Parts of jQuery that aren't ported over (because of code size) throw a "not implemented exception".
 At the moment this only gets thrown for complex filters that filter (i.e $().find) on more than a tagName.
 
-* For <= IE7 all selectors require an Id (i.e. #) or Tag Name (e.g. INPUT) in each child selector.
+* For <= IE7 all selectors require an Id (i.e. #) Tag or class name (e.g. INPUT) in each child selector.
  
  Valid Examples:
 
    - TBODY TD.c1 INPUT
    - TH.c1 STRONG
    - #btnSubmit SPAN
-   - TBODY INPUT[name='chkProcess']
-   - TBODY INPUT[type='text']
+   - FORM INPUT[name='chkProcess']
+   - FORM INPUT[type='text']
+   - FORM INPUT[type]
+   - FORM#id.a.b
+   - FORM#id .a.b
+   - .a.b.c
+   - .a 
 
 Events passed to your event handers are the 'real' browser DOM events. 
 You can use the jquip.custom $.namedKey() feature for cross-browser key detection.

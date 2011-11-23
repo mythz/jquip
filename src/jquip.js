@@ -617,16 +617,14 @@ window.$ = window.jQuery = (function ()
 		return a1;
 	}; $.merge = merge;
 
-	$.extend = $.fn.extend = function ()
-	{
+	$.extend = $.fn.extend = function () {
 		var opt, name, src, copy, copyIsArr, clone, args = arguments,
 			dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
 		if (typeof dst === "boolean")
 			deep = dst, dst = args[1] || {}, i = 2;
 		if (typeof dst !== "object" && !isF(dst)) dst = {};
 		if (aLen === i) { dst = this; --i; }
-		for (; i < aLen; i++)
-		{
+		for (; i < aLen; i++) {
 			if ((opt = args[i]) != null)
 			{
 				for (name in opt)
