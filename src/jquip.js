@@ -1,4 +1,4 @@
-window.$ = window.jQuery = (function ()
+window.jquip = window.$ = (function ()
 {
 	var win = window, doc = document, docEl = doc.documentElement, $id = function (id) { return doc.getElementById(id); },
         $tag = function (tag, ctx) { return (ctx || doc).getElementsByTagName(tag); },
