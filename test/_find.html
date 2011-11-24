@@ -39,7 +39,7 @@
     return sb;
   }
   function test(rule, expected) {
-    var actual = $.queryAll(rule,document);
+    var actual = $.query(rule,document);
     //console.log(actual);
     console.log((ids(actual) == expected ? "OK " : "FAIL was " + ids(actual) + " > ") + rule);
   }
