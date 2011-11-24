@@ -3,12 +3,17 @@ jQuery getting too big?
 The primary goal of this project would be for the feedback/demand to kickstart jquery.com into re-organizing its code-base so it's more modular since we believe we've proved the most useful parts of jQuery is a fraction of its code-base. 
 
 To this end, follow this project if you want jquery.com to measure the demand for this. Another project with 
-similar goals is http://ender.no.de/ - for node.js.
+similar goals is http://ender.no.de/ - for node.js. 
+
+[Zepto.js](http://zeptojs.com/) is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers.
+It's a popular option for PhoneGap developers with full support for the 
+[Backbone.js](http://documentcloud.github.com/backbone/), [Underscore.js](http://documentcloud.github.com/underscore/) and [Spine.js](http://zeptojs.com/) frameworks.
+
 
 Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although instead of just giving a trim, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) sound promising. 
 
 **Disclaimer:** This is **NOT** an official [jQuery.com](http://jquery.com/) project.
-Also some things are not fully implemented, please report back issues so we can measure the API popularity of missing pieces.
+Also this is still under heavy development and some things are not fully implemented, please report issues so we can measure the API popularity of missing pieces.
 
 ## News
 
