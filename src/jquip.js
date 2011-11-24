@@ -325,7 +325,7 @@ window.jquip = window.$ = (function ()
                         ? ((el = (ctx || doc).getElementById(arg)) ? [el] : emptyArr)
                         : slice.call(firstChar == "."
                             ? ctx.getElementsByClassName(arg)
-                            : ctx.getElementsByTagName(arg))
+                            : ctx.getElementsByTagName(sel))
                     );
             } catch(e){}
         }

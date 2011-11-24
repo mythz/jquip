@@ -26,6 +26,7 @@
   <input name="a" value="b" id="in3" class="d" />
   <input name="b" value="b" id="in4" class="d" />
   <i id="i10" class="b c d e f g">i10</i>
+  <textarea id="t1"></textarea>
 
 
 <script type="text/javascript" src="../src/jquip.js"></script>
@@ -58,6 +59,7 @@
   test("form#f1.a input[name='a']", "in1,in2");
   test("form#f1.a .n .d", "i8,i9");
   test("#f1.a .n .d", "i8,i9");
+  test("textarea", "t1");
 
 </script>
 </body>
