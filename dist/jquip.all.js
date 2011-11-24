@@ -384,6 +384,13 @@ window.jquip = window.$ = (function ()
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	} $._each = _each;
+    $._defaults = function(obj) {
+        _each(slice.call(arguments, 1), function(o) {
+            for (var k in o)
+                if (obj[k] == null) obj[k] = o[k];
+        });
+        return obj;
+    };
 	$.filter = function (expr, els, not) {
 		var ret = [], isTagOnly = (expr.indexOf(' ') === -1);
 		if (isTagOnly) {
@@ -733,7 +740,7 @@ $.plug("ajax", function ($) {
 	};
 	$.ajax = function (o) {
 		var xhr = $.xhr(), timer, n = 0;
-		o = $.extend({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" }, o);
+		o = $._defaults({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" }, o);
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4)

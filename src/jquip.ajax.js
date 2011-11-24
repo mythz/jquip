@@ -42,7 +42,7 @@ $.plug("ajax", function ($) {
 	};
 	$.ajax = function (o) {
 		var xhr = $.xhr(), timer, n = 0;
-		o = $.extend({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" }, o);
+		o = $._defaults({ userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" }, o);
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4)

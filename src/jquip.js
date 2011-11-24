@@ -384,6 +384,13 @@ window.jquip = window.$ = (function ()
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	} $._each = _each;
+    $._defaults = function(obj) {
+        _each(slice.call(arguments, 1), function(o) {
+            for (var k in o)
+                if (obj[k] == null) obj[k] = o[k];
+        });
+        return obj;
+    };
 	$.filter = function (expr, els, not) {
 		var ret = [], isTagOnly = (expr.indexOf(' ') === -1);
 		if (isTagOnly) {
