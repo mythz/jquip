@@ -1,4 +1,4 @@
-$.addPlugin("css", function ($) {
+$.plug("css", function ($) {
     var doc = document,
         ralpha = /alpha\([^)]*\)/i,
         ropacity = /opacity=([^)]*)/,
@@ -164,4 +164,29 @@ $.addPlugin("css", function ($) {
             else return this.css(type, typeof size === "string" ? size : size + "px");
         };
     });
+
+    function getWin(el) { return $.isWindow(el) ? el : el.nodeType === 9 ? el.defaultView || el.parentWindow : false; }
+
+    $._each(["Left", "Top"], function (name, i) {
+        var method = "scroll" + name;
+        $.fn[method] = function (val) {
+            var el, win;
+            if (val === undefined) {
+                el = this[0];
+                if (!el) return null;
+                win = getWin(el);
+                return win ? ("pageXOffset" in win)
+                    ? win[i ? "pageYOffset" : "pageXOffset"]
+                    : $.support.boxModel && win.document.documentElement[method] || win.document.body[method] : el[method];
+            }
+            return this.each(function() {
+                win = getWin(this);
+                if (win)
+                    win.scrollTo(!i ? val : $(win).scrollLeft(), i ? val : $(win).scrollTop());
+                else
+                    this[method] = val;
+            });
+        };
+    });
+
 });

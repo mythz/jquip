@@ -1,6 +1,6 @@
-$.addPlugin("docready", function ($) {
+$.plug("docready", function ($) {
     var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
-    $.addConstructor(function (selector, ctx) {
+    $.hook(function (selector, ctx) {
         if (typeof selector == "function") {
             this.ready(selector);
             return true;
@@ -36,13 +36,11 @@ $.addPlugin("docready", function ($) {
             }
         }
     };
-    if (doc.addEventListener)
-        DOMContentLoaded = function () {
+    DOMContentLoaded = doc.addEventListener
+        ? function () {
             doc.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
-            $.ready();
-        };
-    else if (doc.attachEvent)
-        DOMContentLoaded = function () {
+            $.ready(); }
+        : function () {
             if (doc.readyState === "complete") {
                 doc.detachEvent("onreadystatechange", DOMContentLoaded);
                 $.ready();

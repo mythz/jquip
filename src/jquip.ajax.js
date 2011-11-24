@@ -1,4 +1,4 @@
-$.addPlugin("ajax", function ($) {
+$.plug("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -8,20 +8,14 @@ $.addPlugin("ajax", function ($) {
         _xhrf = null;
 	$.xhr = function () {
 		if (_xhrf != null) return _xhrf();
-		for (var i = 0, l = xhrs.length; i < l; i++)
-		{
-			try
-			{
+		for (var i = 0, l = xhrs.length; i < l; i++) {
+			try {
 				var f = xhrs[i], req = f();
-				if (req != null)
-				{
+				if (req != null) {
 					_xhrf = f;
 					return req;
 				}
-			} catch (e)
-			{
-				continue;
-			}
+			} catch (e){}
 		}
 		return function () { };
 	};
@@ -41,7 +35,7 @@ $.addPlugin("ajax", function ($) {
 				return xhr.responseText;
 		}
 	};
-	$._formData = function (o) {
+	$.formData = function (o) {
 		var kvps = [], regEx = /%20/g;
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
@@ -65,12 +59,12 @@ $.addPlugin("ajax", function ($) {
 		};
 		var url = o.url, data = null;
 		var isPost = o.type == "POST" || o.type == "PUT";
-		if (!isPost && o.data) url += "?" + $._formData(o.data);
+		if (!isPost && o.data) url += "?" + $.formData(o.data);
 		xhr.open(o.type, url);
 
 		if (isPost) {
 			var isJson = o.dataType.indexOf("json") >= 0;
-			data = isJson ? JSON.stringify(o.data) : $._formData(o.data);
+			data = isJson ? JSON.stringify(o.data) : $.formData(o.data);
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);

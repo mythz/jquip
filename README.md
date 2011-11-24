@@ -25,6 +25,14 @@ Also some things are not fully implemented, please report back issues so we can 
     - $().delegate
   - More plugins!
 
+## Changes
+
+  - $.addConstructor is now `$.hook`
+  - $.addPlugin is now `$.plug`
+  - **scrollLeft** and **scrollTop** is now in the **css** plugin
+  - Due to a request by the jQuery team we're no longer assigning the **jQuery** variable, you will now need to manually change this yourself on the first line of jquip.js:    
+    `window.**jquip** = window.$ = (function()..`
+
 # Introducing jquip - aka jQuery-in-parts.
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
@@ -85,8 +93,6 @@ Methods marked with * are only partially implemented.
   - siblings
   - children
   - contents
-  - scrollLeft
-  - scrollTop
 
 ### Events
 
@@ -96,7 +102,8 @@ change select submit keydown keypress keyup error
 
 ### static methods off $
   
-  - $.each and Underscore's faster [$._each](http://documentcloud.github.com/underscore/#each)
+  - $.each 
+  - [$._each](http://documentcloud.github.com/underscore/#each) - Underscore's native each 
   - $.filter
   - $.dir
   - $.nth
@@ -114,10 +121,10 @@ change select submit keydown keypress keyup error
   - $.isNaN
   - $.merge
   - $.extend
-  - $.unique
-  - $.fromHtml - creates a document fragment from a html string
-  - $.walk - traveres all descendents including self (predicateFn, [[, context], results])
-  - $.queryAll - querySelector || Sizzle if exists otherwise limitedQueryAll*
+  - $.makeArray
+  - $.htmlFrag - creates a document fragment from a html string **(name changed)**
+  - $.walk - traveres all childElems including self `(predicateFn, [[, context], results])`
+  - $.queryAll - Sizzle(or mock) || doc.querySelector || limitedQueryAll*
   - $.attrs - an elements attributes
   - $.unique - return a unique list of elements in document order
 
@@ -137,8 +144,14 @@ yep, it's a plugin!
 ### [css](https://github.com/mythz/jquip/blob/master/src/jquip.css.js)
 
   - [$.css](http://api.jquery.com/css/)
-  - [$.Width](http://api.jquery.com/width/)
-  - [$.Height](http://api.jquery.com/height/)
+  - width
+  - height
+  - innerHeight
+  - innerWidth
+  - outerHeight
+  - outerWidth
+  - scrollLeft
+  - scrollTop
   - $.camelCase
 
 ### [ajax](https://github.com/mythz/jquip/blob/master/src/jquip.ajax.js)
@@ -150,12 +163,33 @@ modfied to work like jQuery's ajax.
   - [$.getJSON](http://api.jquery.com/jQuery.getJSON/)
   - $.get
   - $.post
+  - $.formData - convert object hash into a url Encoded string component
 
 ### [custom](https://github.com/mythz/jquip/blob/master/src/jquip.custom.js)
 
   - $.queryString - cached map of queryString variables 
   - $.is[Tab|Enter|Shift|...] - static functions to detect named keys pressed, e.g. `if ($.isEnter(e)) console.log("pressed enter")`
   - $.cancelEvent - cross-browser fn to `preventDefault()` and `stopPropogation()`, returns false.
+
+### Plugin Authors (adding your own plugins)
+
+Extending jquip:
+
+  * `[elements] window.Sizzle (selector, context)` - Provide an alternate query engine.
+  * `bool $.hook (function(selector, contxt))` - Intercept the constructor request.
+  * `plug(name, fn($))` - Register your own plugin, mutate `$` to extend jquip.
+
+Intercept the `$(){ .. }` constructor and inject your own implementation. Return true to short-circuit. e.g: from the **docready** plugin:
+
+  $.plug("docready", function ($) {
+    $.hook(function (selector, ctx) {
+        if (typeof selector == "function") {
+            this.ready(selector);
+            return true;
+        }
+    });
+    ... 
+  });
 
 ### Limitations
 
@@ -195,7 +229,6 @@ The main task that needs doing is to get all the missing jQuery parts in as plug
 and a comprehensive test suite so we can properly identify the parts of jQuery supported.
 
 Feedback is welcome, drop me a line on [@demisbellot](http://twitter.com/demisbellot).
-
 
 ## Contributors
 

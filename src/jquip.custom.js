@@ -1,4 +1,4 @@
-$.addPlugin("custom", function($){
+$.plug("custom", function($){
     var win=window, doc=document, qsMap = {}, 
         vars = win.location.search.substring(1).split("&");
 

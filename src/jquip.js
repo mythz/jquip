@@ -34,7 +34,7 @@ window.jquip = window.$ = (function ()
         nativeForEach = ArrayProto.forEach,
         nativeMap = ArrayProto.map;
 
-	if (rnotwhite.test("\xA0")) trimLeft = /^[\s\xA0]+/, trimRight = /[\s\xA0]+$/;
+	if (rnotwhite.test("\xA0")) { trimLeft = /^[\s\xA0]+/; trimRight = /[\s\xA0]+$/; }
 
 	var ctors = [], plugins = {};
 	function $(selector, ctx)
@@ -55,7 +55,7 @@ window.jquip = window.$ = (function ()
 			} else if (isA(selector)) return this.make(selector);
 			if (selector.nodeType || isWin(selector)) return this.make([selector]);
 			if (!selector.split) return this;
-			if (selector.charAt(0) === "<") return this.make(fromHtml(selector));
+			if (selector.charAt(0) === "<") return this.make(htmlFrag(selector));
 			return this.make($qs(selector, ctx));
 		},
 		make: function(els) {
@@ -116,7 +116,7 @@ window.jquip = window.$ = (function ()
 			if (!value) return this;
 			if (!isS(value)) throw "Not supported: " + value;
 			return this.each(function () {
-				cb.call(this, fromHtml(value));
+				cb.call(this, htmlFrag(value));
 			});
 		},
 		hide: function(){
@@ -128,7 +128,7 @@ window.jquip = window.$ = (function ()
 		toggle: function(){
 			this.each(function () { this.style.display = this.style.display === "none" ? "block" : "none"; });
 		},
-		pushStack: function(els, name, selector){
+		ps: function(els, name, selector){
 			var ret = this.constructor();
 			if (isA(els)) push.apply(ret, els);
 			else merge(ret, els);
@@ -144,7 +144,7 @@ window.jquip = window.$ = (function ()
 		first: function() { return this.eq(0); },
 		last: function() { return this.eq(-1); },
 		slice: function(){
-			return this.pushStack(slice.apply(this, arguments),
+			return this.ps(slice.apply(this, arguments),
 		        "slice", slice.call(arguments).join(","));
 		},
 		find: function (sel){
@@ -155,7 +155,7 @@ window.jquip = window.$ = (function ()
 						if ($.contains(self[i], this)) return true;
 				});
 			}
-			var ret = this.pushStack("", "find", sel), len, n, r;
+			var ret = this.ps("", "find", sel), len, n, r;
 			for (i = 0, l = this.length; i < l; i++){
 				len = ret.len;
 				merge(ret, $(sel, this[i]));
@@ -268,7 +268,7 @@ window.jquip = window.$ = (function ()
 		var el = $el(ctx), cls = sel.split('.'), tag = cls.shift(), fPos = tag.indexOf('['), fName, fValue, parts;
 		if (fPos >= 0) {
 			parts = tag.substring(fPos + 1, tag.length - 1).split('=');
-			fName = parts[0], fValue = parts.length == 2 && parts[1];
+			fName = parts[0]; fValue = parts.length == 2 && parts[1];
 			if (fValue && fValue.charAt(0) == "'")
 				fValue = fValue.substring(1, fValue.length - 1);
 			tag = tag.substring(0, fPos);
@@ -293,49 +293,47 @@ window.jquip = window.$ = (function ()
 	}
 	function walk(fn, ctx, ret)
 	{
-		ctx = ctx || doc, ret = ret || [];
+		ctx = ctx || doc; ret = ret || [];
 		if (ctx.nodeType == 1)
 			if (fn(ctx)) ret.push(ctx);
 		var els = ctx.childNodes;
 		for (var i = 0, l = els.length; i < l; i++) {
 			var subEl = els[i];
-			if (subEl.nodeType == 1) {
-				if (fn(subEl)) ret.push(subEl);
-				walk(fn, subEl, ret);
-			}
+			if (subEl.nodeType == 1) 
+				walk(fn, subEl, ret);			
 		}
 		return ret;
 	} $.walk = walk;
 
 	var $cls = doc.getElementsByClassName //&& false
-            ? function (cls, ctx) { return (ctx || doc).getElementsByClassName(cls); }
-            : function (cls, ctx) {
-            	var ret = walk(function (el) {
-            		return el.className && el.className.indexOf(cls) >= 0;
-            	}, (ctx || doc));
-            	return unique(ret);
+        ? function (cls, ctx) { return (ctx || doc).getElementsByClassName(cls); }
+        : function (cls, ctx) {
+            var ret = walk(function (el) {
+                return el.className && el.className.indexOf(cls) >= 0;
+            }, (ctx || doc));
+                return unique(ret);
             };
-	$qs = $.fn.qs = doc.querySelectorAll //&& false
-            ? function (sel, ctx) { return (ctx || doc).querySelectorAll(sel); }
-            : win.Sizzle || function (selector, ctx) {
-            	var els, resSet = [[(ctx || doc)]], heir = selector.split(' '), ret = [];
-            	for (var i = 0, l = heir.length; i < l; i++) {
-            		var parentSet = resSet[i];
-            		if (parentSet.length == 0) return ret; //short-circuit
-            		var sel = heir[i], res = [], firstChar = sel.charAt(0);
-            		if (firstChar == '#') {
-            			resSet.push([(ctx || doc).getElementById(sel.substring(1))]);
-            		} else {
-            			for (var j = 0, jlen = parentSet.length; j < jlen; j++) {
-            				els = $token(sel, parentSet[j]);
-            				for (var k = 0, klen = els.length; k < klen; k++)
-            					res.push(els[k]);
-            			}
-            			resSet.push(res);
-            		}
-            	}
-            	return resSet.length > 1 ? resSet.pop() : [];
-            };
+	$qs = $.fn.qs = win.Sizzle || (doc.querySelectorAll
+        ? function (sel, ctx) { return (ctx || doc).querySelectorAll(sel); }
+        : function (selector, ctx) {
+            var els, resSet = [[(ctx || doc)]], heir = selector.split(' '), ret = [];
+            for (var i = 0, l = heir.length; i < l; i++) {
+                var parentSet = resSet[i];
+                if (parentSet.length == 0) return ret; //short-circuit
+                var sel = heir[i], res = [], firstChar = sel.charAt(0);
+                if (firstChar == '#') {
+                    resSet.push([(ctx || doc).getElementById(sel.substring(1))]);
+                } else {
+                    for (var j = 0, jlen = parentSet.length; j < jlen; j++) {
+                        els = $token(sel, parentSet[j]);
+                        for (var k = 0, klen = els.length; k < klen; k++)
+                            res.push(els[k]);
+                    }
+                    resSet.push(res);
+                }
+            }
+            return resSet.length > 1 ? resSet.pop() : [];
+        });
 	$.queryAll = $qs;
 	function $qsMany(els, sel)
 	{
@@ -346,7 +344,7 @@ window.jquip = window.$ = (function ()
 		}
 		unique(ret);
 		return ret;
-	};
+	}
 	//EndQuery
 	function $el(sel) {
 		if (isS(sel))
@@ -385,7 +383,7 @@ window.jquip = window.$ = (function ()
 				if (hasOwn.call(o, key))
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
-	}; $._each = _each;
+	} $._each = _each;
 	$.filter = function (expr, els, not) {
 		var ret = [], isTagOnly = (expr.indexOf(' ') === -1);
 		if (isTagOnly) {
@@ -459,8 +457,8 @@ window.jquip = window.$ = (function ()
 		for (var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
 			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
-	}; $.attrs = attrs;
-	trim = strim
+	} $.attrs = attrs;
+	$.trim = trim = strim
         ? function (text) { return text == null ? "" : strim.call(text); }
         : function (text) { return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
 	$.indexOf = $.inArray = function (el, arr) {
@@ -486,12 +484,12 @@ window.jquip = window.$ = (function ()
 		return this;
 	});
 
-	function typeOf(o) { return o == null ? String(o) : class2type[toString.call(o)] || "object"; }; $.type = typeOf;
-	function isS(o) { return typeof o === "string"; };
-	function isF(o) { return typeof o === "function" || typeOf(o) === "function"; }; $.isFunction = isF;
-	function isA(o) { return typeOf(o) === "array"; }; $.isArray = Array.isArray || isA;
-	function isWin(o) { return o && typeof o === "object" && "setInterval" in o; }; $.isWindow = isWin;
-	function isNan(obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); }; $.isNaN = isNan;
+	function typeOf(o) { return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $.type = typeOf;
+	function isS(o) { return typeof o === "string"; }
+	function isF(o) { return typeof o === "function" || typeOf(o) === "function"; } $.isFunction = isF;
+	function isA(o) { return typeOf(o) === "array"; } $.isArray = Array.isArray || isA;
+	function isWin(o) { return o && typeof o === "object" && "setInterval" in o; } $.isWindow = isWin;
+	function isNan(obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); } $.isNaN = isNan;
 	function eq(str1, str2) { return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() == str2.toLowerCase(); }
 	function isPlainObject(o) {
 		if (!o || typeOf(o) !== "object" || o.nodeType || isWin(o)) return false;
@@ -513,12 +511,12 @@ window.jquip = window.$ = (function ()
 				a1[i++] = a2[j++];
 		a1.length = i;
 		return a1;
-	}; $.merge = merge;
+	} $.merge = merge;
 	$.extend = $.fn.extend = function () {
 		var opt, name, src, copy, copyIsArr, clone, args = arguments,
 			dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
 		if (typeof dst === "boolean")
-			deep = dst, dst = args[1] || {}, i = 2;
+			deep = dst; dst = args[1] || {}; i = 2;
 		if (typeof dst !== "object" && !isF(dst)) dst = {};
 		if (aLen === i) { dst = this; --i; }
 		for (; i < aLen; i++) {
@@ -552,7 +550,7 @@ window.jquip = window.$ = (function ()
 		}
 		return ret;
 	};
-	function fromHtml(html) {
+	function htmlFrag(html) {
 		var frag = doc.createDocumentFragment(),
             div = doc.createElement('div'),
             tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
@@ -563,7 +561,7 @@ window.jquip = window.$ = (function ()
 		while (depth--) { div = div.lastChild; }
 		while (div.firstChild) frag.appendChild(div.firstChild);
 		return frag;
-	}; $.fromHtml = fromHtml;
+	} $.htmlFrag = htmlFrag;
 
 	var sibChk = function (a, b, ret) {
 		if (a === b) return ret;
@@ -613,7 +611,7 @@ window.jquip = window.$ = (function ()
 					if (els[i] === els[i - 1]) els.splice(i--, 1);
 		}
 		return els;
-	}; $.unique = unique;
+	} $.unique = unique;
 	_each(("blur focus focusin focusout load resize scroll unload click dblclick " +
             "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
             "change select submit keydown keypress keyup error").split(" "),
@@ -649,7 +647,7 @@ window.jquip = window.$ = (function ()
 			if (sel && isS(sel)) ret = $.filter(sel, ret);
 			ret = this.length > 1 && !guaranteedUnique[name] ? $.unique(ret) : ret;
 			if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
-			return this.pushStack(ret, name, args.join(","));
+			return this.ps(ret, name, args.join(","));
 		};
 	});
 
@@ -680,34 +678,11 @@ window.jquip = window.$ = (function ()
 		};
 	})();
 
-	function getWin(el) { return isWin(el) ? el : el.nodeType === 9 ? el.defaultView || el.parentWindow : false; }
-	_each(["Left", "Top"], function (name, i) {
-		var method = "scroll" + name;
-		$.fn[method] = function (val) {
-			var el, win;
-			if (val === undefined) {
-				el = this[0];
-				if (!el) return null;
-				win = getWin(el);
-				return win ? ("pageXOffset" in win)
-                    ? win[i ? "pageYOffset" : "pageXOffset"]
-                    : $.support.boxModel && win.document.documentElement[method] || win.document.body[method] : el[method];
-			}
-			return this.each(function() {
-				win = getWin(this);
-				if (win)
-					win.scrollTo(!i ? val : $(win).scrollLeft(), i ? val : $(win).scrollTop());
-				else
-					this[method] = val;
-			});
-		};
-	});
-
-	$.addConstructor = function (fn) { ctors.push(fn); };
-	$.addPlugin = function (meta, fn) {
+	$.hook = function (fn) { ctors.push(fn); };
+	$.plug = function (meta, fn) {
 		var name = isS(meta) ? meta : meta['name'];
-		fn = typeof meta == "function" ? meta : fn;
-		if (typeof fn != "function") throw "Plugin fn required";
+		fn = isF(meta) ? meta : fn;
+		if (!isF(fn)) throw "Plugin fn required";
 		if (name && fn) plugins[name] = fn;
 		fn($);
 	};
