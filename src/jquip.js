@@ -770,6 +770,9 @@ $.plug(function($) {
    	}
 
     $.setQuery(function (selector, ctx) {
+        if (doc.querySelectorAll)
+            return (ctx || doc).querySelectorAll(selector);
+        
         var els, resSet = [[(ctx || doc)]], heir = selector.split(' '), ret = [];
         for (var i = 0, l = heir.length; i < l; i++) {
             var parentSet = resSet[i];
