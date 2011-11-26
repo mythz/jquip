@@ -41,7 +41,7 @@ Licence: http://www.opensource.org/licenses/mit-license.php
 
 ### Build customizable jquip packages with the [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/)
 
-### Disclaimer
+#### Disclaimer
 
 This is **NOT** an official [jQuery.com](http://jquery.com/) project.
 
@@ -170,7 +170,14 @@ Methods marked with * are only partially implemented.
   - $.contains - parent element contains sibling
   - $.setQuery - plugin your own query engine
 
-## Events module (jquip.events.js)
+## Plugins
+
+Pick and choose the parts of jQuery when and add you use them.
+
+Other parts of jQuery can be Added via Plugins which is simply a matter of copying or including the 
+script after the core `jquip.js`.
+
+### [events](https://github.com/mythz/jquip/blob/master/src/jquip.events.js)
 
 ### Methods on `$(selector)`
 
@@ -183,23 +190,16 @@ Methods marked with * are only partially implemented.
   - die
   - trigger
 
-### Static Methods 
-
-  - $.bind
-  - $.unbind
-
-### Helpers
+### Helpers on `$(selector)`
 
 blur focus focusin focusout load resize scroll unload click dblclick 
 mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
 change select submit keydown keypress keyup error
 
-## Plugins
+### Static Methods 
 
-Pick and choose the parts of jQuery when and add you use them.
-
-Other parts of jQuery can be Added via Plugins which is simply a matter of copying or including the 
-script after the core `jquip.js`.
+  - $.bind
+  - $.unbind
 
 ### [documentReady](https://github.com/mythz/jquip/blob/master/src/jquip.docready.js)
 yep, it's a plugin!
