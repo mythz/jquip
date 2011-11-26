@@ -4,9 +4,14 @@ var fs = require("fs"),
 	jsp = require("uglify-js").parser,
 	pro = require("uglify-js").uglify;
 
+String.prototype.startsWith = function (str){
+	return this.indexOf(str) === 0;
+};
+
 var srcDir = '../src', targetDir = '../dist', allJsMap = {}, allMinJsMap = {};
 var files = fs.readdirSync(srcDir);
 files.forEach(function(file) { 
+	if (file.charAt(0) == ".") return;
 	var srcPath = srcDir + '/' + file, 
 		targetPath = targetDir + '/' + file.replace('.js', '.min.js');
 	var js = fs.readFileSync(srcPath).toString('utf-8');
@@ -15,8 +20,11 @@ files.forEach(function(file) {
 	ast = pro.ast_squeeze(ast);
 	var minJs = pro.gen_code(ast); 
 	console.log("writing " + file);
-	allJsMap[file] = js;	
-	allMinJsMap[file] = minJs;	
+	if (file.startsWith("jquip") && !file.startsWith("jquip.q-"))
+	{
+		allJsMap[file] = js;	
+		allMinJsMap[file] = minJs;	
+	}
 	fs.writeFileSync(targetPath, minJs);
 });
 

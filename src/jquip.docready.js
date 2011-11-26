@@ -62,4 +62,5 @@ $.plug("docready", function ($) {
             if (doc.documentElement.doScroll && toplevel) doScrollCheck();
         }
     };
+	if (!$.init) $(document).ready($.onload);
 });

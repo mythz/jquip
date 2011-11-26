@@ -1440,6 +1440,5 @@ window.Sizzle = Sizzle;
 
 })();
 
-$.plug(function($) {
-    $.setQuery(window.Sizzle);
-});
+if (typeof $ !== undefined && $.plug)
+	$.plug(function($) { $.setQuery(window.Sizzle); });

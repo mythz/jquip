@@ -1,133 +1,172 @@
-window.jquip = window.$ = (function ()
-{
-	var win = window, doc = document, docEl = doc.documentElement,
-	    runtil = /Until$/, rmultiselector = /,/,
-        rparentsprev = /^(?:parents|prevUntil|prevAll)/,
-        rtagname = /<([\w:]+)/,
-        rclass = /[\n\t\r]/g,
-        rspace = /\s+/,
-        rdigit = /\d/,
-        rnotwhite = /\S/,
-        strim = String.prototype.trim, trim,
-        trimLeft = /^\s+/,
-        trimRight = /\s+$/,
-        guaranteedUnique = { children: true, contents: true, next: true, prev: true },
-        toString = Object.prototype.toString,
-        class2type = {},
-        hasDup = false, baseHasDup = true,
-        wrapMap = {
-        	option: [1, "<select multiple='multiple'>", "</select>"],
-        	legend: [1, "<fieldset>", "</fieldset>"],
-        	thead: [1, "<table>", "</table>"],
-        	tr: [2, "<table><tbody>", "</tbody></table>"],
-        	td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
-        	col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
-        	area: [1, "<map>", "</map>"],
-        	_default: [0, "", ""] },
-        rComplexQuery = /[,\s.\[]/, emptyArr = [],
+window.jquip = window.$ = (function(){
+	var win = window, queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
+		queryEngines = function(){ return win.Sizzle || win.qwery; },
+		doc = document, docEl = doc.documentElement,
+		runtil = /Until$/, rmultiselector = /,/,
+		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
+		rtagname = /<([\w:]+)/,
+		rclass = /[\n\t\r]/g,
+		rspace = /\s+/,
+		rdigit = /\d/,
+		rnotwhite = /\S/,
+		rReturn = /\r\n/g,
+		strim = String.prototype.trim, trim,
+		trimLeft = /^\s+/,
+		trimRight = /\s+$/,
+		guaranteedUnique = { children: true, contents: true, next: true, prev: true },
+		toString = Object.prototype.toString,
+		class2type = {},
+		hasDup = false, baseHasDup = true,
+		wrapMap = {
+			option: [1, "<select multiple='multiple'>", "</select>"],
+			legend: [1, "<fieldset>", "</fieldset>"],
+			thead: [1, "<table>", "</table>"],
+			tr: [2, "<table><tbody>", "</tbody></table>"],
+			td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+			area: [1, "<map>", "</map>"],
+			_default: [0, "", ""] },
+		rComplexQuery = /[,\s.\[]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
-        hasOwn = ObjProto.hasOwnProperty,
-        slice = ArrayProto.slice,
-        push = ArrayProto.push,
-        indexOf = ArrayProto.indexOf,
-        nativeForEach = ArrayProto.forEach,
-        nativeFilter  = ArrayProto.filter,
-        nativeIndexOf = ArrayProto.indexOf;
+		hasOwn = ObjProto.hasOwnProperty,
+		slice = ArrayProto.slice,
+		push = ArrayProto.push,
+		indexOf = ArrayProto.indexOf,
+		nativeForEach = ArrayProto.forEach,
+		nativeFilter = ArrayProto.filter,
+		nativeIndexOf = ArrayProto.indexOf;
 
-	if (rnotwhite.test("\xA0")) { trimLeft = /^[\s\xA0]+/; trimRight = /[\s\xA0]+$/; }
+	if (rnotwhite.test("\xA0")){
+		trimLeft = /^[\s\xA0]+/;
+		trimRight = /[\s\xA0]+$/;
+	}
 
 	var ctors = [], plugins = {};
-	function $(selector, ctx)
-	{
+	function $(selector, ctx){
 		return new $.fn.init(selector, ctx);
 	}
+
 	$.fn = $.prototype = {
 		constructor: $,
-		init: function (selector, ctx) {
-			for (var i = 0, l = ctors.length; i < l; i++)
+		init: function(selector, ctx){
+			for(var i = 0, l = ctors.length; i < l; i++)
 				if (ctors[i].apply(this, arguments)) return this;
 
 			if (!selector) return this;
-			if (typeof selector == "function")
-			{
+			if (typeof selector == "function"){
 				warn("require docready");
 				return this;
 			} else if (isA(selector)) return this.make(selector);
 			if (selector.nodeType || isWin(selector)) return this.make([selector]);
-			if (!selector.split) return this;
-			if (selector.charAt(0) === "<") return this.make(htmlFrag(selector));
-			return this.make($$(selector, ctx));
+			if (selector == "body" && !ctx && doc.body) {
+				this.context = selector.context;
+				this[0] = doc.body;
+				this.length = 1;
+				this.selector = selector;
+				return this;
+			}
+			if (selector.selector !== undefined) {
+				this.context = selector.context;
+				this.selector = selector.selector;
+				return this.make(selector);
+			}
+			selector = (isS(selector) && selector.charAt(0) === "<")
+				? htmlFrag(selector)
+				: $$(selector, ctx);
+			return this.make(selector);
 		},
-		make: function(els) {
+		make: function(els){
 			make(this, els);
 			return this;
 		},
-		get: function(idx) {
+		get: function(idx){
 			return this[idx];
 		},
-		add: function(sel, ctx) {
+		add: function(sel, ctx){
 			return this.make($(sel, ctx));
 		},
-		each: function(fn) {
+		each: function(fn){
 			if (!isF(fn)) return this;
-			for (var i = 0, l = this.length; i < l; i++)
+			for(var i = 0, l = this.length; i < l; i++)
 				fn.call(this[i], i, this[i]);
 			return this;
 		},
-		attr: function(name) {
-			return this[0] && attrs(this[0])[name];
+		attr: function(name, val){
+			var el = this[0];
+			return (isS(name) && val === undefined)
+				? (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
+				? this.val()
+				: (el
+				? (el.getAttribute(name) || (name in el ? el[name] : undefined))
+				: null)
+				: this.each(function(idx){
+				var nt = this.nodeType;
+				if (nt !== 3 && nt !== 8 && nt !== 2){
+					if (isO(name)) for(var k in name)
+						if (val === null)
+							this.removeAttr(name);
+						else
+							this.setAttribute(k, name[k]);
+					else this.setAttribute(name, isF(val) ? val.call(this, idx, this.getAttribute(name)) : val);
+				}
+			});
 		},
-		bind: function(type, data, fn) {
-			return this.each(function () { $.bind(this, type, fn, data); });
+		removeAttr: function(name){
+			return this.each(function(){
+				this.removeAttribute(name);
+			});
 		},
-		unbind: function(type, fn) {
-			return this.each(function () { $.unbind(this, type, fn); });
-		},
-		data: function(name, setVal) {
+		data: function(name, setVal){
 			return $.data(this[0], name, setVal);
 		},
-		append: function() {
-			return this.dm(arguments, true, function (el) {
+		append: function(){
+			return this.dm(arguments, true, function(el){
 				if (this.nodeType === 1)
 					this.appendChild(el);
 			});
 		},
-		prepend: function() {
-			return this.dm(arguments, true, function (el) {
+		prepend: function(){
+			return this.dm(arguments, true, function(el){
 				if (this.nodeType === 1)
 					this.insertBefore(el, this.firstChild);
 			});
 		},
-		before: function()	{
-			return this.dm(arguments, false, function (el) {
+		before: function(){
+			return this.dm(arguments, false, function(el){
 				this.parentNode.insertBefore(el, this);
 			});
 		},
 		after: function(){
-			if (this[0] && this[0].parentNode) {
-				this.dm(arguments, false, function (el)	{
+			if (this[0] && this[0].parentNode){
+				this.dm(arguments, false, function(el){
 					this.parentNode.insertBefore(el, this.nextSibling);
 				});
 			}
 			return this;
 		},
-		dm: function(args, table, cb) {
+		dm: function(args, table, cb){
 			var value = args[0];
 			if (!value) return this;
 			if (!isS(value)) throw "Not supported: " + value;
-			return this.each(function () {
+			return this.each(function(){
 				cb.call(this, htmlFrag(value));
 			});
 		},
 		hide: function(){
-			this.each(function () { this.style.display = "none"; });
+			this.each(function(){
+				this.style.display = "none";
+			});
 		},
 		show: function(){
-			this.each(function () { this.style.display = "block"; });
+			this.each(function(){
+				this.style.display = "block";
+			});
 		},
 		toggle: function(){
-			this.each(function () { this.style.display = this.style.display === "none" ? "block" : "none"; });
+			this.each(function(){
+				this.style.display = this.style.display === "none" ? "block" : "none";
+			});
 		},
 		ps: function(els, name, selector){
 			var ret = this.constructor();
@@ -141,96 +180,121 @@ window.jquip = window.$ = (function ()
 				ret.selector = this.selector + "." + name + "(" + selector + ")";
 			return ret;
 		},
-		eq: function(i) { return i === -1 ? this.slice(i) : this.slice(i, +i + 1); },
-		first: function() { return this.eq(0); },
-		last: function() { return this.eq(-1); },
+		eq: function(i){
+			return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
+		},
+		first: function(){
+			return this.eq(0);
+		},
+		last: function(){
+			return this.eq(-1);
+		},
 		slice: function(){
 			return this.ps(slice.apply(this, arguments),
-		        "slice", slice.call(arguments).join(","));
+				"slice", slice.call(arguments).join(","));
 		},
-		find: function (sel){
+		find: function(sel){
 			var self = this, i, l;
-			if (!isS(sel)) {
+			if (!isS(sel)){
 				return $(sel).filter(function(){
-					for (i = 0, l = self.length; i < l; i++)
+					for(i = 0, l = self.length; i < l; i++)
 						if ($.contains(self[i], this)) return true;
 				});
 			}
 			var ret = this.ps("", "find", sel), len, n, r;
-			for (i = 0, l = this.length; i < l; i++){
+			for(i = 0, l = this.length; i < l; i++){
 				len = ret.len;
 				merge(ret, $(sel, this[i]));
 				if (i == 0){
-					for (n = len; n < ret.length; n++)
-						for (r = 0; r < len; r++)
-							if (ret[r] === ret[n]) { ret.splice(n--, 1); break; }
+					for(n = len; n < ret.length; n++)
+						for(r = 0; r < len; r++)
+							if (ret[r] === ret[n]){
+								ret.splice(n--, 1);
+								break;
+							}
 				}
 			}
 			return ret;
 		},
-        not: function(sel){
-          var els=[];
-          if (isF(sel) && sel.call !== undefined)
-            this.each(function(idx){
-              if (!sel.call(this,idx)) els.push(this);
-            });
-          else {
-            var excludes = isS(sel)
-                ? this.filter(sel)
-                : (isAL(sel) && isF(sel.item))
-                    ? slice.call(sel)
-                    : $(sel);
-            this.each(function(el){
-              if (excludes.indexOf(el) < 0) els.push(el);
-            });
-          }
-          return $(els);
-        },
-        filter: function(sel){
-            return $(_filter(this, function(el){
-                return el.parentNode && _indexOf($$(el.parentNode, sel), el) >= 0; })
-        )},
-        indexOf: function(val) {
-            return _indexOf(this, val);
-        },
-       	is: function(sel) {
-           return this.length > 0 && $(this[0]).filter(sel).length > 0;
-       	},
+		not: function(sel){
+			var els = [];
+			if (isF(sel) && sel.call !== undefined)
+				this.each(function(idx){
+					if (!sel.call(this, idx)) els.push(this);
+				});
+			else {
+				var excludes = isS(sel)
+					? this.filter(sel)
+					: (isAL(sel) && isF(sel.item))
+					? slice.call(sel)
+					: $(sel);
+				this.each(function(el){
+					if (excludes.indexOf(el) < 0) els.push(el);
+				});
+			}
+			return $(els);
+		},
+		filter: function(sel){
+			return $(_filter(this, function(el){
+					return el.parentNode && _indexOf($$(el.parentNode, sel), el) >= 0;
+				})
+			);
+		},
+		indexOf: function(val){
+			return _indexOf(this, val);
+		},
+		is: function(sel){
+			return this.length > 0 && $(this[0]).filter(sel).length > 0;
+		},
 		remove: function(){
-			for (var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
+			for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
 			return this;
 		},
 		val: function(setVal){
 			if (setVal == null) return (this[0] && this[0].value) || "";
-			return this.each(function () { this.value = setVal; });
+			return this.each(function(){
+				this.value = setVal;
+			});
 		},
 		html: function(setHtml){
 			if (setHtml == null) return (this[0] && this[0].innerHTML) || "";
-			return this.each(function () { this.innerHTML = setHtml; });
+			return this.each(function(){
+				this.innerHTML = setHtml;
+			});
 		},
-        text: function(txt) {
-       		return typeof txt !== "undefined"
-                ? this.each(function(){ this.innerText = txt })
-                : txt(this);
-       	},
+		text: function(val){
+			var el = this[0], nt;
+			return typeof val == "undefined"
+				? (el && (nt = el.nodeType)
+				? ((nt === 1 || nt === 9)
+				? (typeof el.textContent == "string" ? el.textContent : el.innerText.replace(rReturn, ''))
+				: (nt === 3 || nt === 4) ? el.nodeValue : null)
+				: null)
+				: this.empty().append((el && el.ownerDocument || doc).createTextNode(txt));
+		},
+		empty: function(){
+			for(var i = 0, el; (el = this[i]) != null; i++)
+				while (el.firstChild)
+					el.removeChild(el.firstChild);
+			return this;
+		},
 		addClass: function(value){
 			var cls, i, l, el, setClass, c, cl;
 			if (isF(value))
-				return this.each(function (j){
+				return this.each(function(j){
 					$(this).addClass(value.call(this, j, this.className));
 				});
-
-			if (value && isS(value)) {
+			if (value && isS(value)){
 				cls = value.split(rspace);
-				for (i = 0, l = this.length; i < l; i++) {
+				for(i = 0, l = this.length; i < l; i++){
 					el = this[i];
-					if (el && el.nodeType === 1) {
+					if (el && el.nodeType === 1){
 						if (!el.className && cls.length === 1)
 							el.className = value;
 						else {
 							setClass = " " + el.className + " ";
-							for (c = 0, cl = cls.length; c < cl; c++) {
-								if (! ~setClass.indexOf(" " + cls[c] + " "))
+							for(c = 0, cl = cls.length; c < cl; c++){
+								if (!~setClass.indexOf(" " + cls[c] + " "))
 									setClass += cls[c] + " ";
 							}
 							el.className = trim(setClass);
@@ -240,22 +304,20 @@ window.jquip = window.$ = (function ()
 			}
 			return this;
 		},
-		removeClass: function(value) {
+		removeClass: function(value){
 			var clss, i, l, el, cls, c, cl;
-			if (isF(value)) return this.each(function (j) {
+			if (isF(value)) return this.each(function(j){
 				$(this).removeClass(value.call(this, j, this.className));
 			});
-
-			if ((value && isS(value)) || value === undefined) {
+			if ((value && isS(value)) || value === undefined){
 				clss = (value || "").split(rspace);
-				for (i = 0, l = this.length; i < l; i++) {
+				for(i = 0, l = this.length; i < l; i++){
 					el = this[i];
-					if (el.nodeType === 1 && el.className) {
-						if (value) {
+					if (el.nodeType === 1 && el.className){
+						if (value){
 							cls = (" " + el.className + " ").replace(rclass, " ");
-							for (c = 0, cl = clss.length; c < cl; c++){
+							for(c = 0, cl = clss.length; c < cl; c++)
 								cls = cls.replace(" " + clss[c] + " ", " ");
-							}
 							el.className = trim(cls);
 						}
 						else el.className = "";
@@ -264,10 +326,10 @@ window.jquip = window.$ = (function ()
 			}
 			return this;
 		},
-		hasClass: function(sel) {
+		hasClass: function(sel){
 			return hasClass(this, sel);
 		},
-		fadeIn: function() {
+		fadeIn: function(){
 			this.each(function(){
 				$(this).show();
 			});
@@ -280,265 +342,256 @@ window.jquip = window.$ = (function ()
 	};
 	$.fn.init.prototype = $.fn;
 
-	function make(arr, els)
-	{
+	function make(arr, els){
 		arr.length = (els && els.length || 0);
 		if (arr.length == 0) return arr;
-		for (var i = 0, l = els.length; i < l; i++)
+		for(var i = 0, l = els.length; i < l; i++)
 			arr[i] = els[i];
 		return arr;
 	}
-
-	function hasClass(els, cls)
-	{
+	function hasClass(els, cls){
 		var cls = " " + cls + " ";
-		for (var i = 0, l = els.length; i < l; i++)
+		for(var i = 0, l = els.length; i < l; i++)
 			if (els[i].nodeType === 1 && (" " + els[i].className + " ").replace(rclass, " ").indexOf(cls) > -1)
 				return true;
 		return false;
 	} $.hasClass = hasClass;
-
-	function walk(fn, ctx, ret)
-	{
-		ctx = ctx || doc; ret = ret || [];
+	function walk(fn, ctx, ret){
+		ctx = ctx || doc;
+		ret = ret || [];
 		if (ctx.nodeType == 1)
 			if (fn(ctx)) ret.push(ctx);
 		var els = ctx.childNodes;
-		for (var i = 0, l = els.length; i < l; i++) {
+		for(var i = 0, l = els.length; i < l; i++){
 			var subEl = els[i];
-			if (subEl.nodeType == 1) 
-				walk(fn, subEl, ret);			
+			if (subEl.nodeType == 1)
+				walk(fn, subEl, ret);
 		}
 		return ret;
 	} $.walk = walk;
 
-    function $$(sel, ctx, query){
-        if (sel && isS(sel)) {
-            ctx = ctx || doc; query = query || $.query;
-            var firstChar = sel.charAt(0), arg = sel.substring(1),
-                complex = rComplexQuery.test(arg), el;
-            try {
-                if (complex) return slice.call(query(sel, ctx));
-                return complex
-                    ? slice.call(query(sel, ctx))
-                    : (firstChar == "#"
-                        ? ((el = (ctx || doc).getElementById(arg)) ? [el] : emptyArr)
-                        : slice.call(firstChar == "."
-                            ? ctx.getElementsByClassName(arg)
-                            : ctx.getElementsByTagName(sel))
-                    );
-            } catch(e){}
-        }
-        return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
-    } $.$$ = $$;
+	function $$(sel, ctx, query){
+		if (sel && isS(sel)){
+			ctx = ctx || doc;
+			query = query || $.query;
+			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
+			try{
+				if (complex) return slice.call(query(sel, ctx));
+				return complex
+					? slice.call(query(sel, ctx))
+					: (firstChar == "#"
+						? ((el = doc.getElementById(arg)) ? [el] : emptyArr)
+							: slice.call(firstChar == "."
+							? ctx.getElementsByClassName(arg)
+						: ctx.getElementsByTagName(sel))
+					);
+			}catch(e){
+			}
+		}
+		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
+	} $.$$ = $$;
 
-    $.setQuery = function(query) {
-        $.query = function (sel, ctx)
-        {
-            var ret = $$(sel, ctx, query
-                || function(sel, ctx) { return ctx.querySelectorAll(sel); }
-            );
-            return ret;
-        };
-    };
-    $.setQuery(win.Sizzle || win.qwery); //if declared above use it
+	$.setQuery = function(query){
+		$.query = function(sel, ctx){
+			return $$(sel, ctx, query
+				|| function(sel, ctx){ return ctx.querySelectorAll(sel); }
+			);
+		};
+	};
 
-	function warn() { console && console.warn(arguments) }
+	var useQuery = queryEngines();
+	$.setQuery(useQuery || function(sel, ctx){
+		return doc.querySelectorAll ? (ctx || doc).querySelectorAll(sel) : [];
+	});
 
-	$.each = function (o, cb, args) {
+	function loadScript(url, cb, async){
+		var h = doc.head || doc.getElementsByTagName('head')[0] || docEl,
+			s = doc.createElement('script'), rs;
+		if (async) s.async = "async";
+	    s.onreadystatechange = function () {
+		    if (!(rs = s.readyState) || rs == "loaded" || rs == "complete"){
+			    s.onload = s.onreadystatechange = null;
+			    if (h && s.parentNode)
+			        h.removeChild(s);
+			    s = undefined;
+			    if (cb) cb();
+		    }
+	    };
+		s.onload = cb;
+		s.src = url;
+		h.insertBefore(s, h.firstChild);
+	}$.loadScript = loadScript;
+
+	function warn(){ console && console.warn(arguments) }
+
+	$.each = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
-		if (args) {
+		if (args){
 			if (isObj)
-				for (k in o)
+				for(k in o)
 					if (cb.apply(o[k], args) === false) break;
 					else
-						for (; i < l; )
+						for(; i < l;)
 							if (cb.apply(o[i++], args) === false) break;
 		} else {
 			if (isObj)
-				for (k in o)
+				for(k in o)
 					if (cb.call(o[k], k, o[k]) === false) break;
 					else
-						for (; i < l; )
+						for(; i < l;)
 							if (cb.call(o[i], i, o[i++]) === false) break;
 		}
 		return o;
 	};
-	function _each(o, fn, ctx) {
+	function _each(o, fn, ctx){
 		if (o == null) return;
 		if (nativeForEach && o.forEach === nativeForEach)
 			o.forEach(fn, ctx);
-		else if (o.length === +o.length) {
-			for (var i = 0, l = o.length; i < l; i++)
+		else if (o.length === +o.length){
+			for(var i = 0, l = o.length; i < l; i++)
 				if (i in o && fn.call(ctx, o[i], i, o) === breaker) return;
 		} else {
-			for (var key in o)
+			for(var key in o)
 				if (hasOwn.call(o, key))
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	} $._each = _each;
-    function _indexOf(arr, val) {
-        if (arr == null) return -1;
-        var i, l;
-        if (nativeIndexOf && arr.indexOf === nativeIndexOf) return arr.indexOf(val);
-        for (i = 0, l = arr.length; i < l; i++) if (arr[i] === val) return i;
-        return -1;
-    } $._indexOf = _indexOf;
-    $._defaults = function(obj) {
-        _each(slice.call(arguments, 1), function(o) {
-            for (var k in o)
-                if (obj[k] == null) obj[k] = o[k];
-        });
-        return obj;
-    };
-    function _filter(o, fn, ctx) {
-      var ret = [];
-      if (o == null) return ret;
-      if (nativeFilter && o.filter === nativeFilter) return o.filter(fn, ctx);
-      _each(o, function(val, i, arr) {
-        if (fn.call(ctx, val, i, arr)) ret[ret.length] = val;
-      });
-      return ret;
-    } $._filter = _filter;
-	$.dir = function (el, dir, until) {
+	function _indexOf(arr, val){
+		if (arr == null) return -1;
+		var i, l;
+		if (nativeIndexOf && arr.indexOf === nativeIndexOf) return arr.indexOf(val);
+		for(i = 0, l = arr.length; i < l; i++) if (arr[i] === val) return i;
+		return -1;
+	} $._indexOf = _indexOf;
+	$._defaults = function(obj){
+		_each(slice.call(arguments, 1), function(o){
+			for(var k in o)
+				if (obj[k] == null) obj[k] = o[k];
+		});
+		return obj;
+	};
+	function _filter(o, fn, ctx){
+		var ret = [];
+		if (o == null) return ret;
+		if (nativeFilter && o.filter === nativeFilter) return o.filter(fn, ctx);
+		_each(o, function(val, i, arr){
+			if (fn.call(ctx, val, i, arr)) ret[ret.length] = val;
+		});
+		return ret;
+	} $._filter = _filter;
+	$.dir = function(el, dir, until){
 		var matched = [], cur = el[dir];
-		while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))) {
+		while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))){
 			if (cur.nodeType === 1) matched.push(cur);
 			cur = cur[dir];
 		}
 		return matched;
 	};
-	$.nth = function (cur, result, dir, el) {
+	$.nth = function(cur, result, dir, el){
 		result = result || 1;
 		var num = 0;
-		for (; cur; cur = cur[dir])
+		for(; cur; cur = cur[dir])
 			if (cur.nodeType === 1 && ++num === result) break;
 		return cur;
 	};
-	$.sibling = function (n, el) {
+	$.sibling = function(n, el){
 		var r = [];
-		for (; n; n = n.nextSibling) if (n.nodeType === 1 && n !== el) r.push(n);
+		for(; n; n = n.nextSibling) if (n.nodeType === 1 && n !== el) r.push(n);
 		return r;
 	};
-    $.grep = function(els, cb, inv) {
-        var ret = [], retVal;
-        inv = !!inv;
-        for (var i = 0, length = els.length; i < length; i++) {
-            retVal = !!cb(els[i], i);
-            if (inv !== retVal)
-                ret.push(els[i]);
-        }
-        return ret;
-    };
-    $.map = function(els, cb, arg) {
-        var value, key, ret = [], i = 0, length = els.length,
-            isArray = els instanceof $
-                || typeof length === "number"
-                    && ((length > 0 && els[0] && els[length-1]) || length === 0 || isA(els));
-        if (isArray) {
-            for (; i < length; i++) {
-                value = cb(els[i], i, arg);
-                if (value != null)
-                    ret[ret.length] = value;
-            }
-        } else {
-            for (key in els) {
-                value = cb(els[key], key, arg);
-                if (value != null)
-                    ret[ret.length] = value;
-            }
-        }
-        return ret.concat.apply([], ret);
-    };
-     $.bind = function (o, type, fn) {
-		if (o.attachEvent) {
-			o['e' + type + fn] = fn;
-			o[type + fn] = function () { o['e' + type + fn](win.event); };
-			o.attachEvent('on' + type, o[type + fn]);
-		} else
-			o.addEventListener(type, fn, false);
+	$.grep = function(els, cb, inv){
+		var ret = [], retVal;
+		inv = !!inv;
+		for(var i = 0, length = els.length; i < length; i++){
+			retVal = !!cb(els[i], i);
+			if (inv !== retVal)
+				ret.push(els[i]);
+		}
+		return ret;
 	};
-	$.unbind = function (o, type, fn) {
-		if (o.detachEvent) {
-			o.detachEvent('on' + type, o[type + fn]);
-			o[type + fn] = null;
-		} else
-			o.removeEventListener(type, fn, false);
+	$.map = function(els, cb, arg){
+		var value, key, ret = [], i = 0, length = els.length,
+			isArray = els instanceof $
+				|| typeof length == "number"
+				&& ((length > 0 && els[0] && els[length - 1]) || length === 0 || isA(els));
+		if (isArray){
+			for(; i < length; i++){
+				value = cb(els[i], i, arg);
+				if (value != null)
+					ret[ret.length] = value;
+			}
+		} else {
+			for(key in els){
+				value = cb(els[key], key, arg);
+				if (value != null)
+					ret[ret.length] = value;
+			}
+		}
+		return ret.concat.apply([], ret);
 	};
-	$.data = function (el, name, setVal) {
+	$.data = function(el, name, setVal){
 		if (!el) return {};
-		if (name && setVal) {
+		if (name && setVal){
 			el.setAttribute(name, setVal);
 			return null;
 		}
 		var o = {};
-		_each(attrs(el), function (val, aName) {
+		_each(attrs(el), function(val, aName){
 			if (aName.indexOf("data-") !== 0 || !val) return;
 			o[aName.substr("data-".length)] = val;
 		});
 		if (isS(name)) return o[name];
 		return o;
 	};
-    function text(el) {
-        var attr = el.getAttribute("type"), type = el.type;
-        return eqSI(el.nodeName, "input") && "text" === type && ( attr === type || attr === null );
-    }
-	function attrs(el) {
+	function attrs(el){
 		var o = {};
-		for (var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
+		for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
 			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
 	} $.attrs = attrs;
-    function eqSI(str1, str2) {
-        return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() === str2.toLowerCase();
-    } $.eqSI = eqSI;
+	function eqSI(str1, str2){
+		return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() === str2.toLowerCase();
+	} $.eqSI = eqSI;
 	$.trim = trim = strim
-        ? function (text) { return text == null ? "" : strim.call(text); }
-        : function (text) { return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
-	$.indexOf = $.inArray = function (el, arr) {
+		? function(text){ return text == null ? "" : strim.call(text); }
+		: function(text){ return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
+	$.indexOf = $.inArray = function(el, arr){
 		if (!arr) return -1;
 		if (indexOf) return indexOf.call(arr, el);
-
-		for (var i = 0, length = arr.length; i < length; i++)
+		for(var i = 0, length = arr.length; i < length; i++)
 			if (arr[i] === el)
 				return i;
 		return -1;
 	};
-	$.fn.trigger = function (name) {
-		var $this = this;
-		return this.each(function(){
-			var fn = this[name];
-			if (isF(fn))
-				fn.call(this);
-			return $this;
-		});
-	};
-	_each("Boolean Number String Function Array Date RegExp Object".split(" "), function (name)	{
+	_each("Boolean Number String Function Array Date RegExp Object".split(" "), function(name){
 		class2type["[object " + name + "]"] = name.toLowerCase();
 		return this;
 	});
 
-	function typeOf(o) { return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $.type = typeOf;
-	function isS(o) { return typeof o === "string"; }
-	function isF(o) { return typeof o === "function" || typeOf(o) === "function"; } $.isFunction = isF;
-	function isA(o) { return typeOf(o) === "array"; } $.isArray = Array.isArray || isA;
-    function isAL(obj) { return typeof obj.length == 'number' }
-	function isWin(o) { return o && typeof o === "object" && "setInterval" in o; } $.isWindow = isWin;
-	function isNan(obj) { return obj == null || !rdigit.test(obj) || isNaN(obj); } $.isNaN = isNan;
-	function isPlainObj(o) {
+	function typeOf(o){ return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $.type = typeOf;
+	function isS(o){ return typeof o == "string"; }
+	function isO(o){ return typeof o == "object"; }
+	function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $.isFunction = isF;
+	function isA(o){ return typeOf(o) === "array"; } $.isArray = Array.isArray || isA;
+	function isAL(obj){ return typeof obj.length == 'number' }
+	function isWin(o){ return o && typeof o == "object" && "setInterval" in o; } $.isWindow = isWin;
+	function isNan(obj){ return obj == null || !rdigit.test(obj) || isNaN(obj); } $.isNaN = isNan;
+	function isPlainObj(o){
 		if (!o || typeOf(o) !== "object" || o.nodeType || isWin(o)) return false;
-		try {
-			if (o.constructor && !hasOwn.call(o, "constructor") && !hasOwn.call(o.constructor.prototype, "isPrototypeOf")) return false;
-		} catch (e) { return false; }
+		try{
+			if (o.constructor && !hasOwn.call(o, "constructor") && !hasOwn.call(o.constructor.prototype, "isPrototypeOf"))
+				return false;
+		}catch(e){
+			return false;
+		}
 		var key;
-		for (key in o) { }
+		for(key in o){}
 		return key === undefined || hasOwn.call(o, key);
 	}
-	function merge(a1, a2)
-	{
+	function merge(a1, a2){
 		var i = a1.length, j = 0;
-		if (typeof a2.length === "number")
-			for (var l = a2.length; j < l; j++)
+		if (typeof a2.length == "number")
+			for(var l = a2.length; j < l; j++)
 				a1[i++] = a2[j];
 		else
 			while (a2[j] !== undefined)
@@ -546,21 +599,20 @@ window.jquip = window.$ = (function ()
 		a1.length = i;
 		return a1;
 	} $.merge = merge;
-	$.extend = $.fn.extend = function () {
+	$.extend = $.fn.extend = function(){
 		var opt, name, src, copy, copyIsArr, clone, args = arguments,
 			dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
-		if (typeof dst === "boolean")
-			deep = dst; dst = args[1] || {}; i = 2;
-		if (typeof dst !== "object" && !isF(dst)) dst = {};
-		if (aLen === i) { dst = this; --i; }
-		for (; i < aLen; i++) {
-			if ((opt = args[i]) != null) {
-				for (name in opt) {
+		if (typeof dst == "boolean"){ deep = dst; dst = args[1] || {}; i = 2; }
+		if (typeof dst != "object" && !isF(dst)) dst = {};
+		if (aLen === i){ dst = this; --i; }
+		for(; i < aLen; i++){
+			if ((opt = args[i]) != null){
+				for(name in opt){
 					src = dst[name];
 					copy = opt[name];
 					if (dst === copy) continue;
-					if (deep && copy && (isPlainObj(copy) || (copyIsArr = isA(copy)))) {
-						if (copyIsArr) {
+					if (deep && copy && (isPlainObj(copy) || (copyIsArr = isA(copy)))){
+						if (copyIsArr){
 							copyIsArr = false;
 							clone = src && isA(src) ? src : [];
 						} else
@@ -573,110 +625,93 @@ window.jquip = window.$ = (function ()
 		}
 		return dst;
 	};
-	$.makeArray = function (arr, results) {
+	$.makeArray = function(arr, results){
 		var ret = results || [];
-		if (arr != null) {
+		if (arr != null){
 			var type = typeOf(arr);
-			if (arr.length == null || isS(type) || isF(type) || type === "regexp" || isWin(arr)) 
+			if (arr.length == null || isS(type) || isF(type) || type === "regexp" || isWin(arr))
 				push.call(ret, arr);
-			else 
+			else
 				merge(ret, arr);
 		}
 		return ret;
 	};
-	function htmlFrag(html) {
+	function htmlFrag(html){
 		var frag = doc.createDocumentFragment(),
-            div = doc.createElement('div'),
-            tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
-            wrap = wrapMap[tag] || wrapMap._default,
-            depth = wrap[0];
+			div = doc.createElement('div'),
+			tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
+			wrap = wrapMap[tag] || wrapMap._default,
+			depth = wrap[0];
 		div.innerHTML = wrap[1] + html + wrap[2];
-		while (depth--) { div = div.lastChild; }
+		while (depth--){
+			div = div.lastChild;
+		}
 		while (div.firstChild) frag.appendChild(div.firstChild);
 		return frag;
 	} $.htmlFrag = htmlFrag;
-
-	var sibChk = function (a, b, ret) {
+	var sibChk = function(a, b, ret){
 		if (a === b) return ret;
 		var cur = a.nextSibling;
-		while (cur)
-		{
+		while (cur){
 			if (cur === b) return -1;
 			cur = cur.nextSibling;
 		}
 		return 1;
 	};
-    $.contains = docEl.contains
-        ? function(a,b){return a !== b && (a.contains ? a.contains(b) : true) }
-        : function(){ return false };
+	$.contains = docEl.contains
+		? function(a, b){ return a !== b && (a.contains ? a.contains(b) : true) }
+		: function(){ return false };
 	var sortOrder = docEl.compareDocumentPosition
-        ? ($.contains = function(a,b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning $.contains
-            && function (a, b) {
-                if (a === b)
-                {
-                    hasDup = true;
-                    return 0;
-                }
-                if (!a.compareDocumentPosition || !b.compareDocumentPosition)
-                    return a.compareDocumentPosition ? -1 : 1;
-                return a.compareDocumentPosition(b) & 4 ? -1 : 1;
-            }
-        : function (a, b) {
-        	if (a === b) { hasDup = true; return 0; }
-        	else if (a.sourceIndex && b.sourceIndex) return a.sourceIndex - b.sourceIndex;
-        	var al, bl, ap = [], bp = [], aup = a.parentNode, bup = b.parentNode, cur = aup;
-        	if (aup === bup) return sibChk(a, b);
-        	else if (!aup) return -1;
-        	else if (!bup) return 1;
-        	while (cur) { ap.unshift(cur); cur = cur.parentNode; }
-        	cur = bup;
-        	while (cur) { bp.unshift(cur); cur = cur.parentNode; }
-        	al = ap.length;
-        	bl = bp.length;
-        	for (var i = 0; i < al && i < bl; i++)
-        		if (ap[i] !== bp[i]) return sibChk(ap[i], bp[i]);
-        	return i === al ? sibChk(a, bp[i], -1) : sibChk(ap[i], b, 1);
-        };
-	function unique(els) {
-		if (sortOrder) {
+		? ($.contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning $.contains
+		  && function(a, b){
+			if (a === b){ hasDup = true; return 0; }
+			if (!a.compareDocumentPosition || !b.compareDocumentPosition)
+				return a.compareDocumentPosition ? -1 : 1;
+			return a.compareDocumentPosition(b) & 4 ? -1 : 1;
+		  }
+		: function(a, b){
+			if (a === b){ hasDup = true; return 0; }
+			else if (a.sourceIndex && b.sourceIndex) return a.sourceIndex - b.sourceIndex;
+			var al, bl, ap = [], bp = [], aup = a.parentNode, bup = b.parentNode, cur = aup;
+			if (aup === bup) return sibChk(a, b);
+			else if (!aup) return -1;
+			else if (!bup) return 1;
+			while (cur){ ap.unshift(cur); cur = cur.parentNode; }
+			cur = bup;
+			while (cur){ bp.unshift(cur); cur = cur.parentNode; }
+			al = ap.length;
+			bl = bp.length;
+			for(var i = 0; i < al && i < bl; i++)
+				if (ap[i] !== bp[i]) return sibChk(ap[i], bp[i]);
+			return i === al ? sibChk(a, bp[i], -1) : sibChk(ap[i], b, 1);
+		 };
+	function unique(els){
+		if (sortOrder){
 			hasDup = baseHasDup;
 			els.sort(sortOrder);
 			if (hasDup)
-				for (var i = 1; i < els.length; i++)
+				for(var i = 1; i < els.length; i++)
 					if (els[i] === els[i - 1]) els.splice(i--, 1);
 		}
 		return els;
 	} $.unique = unique;
-	_each(("blur focus focusin focusout load resize scroll unload click dblclick " +
-            "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
-            "change select submit keydown keypress keyup error").split(" "),
-        function (name) {
-        	$.fn[name] = function (data, fn) {
-        		if (fn == null) {
-        			fn = data;
-        			data = null;
-        		}
-        		return arguments.length > 0 ? this.bind(name, data, fn) : this.trigger(name);
-        	};
-        }
-    );
 	_each({
-		parent: function (el) { var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
-		parents: function (el) { return $.dir(el, "parentNode"); },
-		parentsUntil: function (el, i, until) { return $.dir(el, "parentNode", until); },
-		next: function (el) { return $.nth(el, 2, "nextSibling"); },
-		prev: function (el) { return $.nth(el, 2, "previousSibling"); },
-		nextAll: function (el) { return $.dir(el, "nextSibling"); },
-		prevAll: function (el) { return $.dir(el, "previousSibling"); },
-		nextUntil: function (el, i, until) { return $.dir(el, "nextSibling", until); },
-		prevUntil: function (el, i, until) { return $.dir(el, "previousSibling", until); },
-		siblings: function (el) { return $.sibling(el.parentNode.firstChild, el); },
-		children: function (el) { return $.sibling(el.firstChild); },
-		contents: function (el) {
+		parent: function(el){ var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
+		parents: function(el){ return $.dir(el, "parentNode"); },
+		parentsUntil: function(el, i, until){ return $.dir(el, "parentNode", until); },
+		next: function(el){ return $.nth(el, 2, "nextSibling"); },
+		prev: function(el){ return $.nth(el, 2, "previousSibling"); },
+		nextAll: function(el){ return $.dir(el, "nextSibling"); },
+		prevAll: function(el){ return $.dir(el, "previousSibling"); },
+		nextUntil: function(el, i, until){ return $.dir(el, "nextSibling", until); },
+		prevUntil: function(el, i, until){ return $.dir(el, "previousSibling", until); },
+		siblings: function(el){ return $.sibling(el.parentNode.firstChild, el); },
+		children: function(el){ return $.sibling(el.firstChild); },
+		contents: function(el){
 			return el.nodeName === "iframe" ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
 		}
-	}, function (fn, name) {
-		$.fn[name] = function (until, sel) {
+	}, function(fn, name){
+		$.fn[name] = function(until, sel){
 			var ret = $.map(this, fn, until), args = slice.call(arguments);
 			if (!runtil.test(name)) sel = until;
 			if (sel && isS(sel)) ret = $.filter(sel, ret);
@@ -686,13 +721,8 @@ window.jquip = window.$ = (function ()
 		};
 	});
 
-	function boxmodel() {
-		if (!doc.body) { //in HEAD
-			$(win).bind("load", function() {
-				$.support = boxmodel();
-			});
-			return null;
-		}
+	function boxmodel(){
+		if (!doc.body) return null; //in HEAD
 		var d = doc.createElement('div');
 		doc.body.appendChild(d);
 		d.style.width = '20px';
@@ -701,92 +731,55 @@ window.jquip = window.$ = (function ()
 		doc.body.removeChild(d);
 		return w == 40;
 	}
-	(function () {
+
+	(function(){
 		var div = document.createElement("div");
 		div.style.display = "none";
 		div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
 		var a = div.getElementsByTagName("a")[0];
 		$.support = {
-			boxModel: boxmodel(),
+			boxModel: null,
 			opacity: /^0.55$/.test(a.style.opacity),
 			cssFloat: !!a.style.cssFloat
 		};
+
+		var rwebkit = /(webkit)[ \/]([\w.]+)/,
+			ropera = /(opera)(?:.*version)?[ \/]([\w.]+)/,
+			rmsie = /(msie) ([\w.]+)/,
+			rmozilla = /(mozilla)(?:.*? rv:([\w.]+))?/,
+			ua = navigator.userAgent.toLowerCase(),
+			match = rwebkit.exec(ua)
+				 || ropera.exec( ua )
+				 || rmsie.exec( ua )
+				 || ua.indexOf("compatible") < 0 && rmozilla.exec( ua ) || [],
+			b;
+		b = $.browser = { version: match[2] || "0" };
+		b[match[1] || ""] = true;
 	})();
 
-	$.hook = function (fn) { ctors.push(fn); };
-	$.plug = function (meta, fn) {
+	$.init = false;
+	$.onload = function(){
+		if (!$.init)
+		try {
+			$.support.boxModel = boxmodel();
+			if (!useQuery && !doc.querySelectorAll)
+				loadScript(queryShimCdn, function(){
+					$.setQuery(queryEngines());
+				});
+			$.init = true;
+		} catch(e){}
+	};
+	if (doc.body) $.init();
+
+	$.hook = function(fn){
+		ctors.push(fn);
+	};
+	$.plug = function(meta, fn){
 		var name = isS(meta) ? meta : meta['name'];
 		fn = isF(meta) ? meta : fn;
 		if (!isF(fn)) throw "Plugin fn required";
 		if (name && fn) plugins[name] = fn;
 		fn($);
 	};
-
 	return $;
 })();
-$.plug(function($) {
-
-    var doc = document,
-        $id = function (id, ctx) { return (ctx || doc).getElementById(id); },
-        $tag = function (tag, ctx) { return (ctx || doc).getElementsByTagName(tag); },
-        $cls = doc.getElementsByClassName //&& false
-            ? function (cls, ctx) { return (ctx || doc).getElementsByClassName(cls); }
-            : function (cls, ctx) {
-                var ret = $.walk(function (el) {
-                    return el.className && el.className.indexOf(cls) >= 0;
-                }, (ctx || doc));
-                    return $.unique(ret);
-            };
-
-    function childSel(sel, ctx)
-   	{
-   		var el = $.$$(ctx)[0], cls = sel.split('.'), tag = cls.shift(), fPos = tag.indexOf('['), fName, fValue, parts,
-               firstChar = tag.charAt(0);
-        if (firstChar == "#") return $id(tag.substring(1), el);
-   		if (fPos >= 0) {
-   			parts = tag.substring(fPos + 1, tag.length - 1).split('=');
-   			fName = parts[0]; fValue = parts.length == 2 && parts[1];
-   			if (fValue && fValue.charAt(0) == "'")
-   				fValue = fValue.substring(1, fValue.length - 1);
-   			tag = tag.substring(0, fPos);
-   		}
-   		var tagWithId = tag.split('#');
-   		if (tagWithId.length == 2){
-   			el = $id(tagWithId[1], el);
-   			if (!el) return [];
-   			if (!$.eqSI(el.tagName, tagWithId[0])) return [];
-   			if (cls.length == 1) return [el];
-   		}
-   		var els = tag ? $tag(tag,el) : $cls(cls.shift(), el);
-   		if (!cls.length && !fName) return els;
-   		var ret = [];
-   		for (var i = 0, l = els.length; i < l; i++){
-   			var subEl = els[i], j = cls.length, matches = true;
-   			if (cls.length) while (j--) if (!$.hasClass([subEl], cls[j])) matches = false;
-   			if (matches && (!fName || (!fValue || subEl[fName] == fValue)))
-   				ret.push(subEl);
-   		}
-   		return ret;
-   	}
-
-    $.setQuery(function (selector, ctx) {
-        if (doc.querySelectorAll)
-            return (ctx || doc).querySelectorAll(selector);
-        
-        var els, resSet = [[(ctx || doc)]], heir = selector.split(' '), ret = [];
-        for (var i = 0, l = heir.length; i < l; i++) {
-            var parentSet = resSet[i];
-            if (parentSet.length == 0) return ret;
-            var sel = heir[i], res = [];
-
-                for (var j = 0, jlen = parentSet.length; j < jlen; j++) {
-                    els = childSel(sel, parentSet[j]);
-                    for (var k = 0, klen = els.length; k < klen; k++)
-                        res.push(els[k]);
-                }
-                resSet.push(res);
-
-        }
-        return resSet.length > 1 ? resSet.pop() : [];
-    });
-});

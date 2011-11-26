@@ -7,42 +7,29 @@ similar goals is http://ender.no.de/ - for node.js.
 
 [Zepto.js](http://zeptojs.com/) is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers.
 It's a popular option for PhoneGap developers with full support for the 
-[Backbone.js](http://documentcloud.github.com/backbone/), [Underscore.js](http://documentcloud.github.com/underscore/) and [Spine.js](http://zeptojs.com/) frameworks.
+[Backbone.js](http://documentcloud.github.com/backbone/), [Underscore.js](http://documentcloud.github.com/underscore/) and [Spine.js](http://spinejs.com) frameworks.
 
-
-Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although instead of just giving a trim, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) sound promising. 
-
-**Disclaimer:** This is **NOT** an official [jQuery.com](http://jquery.com/) project.
-Also this is still under heavy development and some things are not fully implemented, please report issues so we can measure the API popularity of missing pieces.
-
-## News
-
-  - **New!** - Build customizable jquip packages with the new 
-  [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/).  
-  - Node js build scripts added to minify jquip with UglifyJS.
-
-## Roadmap
-
-  - We want jquip core to work well 
-  [Backbone.js](http://documentcloud.github.com/backbone/) and 
-  [Spine.js](http://spinejs.com) so as a minium, we'll need:
-    - Improved $().find
-    - $().delegate
-  - More plugins!
-
-## Changes
-
-  - $.addConstructor is now `$.hook`
-  - $.addPlugin is now `$.plug`
-  - **scrollLeft** and **scrollTop** is now in the **css** plugin
-  - Due to a request by the jQuery team we're no longer assigning the **jQuery** variable, you will now need to manually change this yourself on the first line of jquip.js:    
-    `window.**jquip** = window.$ = (function()..`
+Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although we don't thing giving a trim is going far enough, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) do sound promising. 
 
 # Introducing jquip - aka jQuery-in-parts.
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
-The core **jquip.js** is only **4.28KB** (minified and gzipped) only **13%** of the size of jQuery.
+Minified & gzipped code sizes (v.01):
+  
+  - jquip.js (5.2k)
+  - jquip.events.js (1k)
+  - jquip.docready.js (.5k)
+  - jquip.css.js (1.6k)
+  - jquip.ajax.js (.9k)
+
+### Query Engine options (not required for modern browsers)
+
+  - jquip.q-min.js (.6k) - A mini limited query engine (e.g. only #id tags and .classes)
+  - jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js
+  - jquip.q-sizzle.js (5.29k) - Sizzle.js
+
+The core **jquip.js** is only **5.2KB** (minified and gzipped) only a fraction of the size of jQuery.
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
@@ -51,6 +38,51 @@ Includes 7-8x Faster DOM traversal for <= IE7. (i.e. where there's no querySelec
 Most code has been ported from jQuery and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
 Licence: http://www.opensource.org/licenses/mit-license.php
+
+### Build customizable jquip packages with the [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/)
+
+### Disclaimer
+
+This is **NOT** an official [jQuery.com](http://jquery.com/) project.
+
+The code-base is now a lot more stable since reached our goal of jquip.js (with the **events** + **docready** plugins) working in Backbone.js, there are likely a few fixes still to be added but the core is close to feature complete and wont require the major refactoring done recently.
+
+We sould still like to hear feedback on issues/non-implemented core functionality so we can measure the API popularity of missing pieces.
+
+## News
+
+### v.01
+
+  - Abstracted Events, pluggable query engines and new `$().find` and `Events` system courtesy of the much leaner implementation in [Zepto.js](http://zeptojs.com/), refactored to support multiple browsers.  
+  - We are now passing Backbone.js latest test-suite in all the latest browsers!
+    - (we'll get to older IE browsers as soon as we find a PC with them installed :)
+
+### pre-alpha, first release
+
+  - Customizable Library builder service at 
+  - Node js build scripts added to minify jquip with UglifyJS.
+  
+## Roadmap
+
+  - Getting jquip to work in Google Closure Compilers advanced compilation mode so it can be used to programatically strip out dead code your application doesn't need for an even smaller footprint!
+
+## Changes
+  
+#### v.01 
+  
+  - New tests added and bug fixes. Backbone.js latest test suite now passes in all the latest browsers - now included in the **/test** folder.
+  - New Event system added as a plugin, now with abstracted events. 
+    - We expect most devs would want to include events, but can now be stripped if you dont.
+  - Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from [cdnjs.com](http://cdnjs.com) if a browser doesn't supprot `document.querySelectorAll` (i.e. <=IE7). Note: because there's Sizzle.js it's important to be aware of the limitations when relying on browsers native querySelector implementations, i.e. there are [restrictions in IE8](http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml) where the HTML page must be in standards mode and Safari in quirks mode [can't handle uppercase or unicode characters](http://www.wordsbyf.at/2011/11/23/selectors-selectoring/).
+
+#### pre-alpha
+
+  - $.addConstructor is now `$.hook`
+  - $.addPlugin is now `$.plug`
+  - **scrollLeft** and **scrollTop** is now in the **css** plugin
+  - Due to a request by the jQuery team we're no longer assigning the **jQuery** variable, you will now need to manually change this yourself on the first line of jquip.js:    
+    `window.jquip = window.$ = (function()..` 
+
 
 ## What's in the box? - i.e. the 90% good parts
 
@@ -62,12 +94,11 @@ Methods marked with * are only partially implemented.
 
 ### Methods operating on a `$(selctor)`
   
-  - each
-  - add
   - get
+  - add
+  - each
   - attr
-  - bind
-  - unbind
+  - removeAttr
   - data
   - append
   - prepend
@@ -79,14 +110,19 @@ Methods marked with * are only partially implemented.
   - first
   - last
   - slice
-  - find*
+  - find
+  - not
+  - filter
+  - indexOf
+  - is
   - remove
   - val - does not do checkbox, select, etc.
   - html
+  - text
+  - empty
   - addClass
   - removeClass
   - hasClass
-  - trigger
   - parent
   - parents
   - parentsUntil
@@ -99,28 +135,23 @@ Methods marked with * are only partially implemented.
   - children
   - contents
 
-### Events
-
-blur focus focusin focusout load resize scroll unload click dblclick 
-mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
-change select submit keydown keypress keyup error
-
 ### static methods off $
   
+  - $$ - querySelectorAll or query engine shim
   - $.each 
   - [$._each](http://documentcloud.github.com/underscore/#each) - Underscore's native each
+  - [$._indexOf](http://documentcloud.github.com/underscore/#indexOf) - Underscore's indexOf
   - [$._defaults](http://documentcloud.github.com/underscore/#defaults) - Underscore's defaults
+  - [$._filter](http://documentcloud.github.com/underscore/#filter) - Underscore's filter
   - $.filter
   - $.dir
   - $.nth
   - $.sibling
+  - $.grep
   - $.map
-  - $.bind
-  - $.unbind
   - $.data
   - $.attrs
   - $.trim
-  - $.indexOf
   - $.isFunction
   - $.isArray
   - $.isWindow
@@ -128,11 +159,40 @@ change select submit keydown keypress keyup error
   - $.merge
   - $.extend
   - $.makeArray
+  - $.hasClass
+  - $.typeOf - safe type of an variable
+  - $.loadScript - (url, callback [, async]) load an external script dynamically
   - $.htmlFrag - creates a document fragment from a html string **(name changed)**
   - $.walk - traveres all childElems including self `(predicateFn, [[, context], results])`
   - $.queryAll - Sizzle(or mock) || doc.querySelector || limitedQueryAll*
   - $.attrs - an elements attributes
   - $.unique - return a unique list of elements in document order
+  - $.contains - parent element contains sibling
+  - $.setQuery - plugin your own query engine
+
+## Events module (jquip.events.js)
+
+### Methods on `$(selector)`
+
+  - bind
+  - unbind
+  - one
+  - delegate
+  - undelegate
+  - live
+  - die
+  - trigger
+
+### Static Methods 
+
+  - $.bind
+  - $.unbind
+
+### Helpers
+
+blur focus focusin focusout load resize scroll unload click dblclick 
+mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
+change select submit keydown keypress keyup error
 
 ## Plugins
 
@@ -197,10 +257,15 @@ Intercept the `$(){ .. }` constructor and inject your own implementation. Return
     ... 
   });
 
-### Limitations
+## Limitations
 
-Parts of jQuery that aren't ported over (because of code size) throw a "not implemented exception".
-At the moment this only gets thrown for complex filters that filter (i.e $().find) on more than a tagName.
+A few corner cases we feel are not likely to be hit in normal development have been stripped out, so it is possible older browsers may experience some issues.
+
+There are no additional Expression support provided beyond what is offered by the browsers native **querySelector** API or bundled query engine chosen.
+
+If you don't bundle either **events** or **docready** plugins you should include jquip near the end of your page, i.e. before the </body> tag or call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js if required calculating if boxmodel is supported.
+
+### Mini Querey Enginge 
 
 * For <= IE7 all selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each child selector.
  
@@ -217,10 +282,7 @@ At the moment this only gets thrown for complex filters that filter (i.e $().fin
    - .a.b.c
    - .a 
 
-For optimal performance in <= IE7 have the first child selector be a tag or an #id which cuts down the amount of DOM traversing needed to be done in JavaScript.
-
-Events passed to your event handers are the 'real' browser DOM events. 
-You can use the jquip.custom $.namedKey() feature for cross-browser key detection.
+For optimal performance in <= IE7 have the first child selector should be a tag or an #id as it cuts down the amount of DOM traversing needed to be done in JavaScript.
 
 ### jquip Library Builder Service
 

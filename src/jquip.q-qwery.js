@@ -386,6 +386,5 @@
   return qwery
 });
 
-$.plug(function($) {
-    $.setQuery(window.qwery);
-});
+if (typeof $ !== undefined && $.plug)
+	$.plug(function($) { $.setQuery(window.qwery); });
