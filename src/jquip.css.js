@@ -141,13 +141,11 @@ $['plug']("css", function ($) {
         $['fn'][type] = function (size) {
             var el = this[0];
             if (!el) return size == null ? null : this;
-
             if ($['isFunction'](size))
                 return this.each(function (i) {
                     var self = $(this);
                     self[type](size.call(this, i, self[type]()));
                 });
-
             if ($['isWindow'](el)) {
                 var docElemProp = el.document.documentElement["client" + name], body = el.document.body;
                 return el.document.compatMode === "CSS1Compat" && docElemProp || body && body["client" + name] || docElemProp;
@@ -161,7 +159,7 @@ $['plug']("css", function ($) {
                     ret = parseFloat(orig);
                 return $['isNaN'](ret) ? orig : ret;
             }
-            else return this.css(type, typeof size === "string" ? size : size + "px");
+            else return this['css'](type, typeof size === "string" ? size : size + "px");
         };
     });
 
