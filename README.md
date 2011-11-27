@@ -56,6 +56,7 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
 
   - We now are able to compile in Closure Compiler's advanced compilation mode! 
   The minified output passes Backbone.js test suite and reports only 1 not implemented feature in Spine.js tests. We still have Closure Compiler warnings as a result of un-annotated methods which we'll look at adding in the near future.
+  - The source code was modified (somewhat unnaturally) so it would work with the Closure Compiler, i.e. have all the API methods exported correctly.
   - The total code-size (min+gzip) for jquip and non-query plugins (i.e. docready,events,css,ajax,custom) is **9.67k** in advanced mode and **9.86k** in Simple mode.
 
 
