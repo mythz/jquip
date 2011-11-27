@@ -4,9 +4,8 @@ The primary goal of this project would be for the feedback/demand to kickstart j
 
 To this end, follow this project if you want jquery.com to measure the demand for this. Another project with similar goals is http://ender.no.de/ - for node.js. [JSLim](https://github.com/zgrossbart/jslim) is another project that takes a novel approach to reducing code size with advanced minification techniques.
 
-[Zepto.js](http://zeptojs.com/) is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers.
-It's a popular option for PhoneGap developers with full support for the 
-[Backbone.js](http://documentcloud.github.com/backbone/), [Underscore.js](http://documentcloud.github.com/underscore/) and [Spine.js](http://spinejs.com) frameworks.
+[Zepto.js](http://zeptojs.com/) is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers. It's a popular option for PhoneGap developers with full support for the 
+[Backbone.js](http://documentcloud.github.com/backbone/), [Underscore.js](http://documentcloud.github.com/underscore/) and [Spine.js](http://spinejs.com) frameworks. It has very recently added support for the latest Safari, Chrome, Firefox and Opera browsers - it makes use of latest EcmaScript 5 APIs without shims so if this is your targetted market, we encourage you to try it.
 
 Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although we don't thing giving a trim is going far enough, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) do sound promising. 
 
@@ -47,7 +46,7 @@ This is **NOT** an official [jQuery.com](http://jquery.com/) project.
 
 Code-base will now be more stable as we've reached our goal of jquip.js (with the **events** + **docready** plugins) working in Backbone.js, there are likely a few fixes still to be added but the core is close to feature complete and wont require the major refactoring done recently.
 
-We sould still like to hear feedback on issues/non-implemented core functionality so we can measure the API popularity of missing pieces.
+We would still like to hear feedback on issues/non-implemented core functionality so we can measure the API popularity of missing pieces.
 
 ## News
 
@@ -285,10 +284,9 @@ We prefer not to take the perf and code-bloat hit of this quarantine - if your a
 
 ## Best Practices 
 
-Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript below the HTML elements they reference. This is the guidance from the 
-[Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
+Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will fire before DOMContentReady which is no longer required. This is the guidance from the [Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
 
-We thought we'd clarify as we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
+We thought we'd clarify as we've received a lot of feedback (aka strong opinions) on this subject - this is why jQuery's popular **docready** is a plugin that's not included by default - simply include it as a plugin if you wish.
 
 Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing `</body>` tag.
 
