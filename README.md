@@ -15,7 +15,7 @@ Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
-Minified & gzipped code sizes (v.01):
+Minified & gzipped code sizes (v.02):
   
   - jquip.js (5.7k)
   - jquip.events.js (1k)
@@ -25,7 +25,7 @@ Minified & gzipped code sizes (v.01):
 
 ### Query Engine options (not required for modern browsers)
 
-  - jquip.q-min.js (.6k) - An extremely fast but limited query engine (see blow)
+  - jquip.q-min.js (.6k) - An extremely fast but limited query engine (see below)
   - jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js
   - jquip.q-sizzle.js (5.29k) - Sizzle.js
 
@@ -55,7 +55,7 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
 ### v.02
 
   - We now are able to compile in Closure Compiler's advanced compilation mode! 
-  The minified output passes Backbone.js test suite and reports only 1 not implemented feature in Spine.js tests. We still have Closure Compiler warnings as a result of un-annotated methods which we'll be adding in the near future.
+  The minified output passes Backbone.js test suite and reports only 1 not implemented feature in Spine.js tests. We still have Closure Compiler warnings as a result of un-annotated methods which we'll look at adding in the near future.
   - The total code-size (min+gzip) for jquip and non-query plugins (i.e. docready,events,css,ajax,custom) is **9.67k** in advanced mode and **9.86k** in Simple mode.
 
 
@@ -286,7 +286,7 @@ We prefer not to take the perf and code-bloat hit of this quarantine - if your a
 Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript below the HTML elements they reference. This is the guidance from the 
 [Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
 
-As we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
+We thought we'd clarify as we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
 
 Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing </body> tag.
 
