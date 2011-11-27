@@ -84,11 +84,12 @@
     <h5 id="len"></h5>
 
 <!-- eating our own dogfood :) -->
-<script type="text/javascript" src="jquip.ajax.min.js"></script>
+<script type="text/javascript" src="jquip.events.ajax.js"></script>
 <script type="text/javascript">
 
 var plugins = [
-	['jquip', '$', 'The jquip core, required.'],	
+    ['jquip', '$', 'The jquip core, required.'],    
+    ['events', 'bind,unbind,click,etc', 'The jquip events plugin (recommended).'],    
 	['docready', '$(callback) $.ready()', 'Register callbacks to be called DOMContentLoaded'],	
 	['css', '().css Height Width', 'Get and set CSS properties'],	
 	['ajax', '$.ajax $.xhr $.getJSON $.get', 'Make ajax calls'],	
@@ -103,8 +104,8 @@ $._each(plugins, function(row){
 });
 
 $("tbody").html(html);
-var input = $("#jquip")[0]; 
-input.checked = input.disabled = true;
+var input = $("#jquip")[0], chkEvents = $("#events")[0]; 
+input.checked = input.disabled = chkEvents.checked = true;
 $("INPUT[type='checkbox']").click(generate);
 $("textarea").focus(function(){
 	var txt=this;

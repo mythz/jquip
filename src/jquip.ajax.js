@@ -6,7 +6,7 @@ $['plug']("ajax", function ($) {
            function () { return new ActiveXObject("MSXML2.XMLHTTP"); }
         ],
         _xhrf = null;
-	function xhr() {
+	function _xhr() {
 		if (_xhrf != null) return _xhrf();
 		for (var i = 0, l = xhrs.length; i < l; i++) {
 			try {
@@ -18,7 +18,7 @@ $['plug']("ajax", function ($) {
 			} catch (e){}
 		}
 		return function () { };
-	} $['xhr'] = xhr;
+	} $['xhr'] = _xhr;
 	function _xhrResp(xhr, dataType) {
 		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
 		switch (dataType) {
@@ -41,7 +41,7 @@ $['plug']("ajax", function ($) {
 		return kvps.join('&');
 	};
 	function ajax(o) {
-		var xhr = xhr(), timer, n = 0;
+		var xhr = _xhr(), timer, n = 0;
 		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {

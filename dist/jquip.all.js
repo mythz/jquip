@@ -907,7 +907,7 @@ $['plug']("ajax", function ($) {
            function () { return new ActiveXObject("MSXML2.XMLHTTP"); }
         ],
         _xhrf = null;
-	$['xhr'] = function xhr() {
+	function _xhr() {
 		if (_xhrf != null) return _xhrf();
 		for (var i = 0, l = xhrs.length; i < l; i++) {
 			try {
@@ -919,8 +919,8 @@ $['plug']("ajax", function ($) {
 			} catch (e){}
 		}
 		return function () { };
-	};
-	$['_xhrResp'] = function _xhrResp(xhr, dataType) {
+	} $['xhr'] = _xhr;
+	function _xhrResp(xhr, dataType) {
 		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
 		switch (dataType) {
 			case "text/xml":
@@ -935,14 +935,14 @@ $['plug']("ajax", function ($) {
 			default:
 				return xhr.responseText;
 		}
-	};
+	} $['_xhrResp'] = _xhrResp;
 	$['formData'] = function formData(o) {
 		var kvps = [], regEx = /%20/g;
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
 	};
 	function ajax(o) {
-		var xhr = xhr(), timer, n = 0;
+		var xhr = _xhr(), timer, n = 0;
 		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {
