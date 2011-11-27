@@ -2,7 +2,6 @@ window['$'] = window['jquip'] = (function(){
 	var win = window, queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
 		queryEngines = function(){ return win["Sizzle"] || win["qwery"]; },
 		doc = document, docEl = doc.documentElement,
-		Ctor,
 		runtil = /Until$/, rmultiselector = /,/,
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
@@ -48,10 +47,11 @@ window['$'] = window['jquip'] = (function(){
 		trimRight = /[\s\xA0]+$/;
 	}
 
-	var ctors = [], plugins = {}, jquid = 0;
-	function $(sel, ctx){
-		return new Ctor(sel, ctx);
-	}
+	/**
+	 * @constructor
+	 * @param {Object|Element|string|Array.<string>} sel
+	 * @param {Object=} ctx
+	 */
 	function Ctor(sel, ctx){
 		var ret;
 		for(var i = 0, l = ctors.length; i < l; i++)
@@ -78,11 +78,16 @@ window['$'] = window['jquip'] = (function(){
 		sel = isS(sel) && sel.charAt(0) === "<"
 			? (ret = rsingleTag.exec(sel))
 				? (sel = [doc.createElement(ret[1])]) && isPlainObj(ctx)
-					? $.fn.attr.call(sel, ctx) && sel
+					? $["fn"]["attr"].call(sel, ctx) && sel
 					: sel
 				: htmlFrag(sel).childNodes
 			: $$(sel, ctx);
 		return this['make'](sel);
+	}
+
+	var ctors = [], plugins = {}, jquid = 0;
+	function $(sel, ctx){
+		return new Ctor(sel, ctx);
 	}
 
 	var p = $['fn'] = $.prototype = {
@@ -105,6 +110,11 @@ window['$'] = window['jquip'] = (function(){
 			}
 			return this;
 		},
+		/**
+		 * @param {Object} els
+		 * @param {string} name
+		 * @param {string=} selector
+		 * */
 		ps: function(els, name, selector){
 			var ret = this.constructor();
 			if (isA(els)) push.apply(ret, els);
@@ -417,6 +427,11 @@ window['$'] = window['jquip'] = (function(){
 		return ret;
 	} $['walk'] = walk;
 
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * @param {Object=} qry
+	 * */
 	function $$(sel, ctx, qry){
 		if (sel && isS(sel)){
 			if (ctx instanceof $) ctx = ctx[0];
@@ -469,7 +484,8 @@ window['$'] = window['jquip'] = (function(){
 		h.insertBefore(s, h.firstChild);
 	} $['loadScript'] = loadScript;
 
-	function warn(){ console && console.warn(arguments) }
+	/** @param {...string} var_args */
+	function warn(var_args){ console && console.warn(arguments) }
 
 	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
@@ -571,6 +587,11 @@ window['$'] = window['jquip'] = (function(){
 		}
 		return ret;
 	} $['grep'] = grep;
+	/**
+	 * @param {Object} els
+	 * @param {function} cb
+	 * @param {Object=} arg
+	 * */
 	function map(els, cb, arg){
 		var value, key, ret = [], i = 0, length = els.length,
 			isArray = els instanceof $
@@ -698,6 +719,11 @@ window['$'] = window['jquip'] = (function(){
 		}
 		return ret;
 	} $['makeArray'] = makeArray;
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * @param {Object=} frag
+	 * */
 	function htmlFrag(html, ctx, frag){
 		ctx = ((ctx || doc) || ctx.ownerDocument || ctx[0] && ctx[0].ownerDocument || doc);
 		frag = frag || ctx.createDocumentFragment();
@@ -708,6 +734,10 @@ window['$'] = window['jquip'] = (function(){
 			frag.appendChild(div.firstChild);
 		return frag;
 	} $['htmlFrag'] = htmlFrag;
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * */
 	function fragDiv(html, ctx){
 		var div = (ctx||doc).createElement('div'),
 			tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
@@ -911,7 +941,7 @@ $['plug']("ajax", function ($) {
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
 	};
-	$['ajax'] = function ajax(o) {
+	function ajax(o) {
 		var xhr = xhr(), timer, n = 0;
 		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
@@ -939,7 +969,7 @@ $['plug']("ajax", function ($) {
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
-	};
+	} $['ajax'] = ajax;
 	$['getJSON'] = function (url, data, success, error) {
 		if ($['isFunction'](data)){
 			error = success;

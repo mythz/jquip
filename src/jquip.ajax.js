@@ -40,7 +40,7 @@ $['plug']("ajax", function ($) {
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
 	};
-	$['ajax'] = function ajax(o) {
+	function ajax(o) {
 		var xhr = xhr(), timer, n = 0;
 		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
@@ -68,7 +68,7 @@ $['plug']("ajax", function ($) {
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
-	};
+	} $['ajax'] = ajax;
 	$['getJSON'] = function (url, data, success, error) {
 		if ($['isFunction'](data)){
 			error = success;
