@@ -2,8 +2,7 @@ jQuery getting too big?
 
 The primary goal of this project would be for the feedback/demand to kickstart jquery.com into re-organizing its code-base so it's more modular since we believe we've proved the most useful parts of jQuery is a fraction of its code-base. 
 
-To this end, follow this project if you want jquery.com to measure the demand for this. Another project with 
-similar goals is http://ender.no.de/ - for node.js. 
+To this end, follow this project if you want jquery.com to measure the demand for this. Another project with similar goals is http://ender.no.de/ - for node.js. [JSLim](https://github.com/zgrossbart/jslim) is another project that takes a novel approach to reducing code size with advanced minification techniques.
 
 [Zepto.js](http://zeptojs.com/) is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers.
 It's a popular option for PhoneGap developers with full support for the 
@@ -272,7 +271,9 @@ Intercept the `$(){ .. }` constructor and inject your own implementation. Return
 
 ## Limitations
 
-Many corner cases we feel that are not likely to be hit in normal development have been intentionally stripped out, it's therefore possible for older browsers could experience some issues if you work in these edge cases. In addition to its fluent API, jQuery does a lot of sanitization and quarantine for edge cases in older browsers which makes it the safer but slower option. 
+Many corner cases we feel that are not likely to be hit in normal development have been intentionally stripped out, it's therefore possible for older browsers to experience some issues if you code hits these edge cases. 
+
+In addition to its fluent API, jQuery does **a lot** of cross-browser normalization as well as sanitization and quarantine for edge cases in older browsers which no doubt makes it a safer but slower option. 
 
 Non supported examples:
 
