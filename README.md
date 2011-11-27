@@ -289,7 +289,7 @@ Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady
 
 We thought we'd clarify as we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
 
-Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing </body> tag.
+Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing `</body>` tag.
 
 If you're not referencing jquip near the bottom of your page and don't have either the **events** or **docready** plugins included, you should call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js (for <=IE7), calculates browser feature support, etc.
 
