@@ -1,8 +1,7 @@
-window.jquip = window.$ = (function(){
+window['$'] = window['jquip'] = (function(){
 	var win = window, queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
-		queryEngines = function(){ return win.Sizzle || win.qwery; },
+		queryEngines = function(){ return win["Sizzle"] || win["qwery"]; },
 		doc = document, docEl = doc.documentElement,
-		Ctor,
 		runtil = /Until$/, rmultiselector = /,/,
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
@@ -18,6 +17,7 @@ window.jquip = window.$ = (function(){
 		strim = String.prototype.trim, trim,
 		trimLeft = /^\s+/,
 		trimRight = /\s+$/,
+		contains, sortOrder,
 		guaranteedUnique = { children: true, contents: true, next: true, prev: true },
 		toString = Object.prototype.toString,
 		class2type = {},
@@ -47,119 +47,53 @@ window.jquip = window.$ = (function(){
 		trimRight = /[\s\xA0]+$/;
 	}
 
-	var ctors = [], plugins = {}, jquid = 0;
-	function $(selector, ctx){
-		return new $.fn.init(selector, ctx);
+	/**
+	 * @constructor
+	 * @param {Object|Element|string|Array.<string>} sel
+	 * @param {Object=} ctx
+	 */
+	function Ctor(sel, ctx){
+		var ret;
+		for(var i = 0, l = ctors.length; i < l; i++)
+			if (ctors[i].apply(this, arguments)) return this;
+
+		if (!sel) return this;
+		if (typeof sel == "function"){
+			warn("require docready");
+			return this;
+		} else if (isA(sel)) return this['make'](sel);
+		if (sel.nodeType || isWin(sel)) return this['make']([sel]);
+		if (sel == "body" && !ctx && doc.body) {
+			this['context'] = sel['context'];
+			this[0] = doc.body;
+			this.length = 1;
+			this['selector'] = sel;
+			return this;
+		}
+		if (sel['selector'] !== undefined) {
+			this['context'] = sel['context'];
+			this['selector'] = sel['selector'];
+			return this['make'](sel);
+		}
+		sel = isS(sel) && sel.charAt(0) === "<"
+			? (ret = rsingleTag.exec(sel))
+				? (sel = [doc.createElement(ret[1])]) && isPlainObj(ctx)
+					? $["fn"]["attr"].call(sel, ctx) && sel
+					: sel
+				: htmlFrag(sel).childNodes
+			: $$(sel, ctx);
+		return this['make'](sel);
 	}
 
-	$.fn = $.prototype = {
-		constructor: $,
-		selector: "",
-		init: function(selector, ctx){
-			var ret;
-			for(var i = 0, l = ctors.length; i < l; i++)
-				if (ctors[i].apply(this, arguments)) return this;
+	var ctors = [], plugins = {}, jquid = 0;
+	function $(sel, ctx){
+		return new Ctor(sel, ctx);
+	}
 
-			if (!selector) return this;
-			if (typeof selector == "function"){
-				warn("require docready");
-				return this;
-			} else if (isA(selector)) return this.make(selector);
-			if (selector.nodeType || isWin(selector)) return this.make([selector]);
-			if (selector == "body" && !ctx && doc.body) {
-				this.context = selector.context;
-				this[0] = doc.body;
-				this.length = 1;
-				this.selector = selector;
-				return this;
-			}
-			if (selector.selector !== undefined) {
-				this.context = selector.context;
-				this.selector = selector.selector;
-				return this.make(selector);
-			}
-			selector = isS(selector) && selector.charAt(0) === "<"
-				? (ret = rsingleTag.exec(selector))
-					? (selector = [doc.createElement(ret[1])]) && isPlainObj(ctx)
-						? $.fn.attr.call(selector, ctx) && selector
-						: selector
-					: htmlFrag(selector).childNodes
-				: $$(selector, ctx);
-			return this.make(selector);
-		},
-		make: function(els){
-			make(this, els);
-			return this;
-		},
-		toArray: function() {
-			return slice.call(this, 0);
-		},
-		get: function(num){
-			return num == null
-				? this.toArray()
-				: (num < 0 ? this[this.length + num] : this[num]);
-		},
-		add: function(sel, ctx){
-			return this.make($(sel, ctx));
-		},
-		each: function(fn){
-			if (!isF(fn)) return this;
-			for(var i = 0, l = this.length; i < l; i++)
-				fn.call(this[i], i, this[i]);
-			return this;
-		},
-		attr: function(name, val){
-			var el = this[0];
-			return (isS(name) && val === undefined)
-				? (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
-					? this.val()
-					: (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null)
-				: this.each(function(idx){
-					var nt = this.nodeType;
-					if (nt !== 3 && nt !== 8 && nt !== 2){
-						if (isO(name)) for(var k in name)
-							if (val === null)
-								this.removeAttr(name);
-							else
-								this.setAttribute(k, name[k]);
-						else this.setAttribute(name, isF(val) ? val.call(this, idx, this.getAttribute(name)) : val);
-				}
-			});
-		},
-		removeAttr: function(name){
-			return this.each(function(){
-				this.removeAttribute(name);
-			});
-		},
-		data: function(name, setVal){
-			return $.data(this[0], name, setVal);
-		},
-		append: function(){
-			return this.dm(arguments, true, function(el){
-				if (this.nodeType === 1)
-					this.appendChild(el);
-			});
-		},
-		prepend: function(){
-			return this.dm(arguments, true, function(el){
-				if (this.nodeType === 1)
-					this.insertBefore(el, this.firstChild);
-			});
-		},
-		before: function(){
-			return this.dm(arguments, false, function(el){
-				this.parentNode.insertBefore(el, this);
-			});
-		},
-		after: function(){
-			if (this[0] && this[0].parentNode){
-				this.dm(arguments, false, function(el){
-					this.parentNode.insertBefore(el, this.nextSibling);
-				});
-			}
-			return this;
-		},
-		dm: function(args, table, cb){
+	var p = $['fn'] = $.prototype = {
+		constructor: $,
+		'selector': "",
+		dm: function(args, tbl, cb){
 			var value = args[0], parent, frag, first, i;
 			if (value){
 				if (this[0]) {
@@ -176,21 +110,11 @@ window.jquip = window.$ = (function(){
 			}
 			return this;
 		},
-		hide: function(){
-			this.each(function(){
-				this.style.display = "none";
-			});
-		},
-		show: function(){
-			this.each(function(){
-				this.style.display = "block";
-			});
-		},
-		toggle: function(){
-			this.each(function(){
-				this.style.display = this.style.display === "none" ? "block" : "none";
-			});
-		},
+		/**
+		 * @param {Object} els
+		 * @param {string} name
+		 * @param {string=} selector
+		 * */
 		ps: function(els, name, selector){
 			var ret = this.constructor();
 			if (isA(els)) push.apply(ret, els);
@@ -202,190 +126,279 @@ window.jquip = window.$ = (function(){
 			else if (name)
 				ret.selector = this.selector + "." + name + "(" + selector + ")";
 			return ret;
-		},
-		eq: function(i){
-			return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
-		},
-		first: function(){
-			return this.eq(0);
-		},
-		last: function(){
-			return this.eq(-1);
-		},
-		slice: function(){
-			return this.ps(slice.apply(this, arguments),
-				"slice", slice.call(arguments).join(","));
-		},
-		map: function(cb) {
-			return this.ps($.map(this, function(el, i) {
-				return cb.call(el, i, el);
-			}));
-		},
-		find: function(sel){
-			var self = this, i, l;
-			if (!isS(sel)){
-				return $(sel).filter(function(){
-					for(i = 0, l = self.length; i < l; i++)
-						if ($.contains(self[i], this)) return true;
-				});
-			}
-			var ret = this.ps("", "find", sel), len, n, r;
-			for(i=0, l=this.length; i<l; i++){
-				len = ret.len;
-				merge(ret, $(sel, this[i]));
-				if (i == 0){
-					for(n = len; n < ret.length; n++)
-						for(r = 0; r < len; r++)
-							if (ret[r] === ret[n]){
-								ret.splice(n--, 1);
-								break;
-							}
-				}
-			}
-			return ret;
-		},
-		not: function(sel){
-			return this.ps(winnow(this, sel, false), "not", sel);
-		},
-		filter: function(sel){
-			return this.ps(winnow(this, sel, true), "filter", sel);
-		},
-		indexOf: function(val){
-			return _indexOf(this, val);
-		},
-		is: function(sel){
-			return this.length > 0 && $(this[0]).filter(sel).length > 0;
-		},
-		remove: function(){
-			for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
-			return this;
-		},
-		val: function(setVal){
-			if (setVal == null) return (this[0] && this[0].value) || "";
-			return this.each(function(){
-				this.value = setVal;
-			});
-		},
-		html: function(setHtml){
-			if (setHtml == null) return (this[0] && this[0].innerHTML) || "";
-			return this.each(function(){
-				this.innerHTML = setHtml;
-			});
-		},
-		text: function(val){
-			var el = this[0], nt;
-			return typeof val == "undefined"
-				? (el && (nt = el.nodeType)
-				? ((nt === 1 || nt === 9)
-				? (typeof el.textContent == "string" ? el.textContent : el.innerText.replace(rReturn, ''))
-				: (nt === 3 || nt === 4) ? el.nodeValue : null)
-				: null)
-				: this.empty().append((el && el.ownerDocument || doc).createTextNode(txt));
-		},
-		empty: function(){
-			for(var i = 0, el; (el = this[i]) != null; i++)
-				while (el.firstChild)
-					el.removeChild(el.firstChild);
-			return this;
-		},
-		addClass: function(value){
-			var cls, i, l, el, setClass, c, cl;
-			if (isF(value))
-				return this.each(function(j){
-					$(this).addClass(value.call(this, j, this.className));
-				});
-			if (value && isS(value)){
-				cls = value.split(rspace);
-				for(i = 0, l = this.length; i < l; i++){
-					el = this[i];
-					if (el && el.nodeType === 1){
-						if (!el.className && cls.length === 1)
-							el.className = value;
-						else {
-							setClass = " " + el.className + " ";
-							for(c = 0, cl = cls.length; c < cl; c++){
-								if (!~setClass.indexOf(" " + cls[c] + " "))
-									setClass += cls[c] + " ";
-							}
-							el.className = trim(setClass);
-						}
-					}
-				}
-			}
-			return this;
-		},
-		removeClass: function(value){
-			var clss, i, l, el, cls, c, cl;
-			if (isF(value)) return this.each(function(j){
-				$(this).removeClass(value.call(this, j, this.className));
-			});
-			if ((value && isS(value)) || value === undefined){
-				clss = (value || "").split(rspace);
-				for(i = 0, l = this.length; i < l; i++){
-					el = this[i];
-					if (el.nodeType === 1 && el.className){
-						if (value){
-							cls = (" " + el.className + " ").replace(rclass, " ");
-							for(c = 0, cl = clss.length; c < cl; c++)
-								cls = cls.replace(" " + clss[c] + " ", " ");
-							el.className = trim(cls);
-						}
-						else el.className = "";
-					}
-				}
-			}
-			return this;
-		},
-		hasClass: function(sel){
-			return hasClass(this, sel);
-		},
-		fadeIn: function(){
-			this.each(function(){
-				$(this).show();
-			});
-		},
-		fadeOut: function(){
-			this.each(function(){
-				$(this).hide();
-			});
-		},
-		serializeArray: function() {
-			return this.map(function(){
-				return this.elements ? makeArray(this.elements) : this;
-			}).filter(function(){
-				return this.name && !this.disabled &&
-					(this.checked || rselectTextarea.test(this.nodeName) || rinput.test(this.type));
-			}).map(function(i, el){
-				var val = $(this).val();
-				return val == null || isA(val)
-					? $.map(val, function(val){
-						return { name: el.name, value: val.replace(rCRLF, "\r\n") };
-                      })
-					: { name: el.name, value: val.replace(rCRLF, "\r\n") };
-			}).get();
 		}
 	};
-	$.fn.init.prototype = $.fn;
+
+	p['make'] = function(els){
+		make(this, els);
+		return this;
+	};
+	p['toArray'] = function() {
+		return slice.call(this, 0);
+	};
+	p['get'] = function(num){
+		return num == null
+			? this['toArray']()
+			: (num < 0 ? this[this.length + num] : this[num]);
+	};
+	p['add'] = function(sel, ctx){
+			return this['make']($(sel, ctx));
+	};
+	p['each'] = function(fn){
+			if (!isF(fn)) return this;
+			for(var i = 0, l = this.length; i < l; i++)
+				fn.call(this[i], i, this[i]);
+			return this;
+	};
+	p['attr'] = function(name, val){
+		var el = this[0];
+		return (isS(name) && val === undefined)
+			? (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
+				? this['val']()
+				: (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null)
+			: this['each'](function(idx){
+				var nt = this.nodeType;
+				if (nt !== 3 && nt !== 8 && nt !== 2){
+					if (isO(name)) for(var k in name)
+						if (val === null)
+							this.removeAttribute(name);
+						else
+							this.setAttribute(k, name[k]);
+					else this.setAttribute(name, isF(val) ? val.call(this, idx, this.getAttribute(name)) : val);
+			}
+		});
+	};
+	p['removeAttr'] = function(name){
+		return this['each'](function(){
+			this.removeAttribute(name);
+		});
+	};
+	p['data'] = function(name, setVal){
+		return data(this[0], name, setVal);
+	};
+	p['append'] = function(){
+		return this.dm(arguments, true, function(el){
+			if (this.nodeType === 1)
+				this.appendChild(el);
+		});
+	};
+	p['prepend'] = function(){
+		return this.dm(arguments, true, function(el){
+			if (this.nodeType === 1)
+				this.insertBefore(el, this.firstChild);
+		});
+	};
+	p['before'] = function(){
+		return this.dm(arguments, false, function(el){
+			this.parentNode.insertBefore(el, this);
+		});
+	};
+	p['after'] = function(){
+		if (this[0] && this[0].parentNode){
+			this.dm(arguments, false, function(el){
+				this.parentNode.insertBefore(el, this.nextSibling);
+			});
+		}
+		return this;
+	};
+	p['hide'] = function(){
+		this['each'](function(){
+			this.style.display = "none";
+		});
+	};
+	p['show'] = function(){
+		this['each'](function(){
+			this.style.display = "block";
+		});
+	};
+	p['toggle'] = function(){
+		this['each'](function(){
+			this.style.display = this.style.display === "none" ? "block" : "none";
+		});
+	};
+	p['eq'] = function(i){
+		return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
+	};
+	p['first'] = function(){
+		return this['eq'](0);
+	};
+	p['last'] = function(){
+		return this['eq'](-1);
+	};
+	p['slice'] = function(){
+		return this.ps(slice.apply(this, arguments),
+			"slice", slice.call(arguments).join(","));
+	};
+	p['map'] = function(cb) {
+		return this.ps(map(this, function(el, i) {
+			return cb.call(el, i, el);
+		}));
+	};
+	p['find'] = function(sel){
+		var self = this, i, l;
+		if (!isS(sel)){
+			return $(sel).filter(function(){
+				for(i = 0, l = self.length; i < l; i++)
+					if (contains(self[i], this)) return true;
+			});
+		}
+		var ret = this.ps("", "find", sel), len, n, r;
+		for(i=0, l=this.length; i<l; i++){
+			len = ret.len;
+			merge(ret, $(sel, this[i]));
+			if (i == 0){
+				for(n = len; n < ret.length; n++)
+					for(r = 0; r < len; r++)
+						if (ret[r] === ret[n]){
+							ret.splice(n--, 1);
+							break;
+						}
+			}
+		}
+		return ret;
+	};
+	p['not'] = function(sel){
+		return this.ps(winnow(this, sel, false), "not", sel);
+	};
+	p['filter'] = function(sel){
+		return this.ps(winnow(this, sel, true), "filter", sel);
+	};
+	p['indexOf'] = function(val){
+		return _indexOf(this, val);
+	};
+	p['is'] = function(sel){
+		return this.length > 0 && $(this[0]).filter(sel).length > 0;
+	};
+	p['remove'] = function(){
+		for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
+		return this;
+	};
+	p['val'] = function(setVal){
+		if (setVal == null) return (this[0] && this[0].value) || "";
+		return this['each'](function(){
+			this.value = setVal;
+		});
+	};
+	p['html'] = function(setHtml){
+		if (setHtml == null) return (this[0] && this[0].innerHTML) || "";
+		return this['each'](function(){
+			this.innerHTML = setHtml;
+		});
+	};
+	p['text'] = function(val){
+		var el = this[0], nt;
+		return typeof val == "undefined"
+			? (el && (nt = el.nodeType)
+				? ((nt === 1 || nt === 9)
+					? (typeof el.textContent == "string" ? el.textContent : el.innerText.replace(rReturn, ''))
+					: (nt === 3 || nt === 4) ? el.nodeValue : null)
+				: null)
+			: this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(txt));
+	};
+	p['empty'] = function(){
+		for(var i = 0, el; (el = this[i]) != null; i++)
+			while (el.firstChild)
+				el.removeChild(el.firstChild);
+		return this;
+	};
+	p['addClass'] = function(val){
+		var cls, i, l, el, setClass, c, cl;
+		if (isF(val))
+			return this['each'](function(j){
+				$(this)['addClass'](val.call(this, j, this.className));
+			});
+		if (val && isS(val)){
+			cls = val.split(rspace);
+			for(i = 0, l = this.length; i < l; i++){
+				el = this[i];
+				if (el && el.nodeType === 1){
+					if (!el.className && cls.length === 1)
+						el.className = val;
+					else {
+						setClass = " " + el.className + " ";
+						for(c = 0, cl = cls.length; c < cl; c++){
+							if (!~setClass.indexOf(" " + cls[c] + " "))
+								setClass += cls[c] + " ";
+						}
+						el.className = trim(setClass);
+					}
+				}
+			}
+		}
+		return this;
+	};
+	p['removeClass'] = function(val){
+		var clss, i, l, el, cls, c, cl;
+		if (isF(val)) return this['each'](function(j){
+			$(this)['removeClass'](val.call(this, j, this.className));
+		});
+		if ((val && isS(val)) || val === undefined){
+			clss = (val || "").split(rspace);
+			for(i = 0, l = this.length; i < l; i++){
+				el = this[i];
+				if (el.nodeType === 1 && el.className){
+					if (val){
+						cls = (" " + el.className + " ").replace(rclass, " ");
+						for(c = 0, cl = clss.length; c < cl; c++)
+							cls = cls.replace(" " + clss[c] + " ", " ");
+						el.className = trim(cls);
+					}
+					else el.className = "";
+				}
+			}
+		}
+		return this;
+	};
+	p['hasClass'] = function(sel){
+		return hasClass(this, sel);
+	};
+	p['fadeIn'] = function(){
+		this['each'](function(){
+			$(this)['show']();
+		});
+	};
+	p['fadeOut'] = function(){
+		this['each'](function(){
+			$(this)['hide']();
+		});
+	};
+	p['serializeArray'] = function() {
+		return this['map'](function(){
+			return this.elements ? makeArray(this.elements) : this;
+		}).filter(function(){
+			return this.name && !this.disabled &&
+				(this.checked || rselectTextarea.test(this.nodeName) || rinput.test(this.type));
+		}).map(function(i, el){
+			var val = $(this)['val']();
+			return val == null || isA(val)
+				? map(val, function(val){
+					return { name: el.name, value: val.replace(rCRLF, "\r\n") };
+                  })
+				: { name: el.name, value: val.replace(rCRLF, "\r\n") };
+		}).get();
+	};
+
+	Ctor.prototype = p;
+
 
 	function winnow(els, sel, keep){
 		sel = sel || 0;
 		if (isF(sel))
-			return $.grep(els, function(el, i){
+			return grep(els, function(el, i){
 				return !!sel.call(el, i, el) === keep;
 			});
 		else if (sel.nodeType)
-			return $.grep(els, function(el){
+			return grep(els, function(el){
 				return (el === sel) === keep;
 			});
 		else if (isS(sel))
-			return $.grep(els, function(el) {
+			return grep(els, function(el) {
 				return el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
 			});
-		return $.grep(els, function(el) {
+		return grep(els, function(el) {
 			return (_indexOf(sel, el) >= 0) === keep;
 		});
 	}
-
 	function make(arr, els){
 		arr.length = (els && els.length || 0);
 		if (arr.length == 0) return arr;
@@ -399,7 +412,7 @@ window.jquip = window.$ = (function(){
 			if (els[i].nodeType === 1 && (" " + els[i].className + " ").replace(rclass, " ").indexOf(cls) > -1)
 				return true;
 		return false;
-	} $.hasClass = hasClass;
+	} $['hasClass'] = hasClass;
 	function walk(fn, ctx, ret){
 		ctx = ctx || doc;
 		ret = ret || [];
@@ -412,18 +425,23 @@ window.jquip = window.$ = (function(){
 				walk(fn, subEl, ret);
 		}
 		return ret;
-	} $.walk = walk;
+	} $['walk'] = walk;
 
-	function $$(sel, ctx, query){
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * @param {Object=} qry
+	 * */
+	function $$(sel, ctx, qry){
 		if (sel && isS(sel)){
 			if (ctx instanceof $) ctx = ctx[0];
 			ctx = ctx || doc;
-			query = query || $.query;
+			qry = qry || $['query'];
 			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
 			try{
-				if (complex) return slice.call(query(sel, ctx));
+				if (complex) return slice.call(qry(sel, ctx));
 				return complex
-					? slice.call(query(sel, ctx))
+					? slice.call(qry(sel, ctx))
 					: (firstChar == "#"
 						? ((el = doc.getElementById(arg)) ? [el] : emptyArr)
 							: slice.call(firstChar == "."
@@ -431,21 +449,20 @@ window.jquip = window.$ = (function(){
 						: ctx.getElementsByTagName(sel))
 					);
 			}catch(e){
+				warn(e);
 			}
 		}
 		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
-	} $.$$ = $$;
+	} $['$$'] = $$;
 
-	$.setQuery = function(query){
-		$.query = function(sel, ctx){
-			return $$(sel, ctx, query
-				|| function(sel, ctx){ return ctx.querySelectorAll(sel); }
-			);
+	$['setQuery'] = function(qry){
+		$['query'] = function(sel, ctx){
+			return $$(sel, ctx, (qry || function(sel, ctx){ return ctx.querySelectorAll(sel); }));
 		};
 	};
 
 	var useQuery = queryEngines();
-	$.setQuery(useQuery || function(sel, ctx){
+	$['setQuery'](useQuery || function(sel, ctx){
 		return doc.querySelectorAll ? (ctx || doc).querySelectorAll(sel) : [];
 	});
 
@@ -465,11 +482,12 @@ window.jquip = window.$ = (function(){
 		s.onload = cb;
 		s.src = url;
 		h.insertBefore(s, h.firstChild);
-	}$.loadScript = loadScript;
+	} $['loadScript'] = loadScript;
 
-	function warn(){ console && console.warn(arguments) }
+	/** @param {...string} var_args */
+	function warn(var_args){ console && console.warn(arguments) }
 
-	$.each = function(o, cb, args){
+	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
 		if (args){
 			if (isObj)
@@ -500,15 +518,15 @@ window.jquip = window.$ = (function(){
 				if (hasOwn.call(o, key))
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
-	} $._each = _each;
+	} $['_each'] = _each;
 	function _indexOf(arr, val){
 		if (arr == null) return -1;
 		var i, l;
 		if (nativeIndexOf && arr.indexOf === nativeIndexOf) return arr.indexOf(val);
 		for(i = 0, l = arr.length; i < l; i++) if (arr[i] === val) return i;
 		return -1;
-	} $._indexOf = _indexOf;
-	$._defaults = function(obj){
+	} $['_indexOf'] = _indexOf;
+	$['_defaults'] = function(obj){
 		_each(slice.call(arguments, 1), function(o){
 			for(var k in o)
 				if (obj[k] == null) obj[k] = o[k];
@@ -523,8 +541,8 @@ window.jquip = window.$ = (function(){
 			if (fn.call(ctx, val, i, arr)) ret[ret.length] = val;
 		});
 		return ret;
-	} $._filter = _filter;
-	$.proxy = function(fn, ctx){
+	} $['_filter'] = _filter;
+	$['proxy'] = function(fn, ctx){
 		if (typeof ctx == "string"){
 			var tmp = fn[ctx];
 			ctx = fn;
@@ -538,27 +556,28 @@ window.jquip = window.$ = (function(){
 			return proxy;
 		}
 	};
-	$.dir = function(el, dir, until){
+	function dir(el, dir, until){
 		var matched = [], cur = el[dir];
 		while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))){
 			if (cur.nodeType === 1) matched.push(cur);
 			cur = cur[dir];
 		}
 		return matched;
-	};
-	$.nth = function(cur, result, dir, el){
-		result = result || 1;
+	} $['dir'] = dir;
+	function nth(cur, res, dir){
+		res = res || 1;
 		var num = 0;
 		for(; cur; cur = cur[dir])
-			if (cur.nodeType === 1 && ++num === result) break;
+			if (cur.nodeType === 1 && ++num === res) break;
 		return cur;
-	};
-	$.sibling = function(n, el){
+	} $['nth'] = nth;
+	function sibling(n, el){
 		var r = [];
 		for(; n; n = n.nextSibling) if (n.nodeType === 1 && n !== el) r.push(n);
 		return r;
-	};
-	$.grep = function(els, cb, inv){
+	} $['sibling'] = sibling;
+
+	function grep(els, cb, inv){
 		var ret = [], retVal;
 		inv = !!inv;
 		for(var i=0, l=els.length; i<l; i++){
@@ -567,8 +586,13 @@ window.jquip = window.$ = (function(){
 				ret.push(els[i]);
 		}
 		return ret;
-	};
-	$.map = function(els, cb, arg){
+	} $['grep'] = grep;
+	/**
+	 * @param {Object} els
+	 * @param {function} cb
+	 * @param {Object=} arg
+	 * */
+	function map(els, cb, arg){
 		var value, key, ret = [], i = 0, length = els.length,
 			isArray = els instanceof $
 				|| typeof length == "number"
@@ -587,8 +611,8 @@ window.jquip = window.$ = (function(){
 			}
 		}
 		return ret.concat.apply([], ret);
-	};
-	$.data = function(el, name, setVal){
+	} $['map'] = map;
+	function data(el, name, setVal){
 		if (!el) return {};
 		if (name && setVal){
 			el.setAttribute(name, setVal);
@@ -601,20 +625,20 @@ window.jquip = window.$ = (function(){
 		});
 		if (isS(name)) return o[name];
 		return o;
-	};
+	} $['data'] = data;
 	function attrs(el){
 		var o = {};
 		for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
 			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
-	} $.attrs = attrs;
+	} $['attrs'] = attrs;
 	function eqSI(str1, str2){
 		return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() === str2.toLowerCase();
-	} $.eqSI = eqSI;
-	$.trim = trim = strim
+	} $['eqSI'] = eqSI;
+	$['trim'] = trim = strim
 		? function(text){ return text == null ? "" : strim.call(text); }
 		: function(text){ return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
-	$.indexOf = $.inArray = function(el, arr){
+	$['indexOf'] = $['inArray'] = function(el, arr){
 		if (!arr) return -1;
 		if (indexOf) return indexOf.call(arr, el);
 		for(var i = 0, length = arr.length; i < length; i++)
@@ -627,14 +651,14 @@ window.jquip = window.$ = (function(){
 		return this;
 	});
 
-	function typeOf(o){ return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $.type = typeOf;
+	function typeOf(o){ return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $['type'] = typeOf;
 	function isS(o){ return typeof o == "string"; }
 	function isO(o){ return typeof o == "object"; }
-	function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $.isFunction = isF;
-	function isA(o){ return typeOf(o) === "array"; } $.isArray = Array.isArray || isA;
+	function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $['isFunction'] = isF;
+	function isA(o){ return typeOf(o) === "array"; } $['isArray'] = Array.isArray || isA;
 	function isAL(o){ return !isS(o) && typeof o.length == 'number' }
-	function isWin(o){ return o && typeof o == "object" && "setInterval" in o; } $.isWindow = isWin;
-	function isNan(obj){ return obj == null || !rdigit.test(obj) || isNaN(obj); } $.isNaN = isNan;
+	function isWin(o){ return o && typeof o == "object" && "setInterval" in o; } $['isWindow'] = isWin;
+	function isNan(obj){ return obj == null || !rdigit.test(obj) || isNaN(obj); } $['isNaN'] = isNan;
 	function isPlainObj(o){
 		if (!o || typeOf(o) !== "object" || o.nodeType || isWin(o)) return false;
 		try{
@@ -657,8 +681,8 @@ window.jquip = window.$ = (function(){
 				a1[i++] = a2[j++];
 		a1.length = i;
 		return a1;
-	} $.merge = merge;
-	$.extend = $.fn.extend = function(){
+	} $['merge'] = merge;
+	function extend(){
 		var opt, name, src, copy, copyIsArr, clone, args = arguments,
 			dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
 		if (typeof dst == "boolean"){ deep = dst; dst = args[1] || {}; i = 2; }
@@ -676,16 +700,16 @@ window.jquip = window.$ = (function(){
 							clone = src && isA(src) ? src : [];
 						} else
 							clone = src && isPlainObj(src) ? src : {};
-						dst[name] = $.extend(deep, clone, copy);
+						dst[name] = extend(deep, clone, copy);
 					} else if (copy !== undefined)
 						dst[name] = copy;
 				}
 			}
 		}
 		return dst;
-	};
-	function makeArray(arr, results){
-		var ret = results || [];
+	} $['extend'] = $['fn']['extend'] = extend;
+	function makeArray(arr, res){
+		var ret = res || [];
 		if (arr != null){
 			var type = typeOf(arr);
 			if (arr.length == null || type == "string" || type == "function" || type === "regexp" || isWin(arr))
@@ -694,7 +718,12 @@ window.jquip = window.$ = (function(){
 				merge(ret, arr);
 		}
 		return ret;
-	} $.makeArray = makeArray;
+	} $['makeArray'] = makeArray;
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * @param {Object=} frag
+	 * */
 	function htmlFrag(html, ctx, frag){
 		ctx = ((ctx || doc) || ctx.ownerDocument || ctx[0] && ctx[0].ownerDocument || doc);
 		frag = frag || ctx.createDocumentFragment();
@@ -704,7 +733,11 @@ window.jquip = window.$ = (function(){
 		while (div.firstChild)
 			frag.appendChild(div.firstChild);
 		return frag;
-	} $.htmlFrag = htmlFrag;
+	} $['htmlFrag'] = htmlFrag;
+	/**
+	 * @param {string} html
+	 * @param {Object=} ctx
+	 * */
 	function fragDiv(html, ctx){
 		var div = (ctx||doc).createElement('div'),
 			tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
@@ -731,7 +764,6 @@ window.jquip = window.$ = (function(){
 					frag.appendChild(ret[i]);
 		return ret;
 	}
-
 	var sibChk = function(a, b, ret){
 		if (a === b) return ret;
 		var cur = a.nextSibling;
@@ -741,11 +773,11 @@ window.jquip = window.$ = (function(){
 		}
 		return 1;
 	};
-	$.contains = docEl.contains
+	contains = $['contains'] = docEl.contains
 		? function(a, b){ return a !== b && (a.contains ? a.contains(b) : true) }
 		: function(){ return false };
-	var sortOrder = docEl.compareDocumentPosition
-		? ($.contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning $.contains
+	sortOrder = docEl.compareDocumentPosition
+		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning contains
 		  && function(a, b){
 			if (a === b){ hasDup = true; return 0; }
 			if (!a.compareDocumentPosition || !b.compareDocumentPosition)
@@ -777,28 +809,28 @@ window.jquip = window.$ = (function(){
 					if (els[i] === els[i - 1]) els.splice(i--, 1);
 		}
 		return els;
-	} $.unique = unique;
+	} $['unique'] = unique;
 	_each({
-		parent: function(el){ var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
-		parents: function(el){ return $.dir(el, "parentNode"); },
-		parentsUntil: function(el, i, until){ return $.dir(el, "parentNode", until); },
-		next: function(el){ return $.nth(el, 2, "nextSibling"); },
-		prev: function(el){ return $.nth(el, 2, "previousSibling"); },
-		nextAll: function(el){ return $.dir(el, "nextSibling"); },
-		prevAll: function(el){ return $.dir(el, "previousSibling"); },
-		nextUntil: function(el, i, until){ return $.dir(el, "nextSibling", until); },
-		prevUntil: function(el, i, until){ return $.dir(el, "previousSibling", until); },
-		siblings: function(el){ return $.sibling(el.parentNode.firstChild, el); },
-		children: function(el){ return $.sibling(el.firstChild); },
-		contents: function(el){
-			return el.nodeName === "iframe" ? el.contentDocument || el.contentWindow.document : makeArray(el.childNodes);
+		'parent': function(el){ var parent = el.parentNode; return parent && parent.nodeType !== 11 ? parent : null; },
+		'parents': function(el){ return dir(el, "parentNode"); },
+		'parentsUntil': function(el, i, until){ return dir(el, "parentNode", until); },
+		'next': function(el){ return nth(el, 2, "nextSibling"); },
+		'prev': function(el){ return nth(el, 2, "previousSibling"); },
+		'nextAll': function(el){ return dir(el, "nextSibling"); },
+		'prevAll': function(el){ return dir(el, "previousSibling"); },
+		'nextUntil': function(el, i, until){ return dir(el, "nextSibling", until); },
+		'prevUntil': function(el, i, until){ return dir(el, "previousSibling", until); },
+		'siblings': function(el){ return sibling(el['parentNode']['firstChild'], el); },
+		'children': function(el){ return sibling(el['firstChild']); },
+		'contents': function(el){
+			return el['nodeName'] === "iframe" ? el['contentDocument'] || el['contentWindow']['document '] : makeArray(el['childNodes']);
 		}
 	}, function(fn, name){
-		$.fn[name] = function(until, sel){
-			var ret = $.map(this, fn, until), args = slice.call(arguments);
+		$['fn'][name] = function(until, sel){
+			var ret = map(this, fn, until), args = slice.call(arguments);
 			if (!runtil.test(name)) sel = until;
-			if (sel && isS(sel)) ret = $.filter(sel, ret);
-			ret = this.length > 1 && !guaranteedUnique[name] ? $.unique(ret) : ret;
+			if (sel && isS(sel)) ret = $$(sel, ret); //TODO
+			ret = this.length > 1 && !guaranteedUnique[name] ? unique(ret) : ret;
 			if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
 			return this.ps(ret, name, args.join(","));
 		};
@@ -820,7 +852,7 @@ window.jquip = window.$ = (function(){
 		div.style.display = "none";
 		div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
 		var a = div.getElementsByTagName("a")[0];
-		$.support = {
+		$['support'] = {
 			boxModel: null,
 			opacity: /^0.55$/.test(a.style.opacity),
 			cssFloat: !!a.style.cssFloat
@@ -836,33 +868,34 @@ window.jquip = window.$ = (function(){
 				 || rmsie.exec( ua )
 				 || ua.indexOf("compatible") < 0 && rmozilla.exec( ua ) || [],
 			b;
-		b = $.browser = { version: match[2] || "0" };
+		b = $['browser'] = { version: match[2] || "0" };
 		b[match[1] || ""] = true;
 	})();
 
-	$.init = false;
-	$.onload = function(){
-		if (!$.init)
+	$['init'] = false;
+	$['onload'] = function(){
+		if (!$['init'])
 		try {
-			$.support.boxModel = boxmodel();
+			$['support']['boxModel'] = boxmodel();
 			if (!useQuery && !doc.querySelectorAll)
 				loadScript(queryShimCdn, function(){
-					$.setQuery(queryEngines());
+					$['setQuery'] = queryEngines();
 				});
-			$.init = true;
+			$['init'] = true;
 		} catch(e){}
 	};
-	if (doc.body && !$.init) $.onload();
+	if (doc['body'] && !$['init']) $['onload']();
 
-	$.hook = function(fn){
+	$['hook'] = function(fn){
 		ctors.push(fn);
 	};
-	$.plug = function(meta, fn){
+	$['plug'] = function(meta, fn){
 		var name = isS(meta) ? meta : meta['name'];
 		fn = isF(meta) ? meta : fn;
 		if (!isF(fn)) throw "Plugin fn required";
 		if (name && fn) plugins[name] = fn;
 		fn($);
 	};
+
 	return $;
 })();

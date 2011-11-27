@@ -1,4 +1,4 @@
-$.plug(function($){
+$['plug'](function($){
 	var doc = document,
 		$id = function(id, ctx){ return (ctx || doc).getElementById(id); },
 		$tag = function(tag, ctx){ return (ctx || doc).getElementsByTagName(tag); },
@@ -6,14 +6,14 @@ $.plug(function($){
 			? function(cls, ctx){
 				return (ctx || doc).getElementsByClassName(cls); }
 			: function(cls, ctx){
-				var ret = $.walk(function(el){
+				var ret = $['walk'](function(el){
 					return el.className && el.className.indexOf(cls) >= 0;
 				}, (ctx || doc));
-				return $.unique(ret);
+				return $['unique'](ret);
 			  };
 
 	function childSel(sel, ctx){
-		var el = $.$$(ctx)[0], cls = sel.split('.'), tag = cls.shift(), fPos = tag.indexOf('['), fName, fValue, parts,
+		var el = $['$$'](ctx)[0], cls = sel.split('.'), tag = cls.shift(), fPos = tag.indexOf('['), fName, fValue, parts,
 			firstChar = tag.charAt(0);
 		if (firstChar == "#") return $id(tag.substring(1), el);
 		if (fPos >= 0){
@@ -28,7 +28,7 @@ $.plug(function($){
 		if (tagWithId.length == 2){
 			el = $id(tagWithId[1], el);
 			if (!el) return [];
-			if (!$.eqSI(el.tagName, tagWithId[0])) return [];
+			if (!$['eqSI'](el.tagName, tagWithId[0])) return [];
 			if (cls.length == 1) return [el];
 		}
 		var els = tag ? $tag(tag, el) : $cls(cls.shift(), el);
@@ -36,14 +36,14 @@ $.plug(function($){
 		var ret = [];
 		for(var i = 0, l = els.length; i < l; i++){
 			var subEl = els[i], j = cls.length, matches = true;
-			if (cls.length) while (j--) if (!$.hasClass([subEl], cls[j])) matches = false;
+			if (cls.length) while (j--) if (!$['hasClass']([subEl], cls[j])) matches = false;
 			if (matches && (!fName || (!fValue || subEl[fName] == fValue)))
 				ret.push(subEl);
 		}
 		return ret;
 	}
 
-	$.setQuery(function(selector, ctx){
+	$['setQuery'](function(selector, ctx){
 		if (doc.querySelectorAll)
 			return (ctx || doc).querySelectorAll(selector);
 

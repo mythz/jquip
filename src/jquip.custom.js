@@ -1,4 +1,4 @@
-$.plug("custom", function($){
+$['plug']("custom", function($){
     var win=window, doc=document, qsMap = {}, 
         vars = win.location.search.substring(1).split("&");
 
@@ -6,21 +6,21 @@ $.plug("custom", function($){
         var kvp = vars[i].split("=");
         qsMap[kvp[0]] = unescape(kvp[1]);
     }
-    $.queryString = function (name) { return qsMap[name]; };
-    $.Key = function (keyCode) { this.keyCode = keyCode; };
-    $.Key.namedKeys = {
+    $['queryString'] = function (name) { return qsMap[name]; };
+    var Key = $['Key'] = function (keyCode) { this.keyCode = keyCode; };
+	Key.namedKeys = {
         Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, Pause: 19, Capslock: 20, Escape: 27, PageUp: 33, 
         PageDown: 34, End: 35, Home: 36, LeftArrow: 37, UpArrow: 38, RightArrow: 39, DownArrow: 40, Insert: 45, Delete: 46
     };
-    $._each($.Key.namedKeys, function (val, key) {
+    $['_each'](Key.namedKeys, function (val, key) {
         var keyCode = val;
-        $.Key.prototype['is' + key] = function () { return this.keyCode === keyCode; };
+	    Key.prototype['is' + key] = function () { return this.keyCode === keyCode; };
     });
     $.key = function (e) {
         e = e || window.event;
-        return new $.Key(e.keyCode || e.which);
+        return new Key(e.keyCode || e.which);
     };
-    $.cancelEvent = function (e) {
+    $['cancelEvent'] = function (e) {
         if (!e) e = window.event;
         e.cancelBubble = true;
         e.returnValue = false;
@@ -30,13 +30,13 @@ $.plug("custom", function($){
         }
         return false;
     };
-    $.templateSettings = {
+    $['templateSettings'] = {
       evaluate    : /<%([\s\S]+?)%>/g,
       interpolate : /<%=([\s\S]+?)%>/g,
       escape      : /<%-([\s\S]+?)%>/g
     };
-    $.template = function(str, data) {
-        var c  = _.templateSettings;
+    $['template'] = function(str, data) {
+        var c  = $['templateSettings'];
         var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
           'with(obj||{}){__p.push(\'' +
           str.replace(/\\/g, '\\\\')
@@ -58,23 +58,4 @@ $.plug("custom", function($){
         var func = new Function('obj', '_', tmpl);
         return data ? func(data, _) : function(data) { return func(data, _) };
     };
-    function detect(ua){
-      var ua = ua, os = {},
-        android = ua.match(/(Android)\s+([\d.]+)/),
-        iphone = ua.match(/(iPhone\sOS)\s([\d_]+)/),
-        ipad = ua.match(/(iPad).*OS\s([\d_]+)/),
-        webos = ua.match(/(webOS)\/([\d.]+)/),
-        blackberry = ua.match(/(BlackBerry).*Version\/([\d.]+)/);
-      if (android) {os.android = true; os.version = android[2] }
-      if (iphone) {os.ios = true; os.version = iphone[2].replace(/_/g, '.'); os.iphone = true }
-      if (ipad) {os.ios = true; os.version = ipad[2].replace(/_/g, '.'); os.ipad = true }
-      if (webos) { os.webos = true; os.version = webos[2] }
-      if (blackberry) {os.blackberry = true; os.version = blackberry[2];}
-      return os;
-    }
-    $.os = detect(navigator.userAgent);
-    $.__detect = detect;
-
-    var v = navigator.userAgent.match(/WebKit\/([\d.]+)/);
-    $.browser = v ? { webkit: true, version: v[1] } : { webkit: false };
 });

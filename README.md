@@ -17,7 +17,7 @@ Smaller, Lighter, Faster, more modular jQuery - include only the parts you want!
 
 Minified & gzipped code sizes (v.01):
   
-  - jquip.js (5.2k)
+  - jquip.js (5.7k)
   - jquip.events.js (1k)
   - jquip.docready.js (.5k)
   - jquip.css.js (1.6k)
@@ -29,9 +29,12 @@ Minified & gzipped code sizes (v.01):
   - jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js
   - jquip.q-sizzle.js (5.29k) - Sizzle.js
 
-The core **jquip.js** is only **5.2KB** (minified and gzipped) only a fraction of the size of jQuery.
+The core **jquip.js** is only **5.7KB** (minified and gzipped) - a fraction of the size of jQuery.
 
-Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
+Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference. 
+
+### Automatically downloads parts needed for older browsers
+Sizzle.js is only added on demand from [cdnjs.com](http://cdnjs.com) for browers that need it (i.e. <=IE7) which we believe this is the optimal way to download shims for browsers that need it. We still have some testing to do, but that is at least our goal.
 
 Most code has been ported from jQuery or Zepto.js and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
@@ -49,6 +52,13 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
 
 ## News
 
+### v.02
+
+  - We now are able to compile in Closure Compiler's advanced compilation mode! 
+  The minified output passes Backbone.js test suite and reports only 1 not implemented feature in Spine.js tests. We still have Closure Compiler warnings as a result of un-annotated methods which we'll be adding in the near future.
+  - The total code-size (min+gzip) for jquip and non-query plugins (i.e. docready,events,css,ajax,custom) is **9.67k** in advanced mode and **9.86k** in Simple mode.
+
+
 ### v.01
 
   - Abstracted Events, pluggable query engines and new `$().find` and `Events` system courtesy of the much leaner implementation in [Zepto.js](http://zeptojs.com/), refactored to support multiple browsers.  
@@ -62,12 +72,14 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
   
 ## Roadmap
 
-  - Getting jquip to work in Google Closure Compiler's advanced compilation mode so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
+  - Getting jquip to work in Google Closure Compiler's advanced compilation mode without warnings so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
+  - Add caching to improve performance
 
 ## Changes
   
 #### v.01 
   
+  - New Spine.js tests added as well, now passing all but 1 test (in latest browsers)
   - New tests added and bug fixes. Backbone.js latest test suite now passes in all the latest browsers - now included in the **/test** folder.
   - New Event system added as a plugin, now with abstracted events. 
     - We expect most devs would want to include events, but can now be stripped if you dont.
@@ -92,11 +104,12 @@ Methods marked with * are only partially implemented.
 
 ### Methods operating on a `$(selctor)`
   
-  - get
   - add
   - each
   - attr
   - removeAttr
+  - get
+  - toArray
   - data
   - append
   - prepend
@@ -132,6 +145,7 @@ Methods marked with * are only partially implemented.
   - siblings
   - children
   - contents
+  - serializeArray
 
 ### static methods off $
   
@@ -162,7 +176,7 @@ Methods marked with * are only partially implemented.
   - $.loadScript - (url, callback [, async]) load an external script dynamically
   - $.htmlFrag - creates a document fragment from a html string **(name changed)**
   - $.walk - traveres all childElems including self `(predicateFn, [[, context], results])`
-  - $.queryAll - Sizzle(or mock) || doc.querySelector || limitedQueryAll*
+  - $.query - Sizzle(or mock) || doc.querySelector || limitedQueryAll*
   - $.attrs - an elements attributes
   - $.unique - return a unique list of elements in document order
   - $.contains - parent element contains sibling
@@ -257,7 +271,7 @@ Intercept the `$(){ .. }` constructor and inject your own implementation. Return
 
 ## Limitations
 
-Many corner cases we feel that are not likely to be hit in normal development have been stripped out, it's therefore possible for older browsers could experience some issues if you work in these edge cases. In addition to a fluent API, jQuery does a lot of sanitization and quarantine for edge cases in older browsers which makes it the safer but slower option. 
+Many corner cases we feel that are not likely to be hit in normal development have been intentionally stripped out, it's therefore possible for older browsers could experience some issues if you work in these edge cases. In addition to its fluent API, jQuery does a lot of sanitization and quarantine for edge cases in older browsers which makes it the safer but slower option. 
 
 Non supported examples:
 
@@ -269,8 +283,8 @@ We prefer not to take the perf and code-bloat hit of this quarantine - if your a
 
 ## Best Practices 
 
-Contrary to strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript below the HTML elements they reference. This is the guidance from the 
-[Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview. 
+Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript below the HTML elements they reference. This is the guidance from the 
+[Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
 
 As we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
 

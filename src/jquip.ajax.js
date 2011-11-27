@@ -1,4 +1,4 @@
-$.plug("ajax", function ($) {
+$['plug']("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -6,7 +6,7 @@ $.plug("ajax", function ($) {
            function () { return new ActiveXObject("MSXML2.XMLHTTP"); }
         ],
         _xhrf = null;
-	$.xhr = function () {
+	$['xhr'] = function xhr() {
 		if (_xhrf != null) return _xhrf();
 		for (var i = 0, l = xhrs.length; i < l; i++) {
 			try {
@@ -19,7 +19,7 @@ $.plug("ajax", function ($) {
 		}
 		return function () { };
 	};
-	$._xhrResp = function (xhr, dataType) {
+	$['_xhrResp'] = function _xhrResp(xhr, dataType) {
 		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
 		switch (dataType) {
 			case "text/xml":
@@ -35,14 +35,14 @@ $.plug("ajax", function ($) {
 				return xhr.responseText;
 		}
 	};
-	$.formData = function (o) {
+	$['formData'] = function formData(o) {
 		var kvps = [], regEx = /%20/g;
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
 	};
-	$.ajax = function (o) {
-		var xhr = $.xhr(), timer, n = 0;
-		o = $._defaults(o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
+	$['ajax'] = function ajax(o) {
+		var xhr = xhr(), timer, n = 0;
+		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4)
@@ -50,7 +50,7 @@ $.plug("ajax", function ($) {
 				if (timer) clearTimeout(timer);
 				if (xhr.status < 300)
 				{
-					if (o.success) o.success($._xhrResp(xhr, o.dataType));
+					if (o.success) o.success(_xhrResp(xhr, o.dataType));
 				}
 				else if (o.error) o.error(xhr, xhr.status, xhr.statusText);
 				if (o.complete) o.complete(xhr, xhr.statusText);
@@ -59,40 +59,39 @@ $.plug("ajax", function ($) {
 		};
 		var url = o.url, data = null;
 		var isPost = o.type == "POST" || o.type == "PUT";
-		if (!isPost && o.data) url += "?" + $.formData(o.data);
+		if (!isPost && o.data) url += "?" + formData(o.data);
 		xhr.open(o.type, url);
 
 		if (isPost) {
 			var isJson = o.dataType.indexOf("json") >= 0;
-			data = isJson ? JSON.stringify(o.data) : $.formData(o.data);
+			data = isJson ? JSON.stringify(o.data) : formData(o.data);
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
 	};
-	$.getJSON = function (url, data, success, error) {
-		if ($.isFunction(data))
-		{
+	$['getJSON'] = function (url, data, success, error) {
+		if ($['isFunction'](data)){
 			error = success;
 			success = data;
 			data = null;
 		}
-		$.ajax({ url: url, dataType: "json", data: data, success: success, error: error });
+		ajax({ url: url, dataType: "json", data: data, success: success, error: error });
 	};
-	$.get = function (url, data, success, dataType) {
-		if ($.isFunction(data)) {
+	$['get'] = function (url, data, success, dataType) {
+		if ($['isFunction'](data)) {
 			dataType = success;
 			success = data;
 			data = null;
 		}
-		$.ajax({url: url, type: "GET", data: data, success: success, dataType: dataType || "text/plain"});
+		ajax({url: url, type: "GET", data: data, success: success, dataType: dataType || "text/plain"});
 	};
-	$.post = function (url, data, success, dataType) {
-		if ($.isFunction(data)) {
+	$['post'] = function (url, data, success, dataType) {
+		if ($['isFunction'](data)) {
 			dataType = success;
 			success = data;
 			data = null;
 		}
-		$.ajax({url: url, type: "POST", data: data, success: success, dataType: dataType || "text/plain"});
+		ajax({url: url, type: "POST", data: data, success: success, dataType: dataType || "text/plain"});
 	};
     //TODO $.getScript
 });
