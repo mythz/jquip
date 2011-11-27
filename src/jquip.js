@@ -2,6 +2,7 @@ window.jquip = window.$ = (function(){
 	var win = window, queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
 		queryEngines = function(){ return win.Sizzle || win.qwery; },
 		doc = document, docEl = doc.documentElement,
+		Ctor,
 		runtil = /Until$/, rmultiselector = /,/,
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
@@ -10,6 +11,10 @@ window.jquip = window.$ = (function(){
 		rdigit = /\d/,
 		rnotwhite = /\S/,
 		rReturn = /\r\n/g,
+		rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>)?$/,
+		rCRLF = /\r?\n/g,
+		rselectTextarea = /^(?:select|textarea)/i,
+		rinput = /^(?:color|date|datetime|datetime-local|email|hidden|month|number|password|range|search|tel|text|time|url|week)$/i,
 		strim = String.prototype.trim, trim,
 		trimLeft = /^\s+/,
 		trimRight = /\s+$/,
@@ -42,14 +47,16 @@ window.jquip = window.$ = (function(){
 		trimRight = /[\s\xA0]+$/;
 	}
 
-	var ctors = [], plugins = {};
+	var ctors = [], plugins = {}, jquid = 0;
 	function $(selector, ctx){
 		return new $.fn.init(selector, ctx);
 	}
 
 	$.fn = $.prototype = {
 		constructor: $,
+		selector: "",
 		init: function(selector, ctx){
+			var ret;
 			for(var i = 0, l = ctors.length; i < l; i++)
 				if (ctors[i].apply(this, arguments)) return this;
 
@@ -71,8 +78,12 @@ window.jquip = window.$ = (function(){
 				this.selector = selector.selector;
 				return this.make(selector);
 			}
-			selector = (isS(selector) && selector.charAt(0) === "<")
-				? htmlFrag(selector)
+			selector = isS(selector) && selector.charAt(0) === "<"
+				? (ret = rsingleTag.exec(selector))
+					? (selector = [doc.createElement(ret[1])]) && isPlainObj(ctx)
+						? $.fn.attr.call(selector, ctx) && selector
+						: selector
+					: htmlFrag(selector).childNodes
 				: $$(selector, ctx);
 			return this.make(selector);
 		},
@@ -80,8 +91,13 @@ window.jquip = window.$ = (function(){
 			make(this, els);
 			return this;
 		},
-		get: function(idx){
-			return this[idx];
+		toArray: function() {
+			return slice.call(this, 0);
+		},
+		get: function(num){
+			return num == null
+				? this.toArray()
+				: (num < 0 ? this[this.length + num] : this[num]);
 		},
 		add: function(sel, ctx){
 			return this.make($(sel, ctx));
@@ -96,19 +112,17 @@ window.jquip = window.$ = (function(){
 			var el = this[0];
 			return (isS(name) && val === undefined)
 				? (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
-				? this.val()
-				: (el
-				? (el.getAttribute(name) || (name in el ? el[name] : undefined))
-				: null)
+					? this.val()
+					: (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null)
 				: this.each(function(idx){
-				var nt = this.nodeType;
-				if (nt !== 3 && nt !== 8 && nt !== 2){
-					if (isO(name)) for(var k in name)
-						if (val === null)
-							this.removeAttr(name);
-						else
-							this.setAttribute(k, name[k]);
-					else this.setAttribute(name, isF(val) ? val.call(this, idx, this.getAttribute(name)) : val);
+					var nt = this.nodeType;
+					if (nt !== 3 && nt !== 8 && nt !== 2){
+						if (isO(name)) for(var k in name)
+							if (val === null)
+								this.removeAttr(name);
+							else
+								this.setAttribute(k, name[k]);
+						else this.setAttribute(name, isF(val) ? val.call(this, idx, this.getAttribute(name)) : val);
 				}
 			});
 		},
@@ -146,12 +160,21 @@ window.jquip = window.$ = (function(){
 			return this;
 		},
 		dm: function(args, table, cb){
-			var value = args[0];
-			if (!value) return this;
-			if (!isS(value)) throw "Not supported: " + value;
-			return this.each(function(){
-				cb.call(this, htmlFrag(value));
-			});
+			var value = args[0], parent, frag, first, i;
+			if (value){
+				if (this[0]) {
+					parent = value && value.parentNode;
+					frag = parent && parent.nodeType === 11 && parent.childNodes.length === this.length
+						? parent
+						: htmlFrag(value);
+					first = frag.firstChild;
+					if (frag.childNodes.length === 1) frag = first;
+					if (first)
+						for (i=0, l=this.length; i<l; i++)
+							cb.call(this[i],frag);
+				}
+			}
+			return this;
 		},
 		hide: function(){
 			this.each(function(){
@@ -193,6 +216,11 @@ window.jquip = window.$ = (function(){
 			return this.ps(slice.apply(this, arguments),
 				"slice", slice.call(arguments).join(","));
 		},
+		map: function(cb) {
+			return this.ps($.map(this, function(el, i) {
+				return cb.call(el, i, el);
+			}));
+		},
 		find: function(sel){
 			var self = this, i, l;
 			if (!isS(sel)){
@@ -202,7 +230,7 @@ window.jquip = window.$ = (function(){
 				});
 			}
 			var ret = this.ps("", "find", sel), len, n, r;
-			for(i = 0, l = this.length; i < l; i++){
+			for(i=0, l=this.length; i<l; i++){
 				len = ret.len;
 				merge(ret, $(sel, this[i]));
 				if (i == 0){
@@ -217,28 +245,10 @@ window.jquip = window.$ = (function(){
 			return ret;
 		},
 		not: function(sel){
-			var els = [];
-			if (isF(sel) && sel.call !== undefined)
-				this.each(function(idx){
-					if (!sel.call(this, idx)) els.push(this);
-				});
-			else {
-				var excludes = isS(sel)
-					? this.filter(sel)
-					: (isAL(sel) && isF(sel.item))
-					? slice.call(sel)
-					: $(sel);
-				this.each(function(el){
-					if (excludes.indexOf(el) < 0) els.push(el);
-				});
-			}
-			return $(els);
+			return this.ps(winnow(this, sel, false), "not", sel);
 		},
 		filter: function(sel){
-			return $(_filter(this, function(el){
-					return el.parentNode && _indexOf($$(el.parentNode, sel), el) >= 0;
-				})
-			);
+			return this.ps(winnow(this, sel, true), "filter", sel);
 		},
 		indexOf: function(val){
 			return _indexOf(this, val);
@@ -338,9 +348,43 @@ window.jquip = window.$ = (function(){
 			this.each(function(){
 				$(this).hide();
 			});
+		},
+		serializeArray: function() {
+			return this.map(function(){
+				return this.elements ? makeArray(this.elements) : this;
+			}).filter(function(){
+				return this.name && !this.disabled &&
+					(this.checked || rselectTextarea.test(this.nodeName) || rinput.test(this.type));
+			}).map(function(i, el){
+				var val = $(this).val();
+				return val == null || isA(val)
+					? $.map(val, function(val){
+						return { name: el.name, value: val.replace(rCRLF, "\r\n") };
+                      })
+					: { name: el.name, value: val.replace(rCRLF, "\r\n") };
+			}).get();
 		}
 	};
 	$.fn.init.prototype = $.fn;
+
+	function winnow(els, sel, keep){
+		sel = sel || 0;
+		if (isF(sel))
+			return $.grep(els, function(el, i){
+				return !!sel.call(el, i, el) === keep;
+			});
+		else if (sel.nodeType)
+			return $.grep(els, function(el){
+				return (el === sel) === keep;
+			});
+		else if (isS(sel))
+			return $.grep(els, function(el) {
+				return el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
+			});
+		return $.grep(els, function(el) {
+			return (_indexOf(sel, el) >= 0) === keep;
+		});
+	}
 
 	function make(arr, els){
 		arr.length = (els && els.length || 0);
@@ -372,6 +416,7 @@ window.jquip = window.$ = (function(){
 
 	function $$(sel, ctx, query){
 		if (sel && isS(sel)){
+			if (ctx instanceof $) ctx = ctx[0];
 			ctx = ctx || doc;
 			query = query || $.query;
 			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
@@ -479,6 +524,20 @@ window.jquip = window.$ = (function(){
 		});
 		return ret;
 	} $._filter = _filter;
+	$.proxy = function(fn, ctx){
+		if (typeof ctx == "string"){
+			var tmp = fn[ctx];
+			ctx = fn;
+			fn = tmp;
+		}
+		if (isF(fn)){
+			var args = slice.call(arguments, 2),
+				proxy = function(){
+					return fn.apply(ctx, args.concat(slice.call(arguments))); };
+			proxy.guid = fn.guid = fn.guid || proxy.guid || jquid++;
+			return proxy;
+		}
+	};
 	$.dir = function(el, dir, until){
 		var matched = [], cur = el[dir];
 		while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))){
@@ -502,7 +561,7 @@ window.jquip = window.$ = (function(){
 	$.grep = function(els, cb, inv){
 		var ret = [], retVal;
 		inv = !!inv;
-		for(var i = 0, length = els.length; i < length; i++){
+		for(var i=0, l=els.length; i<l; i++){
 			retVal = !!cb(els[i], i);
 			if (inv !== retVal)
 				ret.push(els[i]);
@@ -573,7 +632,7 @@ window.jquip = window.$ = (function(){
 	function isO(o){ return typeof o == "object"; }
 	function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $.isFunction = isF;
 	function isA(o){ return typeOf(o) === "array"; } $.isArray = Array.isArray || isA;
-	function isAL(obj){ return typeof obj.length == 'number' }
+	function isAL(o){ return !isS(o) && typeof o.length == 'number' }
 	function isWin(o){ return o && typeof o == "object" && "setInterval" in o; } $.isWindow = isWin;
 	function isNan(obj){ return obj == null || !rdigit.test(obj) || isNaN(obj); } $.isNaN = isNan;
 	function isPlainObj(o){
@@ -625,30 +684,54 @@ window.jquip = window.$ = (function(){
 		}
 		return dst;
 	};
-	$.makeArray = function(arr, results){
+	function makeArray(arr, results){
 		var ret = results || [];
 		if (arr != null){
 			var type = typeOf(arr);
-			if (arr.length == null || isS(type) || isF(type) || type === "regexp" || isWin(arr))
+			if (arr.length == null || type == "string" || type == "function" || type === "regexp" || isWin(arr))
 				push.call(ret, arr);
 			else
 				merge(ret, arr);
 		}
 		return ret;
-	};
-	function htmlFrag(html){
-		var frag = doc.createDocumentFragment(),
-			div = doc.createElement('div'),
+	} $.makeArray = makeArray;
+	function htmlFrag(html, ctx, frag){
+		ctx = ((ctx || doc) || ctx.ownerDocument || ctx[0] && ctx[0].ownerDocument || doc);
+		frag = frag || ctx.createDocumentFragment();
+		if (isAL(html))
+			return clean(html, ctx, frag) && frag;
+		var div = fragDiv(html);
+		while (div.firstChild)
+			frag.appendChild(div.firstChild);
+		return frag;
+	} $.htmlFrag = htmlFrag;
+	function fragDiv(html, ctx){
+		var div = (ctx||doc).createElement('div'),
 			tag = (rtagname.exec(html) || ["", ""])[1].toLowerCase(),
 			wrap = wrapMap[tag] || wrapMap._default,
 			depth = wrap[0];
 		div.innerHTML = wrap[1] + html + wrap[2];
-		while (depth--){
+		while (depth--)
 			div = div.lastChild;
+		return div;
+	}
+	function clean(els, ctx, frag){
+		var ret=[],i,el;
+		for (i=0; (el=els[i])!=null; i++){
+			if (isS(el))
+				el = fragDiv(el, ctx);
+			if (el.nodeType)
+				ret.push(el);
+			else
+				ret = merge(ret, el);
 		}
-		while (div.firstChild) frag.appendChild(div.firstChild);
-		return frag;
-	} $.htmlFrag = htmlFrag;
+		if (frag)
+			for (i=0; i<ret.length; i++)
+				if (ret[i].nodeType)
+					frag.appendChild(ret[i]);
+		return ret;
+	}
+
 	var sibChk = function(a, b, ret){
 		if (a === b) return ret;
 		var cur = a.nextSibling;
@@ -708,7 +791,7 @@ window.jquip = window.$ = (function(){
 		siblings: function(el){ return $.sibling(el.parentNode.firstChild, el); },
 		children: function(el){ return $.sibling(el.firstChild); },
 		contents: function(el){
-			return el.nodeName === "iframe" ? el.contentDocument || el.contentWindow.document : $.makeArray(el.childNodes);
+			return el.nodeName === "iframe" ? el.contentDocument || el.contentWindow.document : makeArray(el.childNodes);
 		}
 	}, function(fn, name){
 		$.fn[name] = function(until, sel){
@@ -769,7 +852,7 @@ window.jquip = window.$ = (function(){
 			$.init = true;
 		} catch(e){}
 	};
-	if (doc.body) $.init();
+	if (doc.body && !$.init) $.onload();
 
 	$.hook = function(fn){
 		ctors.push(fn);

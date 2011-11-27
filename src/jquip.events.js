@@ -64,7 +64,6 @@ $.plug("events", function($){
 		$._each(evtMethods, function(key){
 			proxy[key] = function(){
 				return evt[key].apply(evt, arguments);
-					//: (evt.cancelBubble = (evt.returnValue = false))
 			};
 		});
 		return proxy;

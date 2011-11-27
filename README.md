@@ -25,7 +25,7 @@ Minified & gzipped code sizes (v.01):
 
 ### Query Engine options (not required for modern browsers)
 
-  - jquip.q-min.js (.6k) - A mini limited query engine (e.g. only #id tags and .classes)
+  - jquip.q-min.js (.6k) - An extremely fast but limited query engine (see blow)
   - jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js
   - jquip.q-sizzle.js (5.29k) - Sizzle.js
 
@@ -33,11 +33,9 @@ The core **jquip.js** is only **5.2KB** (minified and gzipped) only a fraction o
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference.
 
-Includes 7-8x Faster DOM traversal for <= IE7. (i.e. where there's no querySelector) *see limitations below.
+Most code has been ported from jQuery or Zepto.js and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
-Most code has been ported from jQuery and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
-
-Licence: http://www.opensource.org/licenses/mit-license.php
+Licence: http://www.opensource.org/licenses/mit-license.php (Same as jQuery and Zepto.js)
 
 ### Build customizable jquip packages with the [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/)
 
@@ -45,7 +43,7 @@ Licence: http://www.opensource.org/licenses/mit-license.php
 
 This is **NOT** an official [jQuery.com](http://jquery.com/) project.
 
-The code-base is now a lot more stable since reached our goal of jquip.js (with the **events** + **docready** plugins) working in Backbone.js, there are likely a few fixes still to be added but the core is close to feature complete and wont require the major refactoring done recently.
+Code-base will now be more stable as we've reached our goal of jquip.js (with the **events** + **docready** plugins) working in Backbone.js, there are likely a few fixes still to be added but the core is close to feature complete and wont require the major refactoring done recently.
 
 We sould still like to hear feedback on issues/non-implemented core functionality so we can measure the API popularity of missing pieces.
 
@@ -64,7 +62,7 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
   
 ## Roadmap
 
-  - Getting jquip to work in Google Closure Compilers advanced compilation mode so it can be used to programatically strip out dead code your application doesn't need for an even smaller footprint!
+  - Getting jquip to work in Google Closure Compiler's advanced compilation mode so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
 
 ## Changes
   
@@ -73,7 +71,7 @@ We sould still like to hear feedback on issues/non-implemented core functionalit
   - New tests added and bug fixes. Backbone.js latest test suite now passes in all the latest browsers - now included in the **/test** folder.
   - New Event system added as a plugin, now with abstracted events. 
     - We expect most devs would want to include events, but can now be stripped if you dont.
-  - Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from [cdnjs.com](http://cdnjs.com) if a browser doesn't supprot `document.querySelectorAll` (i.e. <=IE7). Note: because there's Sizzle.js it's important to be aware of the limitations when relying on browsers native querySelector implementations, i.e. there are [restrictions in IE8](http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml) where the HTML page must be in standards mode and Safari in quirks mode [can't handle uppercase or unicode characters](http://www.wordsbyf.at/2011/11/23/selectors-selectoring/).
+  - Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from [cdnjs.com](http://cdnjs.com) if a browser doesn't support `document.querySelectorAll` (i.e. <=IE7). Note: because there's no Sizzle.js it's important to be aware of limitations when relying on browsers native querySelector implementations, i.e. there are [restrictions in IE8](http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml) where the HTML page must be in standards mode and Safari in quirks mode [can't handle uppercase or unicode characters](http://www.wordsbyf.at/2011/11/23/selectors-selectoring/).
 
 #### pre-alpha
 
@@ -259,15 +257,34 @@ Intercept the `$(){ .. }` constructor and inject your own implementation. Return
 
 ## Limitations
 
-A few corner cases we feel are not likely to be hit in normal development have been stripped out, so it is possible older browsers may experience some issues.
+Many corner cases we feel that are not likely to be hit in normal development have been stripped out, it's therefore possible for older browsers could experience some issues if you work in these edge cases. In addition to a fluent API, jQuery does a lot of sanitization and quarantine for edge cases in older browsers which makes it the safer but slower option. 
 
-There are no additional Expression support provided beyond what is offered by the browsers native **querySelector** API or bundled query engine chosen.
+Non supported examples:
 
-If you don't bundle either **events** or **docready** plugins you should include jquip near the end of your page, i.e. before the </body> tag or call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js if required calculating if boxmodel is supported.
+  - Script tags in inserted HTML are not automatically evaluated 
+  - Attributes and event handlers of cloned html fragments are not copied across
+  - No expression support beyond the browsers native **querySelector** APIs or Sizzle.js shim
 
-### Mini Querey Enginge 
+We prefer not to take the perf and code-bloat hit of this quarantine - if your app does hit one of these edge cases you will either need to code a specific workaround for your apps usage (which will in all likely be more optimized than jQuery's general purpose solution) or simply move back to using jQuery.
 
-* For <= IE7 all selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each child selector.
+## Best Practices 
+
+Contrary to strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript below the HTML elements they reference. This is the guidance from the 
+[Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview. 
+
+As we've received a lot of feedback on this issue - this is why jQuery's popular **docready** is a plugin and not included by default - simply include it as a plugin if you want it.
+
+Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing </body> tag.
+
+If you're not referencing jquip near the bottom of your page and don't have either the **events** or **docready** plugins included, you should call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js (for <=IE7), calculates browser feature support, etc.
+
+### Mini Query Engine (jquip.q-min.js)
+
+Weighing at just **0.6k** query-min is an ultra fast selector engine for browsers that don't provide native support for the **querySelectorAll** APIs (e.g. <=IE7). It works by offloading as much work as possible to the browsers primitive `document.getElementById()`, `document.getElementsByTagName()` and `document.getElementsByClassName()` apis.
+
+On our last JavaScript heavy project, performance was improved by **7-8x** in older browsers. If you're having performance issues with older browsers it's worth evaluating.
+
+All selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each child selector.
  
  Valid Examples:
 
@@ -282,7 +299,7 @@ If you don't bundle either **events** or **docready** plugins you should include
    - .a.b.c
    - .a 
 
-For optimal performance in <= IE7 have the first child selector should be a tag or an #id as it cuts down the amount of DOM traversing needed to be done in JavaScript.
+For optimal performance in <= IE7, the first child selector should be a tag or an #id as it cuts down the amount of DOM traversing needed to be done in JavaScript since there is no `document.getElementsByClassName()` available.
 
 ### jquip Library Builder Service
 
