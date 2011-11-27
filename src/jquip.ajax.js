@@ -6,7 +6,7 @@ $['plug']("ajax", function ($) {
            function () { return new ActiveXObject("MSXML2.XMLHTTP"); }
         ],
         _xhrf = null;
-	$['xhr'] = function xhr() {
+	function xhr() {
 		if (_xhrf != null) return _xhrf();
 		for (var i = 0, l = xhrs.length; i < l; i++) {
 			try {
@@ -18,8 +18,8 @@ $['plug']("ajax", function ($) {
 			} catch (e){}
 		}
 		return function () { };
-	};
-	$['_xhrResp'] = function _xhrResp(xhr, dataType) {
+	} $['xhr'] = xhr;
+	function _xhrResp(xhr, dataType) {
 		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
 		switch (dataType) {
 			case "text/xml":
@@ -34,7 +34,7 @@ $['plug']("ajax", function ($) {
 			default:
 				return xhr.responseText;
 		}
-	};
+	} $['_xhrResp'] = _xhrResp;
 	$['formData'] = function formData(o) {
 		var kvps = [], regEx = /%20/g;
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
