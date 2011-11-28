@@ -130,7 +130,9 @@ $['plug']("events", function($){
 				var e = doc.createEvent('Events');
 				this.dispatchEvent(e, e.initEvent(evt, true, true));
 			} else if (this.fireEvent)
-				this.fireEvent("on" + evt);
+				try {
+					this.fireEvent("on" + evt);
+				} catch(e){}
 		});
 	};
 	if (!$['init']) $(window)['bind']("load",$['onload']);
