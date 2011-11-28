@@ -486,7 +486,7 @@ window['$'] = window['jquip'] = (function(){
 	} $['loadScript'] = loadScript;
 
 	/** @param {...string} var_args */
-	function warn(var_args){ typeof console != null && console.warn(arguments) }
+	function warn(var_args){ typeof win.console != "undefined" && win.console.warn(arguments) }
 
 	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
