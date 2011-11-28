@@ -126,8 +126,11 @@ $['plug']("events", function($){
 	};
 	p['trigger'] = function(evt){
 		return this['each'](function(){
-			var e = doc.createEvent('Events');
-			this['dispatchEvent'](e, e.initEvent(evt, true, true));
+			if (doc.createEvent) {
+				var e = doc.createEvent('Events');
+				this.dispatchEvent(e, e.initEvent(evt, true, true));
+			} else if (this.fireEvent)
+				this.fireEvent("on" + evt);
 		});
 	};
 	if (!$['init']) $(window)['bind']("load",$['onload']);

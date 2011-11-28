@@ -486,7 +486,7 @@ window['$'] = window['jquip'] = (function(){
 	} $['loadScript'] = loadScript;
 
 	/** @param {...string} var_args */
-	function warn(var_args){ typeof console != null && console.warn(arguments) }
+	function warn(var_args){ typeof win.console != "undefined" && win.console.warn(arguments) }
 
 	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
@@ -1444,8 +1444,11 @@ $['plug']("events", function($){
 	};
 	p['trigger'] = function(evt){
 		return this['each'](function(){
-			var e = doc.createEvent('Events');
-			this['dispatchEvent'](e, e.initEvent(evt, true, true));
+			if (doc.createEvent) {
+				var e = doc.createEvent('Events');
+				this.dispatchEvent(e, e.initEvent(evt, true, true));
+			} else if (this.fireEvent)
+				this.fireEvent("on" + evt);
 		});
 	};
 	if (!$['init']) $(window)['bind']("load",$['onload']);
