@@ -31,7 +31,7 @@ window['$'] = window['jquip'] = (function(){
 			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
 			area: [1, "<map>", "</map>"],
 			_default: [0, "", ""] },
-		rComplexQuery = /[,\s.\[]/, emptyArr = [],
+		rComplexQuery = /[,\s.\[>+]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
 		hasOwn = ObjProto.hasOwnProperty,
@@ -439,7 +439,8 @@ window['$'] = window['jquip'] = (function(){
 			qry = qry || $['query'];
 			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
 			try{
-				if (complex) return slice.call(qry(sel, ctx));
+				if (complex)
+					return slice.call(qry(sel, ctx));
 				return complex
 					? slice.call(qry(sel, ctx))
 					: (firstChar == "#"
@@ -1067,7 +1068,7 @@ $['plug']("css", function ($) {
     }
     curCSS = getComputedStyle || currentStyle;
 
-    $['fn']['css '] = function (name, value) {
+    $['fn']['css'] = function (name, value) {
         if (arguments.length === 2 && value === undefined) return this;
 
         return access(this, name, value, true, function (el, name, value) {
@@ -1076,7 +1077,7 @@ $['plug']("css", function ($) {
     };
     $['cssNumber'] = { "zIndex": true, "fontWeight": true, "opacity": true, "zoom": true, "lineHeight": true };
     $['cssProps'] = { "float": $['support']['cssFloat'] ? "cssFloat" : "styleFloat" };
-    $['style'] = function style(el, name, value, extra) {
+    function style(el, name, value, extra) {
         if (!el || el.nodeType === 3 || el.nodeType === 8 || !el.style) return;
         var ret, origName = camelCase(name), style = el.style, hooks = $['cssHooks'][origName];
         name = $['cssProps'][origName] || origName;
@@ -1093,7 +1094,7 @@ $['plug']("css", function ($) {
                 return ret;
             return style[name];
         }
-    };
+    } $['style'] = style;
     function css(el, name, extra) {
         var ret, origName = camelCase(name), hooks = $['cssHooks'][origName];
         name = $['cssProps'][origName] || origName;
@@ -1139,13 +1140,11 @@ $['plug']("css", function ($) {
         $['fn'][type] = function (size) {
             var el = this[0];
             if (!el) return size == null ? null : this;
-
             if ($['isFunction'](size))
                 return this.each(function (i) {
                     var self = $(this);
                     self[type](size.call(this, i, self[type]()));
                 });
-
             if ($['isWindow'](el)) {
                 var docElemProp = el.document.documentElement["client" + name], body = el.document.body;
                 return el.document.compatMode === "CSS1Compat" && docElemProp || body && body["client" + name] || docElemProp;
@@ -1159,7 +1158,7 @@ $['plug']("css", function ($) {
                     ret = parseFloat(orig);
                 return $['isNaN'](ret) ? orig : ret;
             }
-            else return this.css(type, typeof size === "string" ? size : size + "px");
+            else return this['css'](type, typeof size === "string" ? size : size + "px");
         };
     });
 
@@ -1225,7 +1224,7 @@ $['plug']("custom", function($){
       interpolate : /<%=([\s\S]+?)%>/g,
       escape      : /<%-([\s\S]+?)%>/g
     };
-    $['template'] = function(str, data) {
+    $['_template'] = function(str, data) {
         var c  = $['templateSettings'];
         var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
           'with(obj||{}){__p.push(\'' +
@@ -1246,7 +1245,7 @@ $['plug']("custom", function($){
              .replace(/\t/g, '\\t')
              + "');}return __p.join('');";
         var func = new Function('obj', '_', tmpl);
-        return data ? func(data, _) : function(data) { return func(data, _) };
+        return data ? func(data, $) : function(data) { return func(data, $) };
     };
 });
 $['plug']("docready", function ($) {

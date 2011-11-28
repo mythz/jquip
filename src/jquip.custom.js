@@ -35,7 +35,7 @@ $['plug']("custom", function($){
       interpolate : /<%=([\s\S]+?)%>/g,
       escape      : /<%-([\s\S]+?)%>/g
     };
-    $['template'] = function(str, data) {
+    $['_template'] = function(str, data) {
         var c  = $['templateSettings'];
         var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
           'with(obj||{}){__p.push(\'' +
@@ -56,6 +56,6 @@ $['plug']("custom", function($){
              .replace(/\t/g, '\\t')
              + "');}return __p.join('');";
         var func = new Function('obj', '_', tmpl);
-        return data ? func(data, _) : function(data) { return func(data, _) };
+        return data ? func(data, $) : function(data) { return func(data, $) };
     };
 });

@@ -69,7 +69,7 @@ $['plug']("css", function ($) {
     }
     curCSS = getComputedStyle || currentStyle;
 
-    $['fn']['css '] = function (name, value) {
+    $['fn']['css'] = function (name, value) {
         if (arguments.length === 2 && value === undefined) return this;
 
         return access(this, name, value, true, function (el, name, value) {
@@ -78,7 +78,7 @@ $['plug']("css", function ($) {
     };
     $['cssNumber'] = { "zIndex": true, "fontWeight": true, "opacity": true, "zoom": true, "lineHeight": true };
     $['cssProps'] = { "float": $['support']['cssFloat'] ? "cssFloat" : "styleFloat" };
-    $['style'] = function style(el, name, value, extra) {
+    function style(el, name, value, extra) {
         if (!el || el.nodeType === 3 || el.nodeType === 8 || !el.style) return;
         var ret, origName = camelCase(name), style = el.style, hooks = $['cssHooks'][origName];
         name = $['cssProps'][origName] || origName;
@@ -95,7 +95,7 @@ $['plug']("css", function ($) {
                 return ret;
             return style[name];
         }
-    };
+    } $['style'] = style;
     function css(el, name, extra) {
         var ret, origName = camelCase(name), hooks = $['cssHooks'][origName];
         name = $['cssProps'][origName] || origName;

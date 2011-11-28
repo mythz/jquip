@@ -31,7 +31,7 @@ window['$'] = window['jquip'] = (function(){
 			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
 			area: [1, "<map>", "</map>"],
 			_default: [0, "", ""] },
-		rComplexQuery = /[,\s.\[]/, emptyArr = [],
+		rComplexQuery = /[,\s.\[>+]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
 		hasOwn = ObjProto.hasOwnProperty,
@@ -439,7 +439,8 @@ window['$'] = window['jquip'] = (function(){
 			qry = qry || $['query'];
 			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
 			try{
-				if (complex) return slice.call(qry(sel, ctx));
+				if (complex)
+					return slice.call(qry(sel, ctx));
 				return complex
 					? slice.call(qry(sel, ctx))
 					: (firstChar == "#"
