@@ -113,9 +113,13 @@ Methods marked with * are only partially implemented.
   - toArray
   - data
   - append
+  - appendTo
   - prepend
+  - prependTo
   - before
+  - insertBefore
   - after
+  - insertAfter
   - toggle*
   - hide, show, fadeIn and fadeOut - does so without animation, consider using [jquery.animate-enhanced plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
   - eq
@@ -177,11 +181,10 @@ Methods marked with * are only partially implemented.
   - $.loadScript - (url, callback [, async]) load an external script dynamically
   - $.htmlFrag - creates a document fragment from a html string **(name changed)**
   - $.walk - traveres all childElems including self `(predicateFn, [[, context], results])`
-  - $.query - Sizzle(or mock) || doc.querySelector || limitedQueryAll*
+  - $.query - query Engine i.r. doc.querySelector || queryEngine Shim
   - $.attrs - an elements attributes
   - $.unique - return a unique list of elements in document order
   - $.contains - parent element contains sibling
-  - $.setQuery - plugin your own query engine
 
 ## Plugins
 
@@ -202,17 +205,14 @@ script after the core `jquip.js`.
   - live
   - die
   - trigger
+  - $.bind
+  - $.unbind
 
 ### Helpers on `$(selector)`
 
 blur focus focusin focusout load resize scroll unload click dblclick 
 mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
 change select submit keydown keypress keyup error
-
-### Static Methods 
-
-  - $.bind
-  - $.unbind
 
 ### [documentReady](https://github.com/mythz/jquip/blob/master/src/jquip.docready.js)
 yep, it's a plugin!
@@ -254,9 +254,11 @@ modfied to work like jQuery's ajax.
 
 Extending jquip:
 
-  * `[elements] window.Sizzle (selector, context)` - Provide an alternate query engine.
-  * `bool $.hook (function(selector, contxt))` - Intercept the constructor request.
   * `plug(name, fn($))` - Register your own plugin, mutate `$` to extend jquip.
+  * `bool $.hook (function(selector, contxt))` - Intercept the constructor request.
+  * `$.setQuery (function(selector, context))` - plugin your own query engine
+
+You can also include Sizzle.js or qwery.js above jquip.js (using IE's conditional comments is a good approach), it will automatically be registered. The q-{queryEngine}.js plugins are also self-registering.
 
 Intercept the `$(){ .. }` constructor and inject your own implementation. Return true to short-circuit. e.g: from the **docready** plugin:
 

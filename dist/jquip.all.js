@@ -85,12 +85,12 @@ window['$'] = window['jquip'] = (function(){
 		return this['make'](sel);
 	}
 
-	var ctors = [], plugins = {}, jquid = 0;
+	var ctors=[], plugins={}, jquid=0, p;
 	function $(sel, ctx){
 		return new Ctor(sel, ctx);
 	}
 
-	var p = $['fn'] = $.prototype = {
+	p = $['fn'] = $.prototype = {
 		constructor: $,
 		'selector': "",
 		dm: function(args, tbl, cb){
@@ -778,7 +778,7 @@ window['$'] = window['jquip'] = (function(){
 		? function(a, b){ return a !== b && (a.contains ? a.contains(b) : true) }
 		: function(){ return false };
 	sortOrder = docEl.compareDocumentPosition
-		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning contains
+		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //assigning contains
 		  && function(a, b){
 			if (a === b){ hasDup = true; return 0; }
 			if (!a.compareDocumentPosition || !b.compareDocumentPosition)
@@ -834,6 +834,28 @@ window['$'] = window['jquip'] = (function(){
 			ret = this.length > 1 && !guaranteedUnique[name] ? unique(ret) : ret;
 			if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
 			return this.ps(ret, name, args.join(","));
+		};
+	});
+	_each({
+		'appendTo': "append",
+		'prependTo': "prepend",
+		'insertBefore': "before",
+		'insertAfter': "after"
+	}, function(orig, name) {
+		$['fn'][name] = function(sel){
+			var ret = [], to = $(sel), i, els,
+				p = this.length === 1 && this[0].parentNode;
+			if (p && p.nodeType === 11 && p.childNodes.length === 1 && to.length === 1) {
+				to[orig](this[0]);
+				return this;
+			}else{
+				for(i=0, l=to.length; i<l; i++){
+					els = (i > 0 ? this.clone(true) : this).get();
+					$(to[i])[orig](els);
+					ret = ret.concat(els);
+				}
+				return this.ps(ret, name, to['selector']);
+			}
 		};
 	});
 

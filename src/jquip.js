@@ -836,6 +836,28 @@ window['$'] = window['jquip'] = (function(){
 			return this.ps(ret, name, args.join(","));
 		};
 	});
+	_each({
+		'appendTo': "append",
+		'prependTo': "prepend",
+		'insertBefore': "before",
+		'insertAfter': "after"
+	}, function(orig, name) {
+		$['fn'][name] = function(sel){
+			var ret = [], to = $(sel), i, els,
+				p = this.length === 1 && this[0].parentNode;
+			if (p && p.nodeType === 11 && p.childNodes.length === 1 && to.length === 1) {
+				to[orig](this[0]);
+				return this;
+			}else{
+				for(i=0, l=to.length; i<l; i++){
+					els = (i > 0 ? this.clone(true) : this).get();
+					$(to[i])[orig](els);
+					ret = ret.concat(els);
+				}
+				return this.ps(ret, name, to['selector']);
+			}
+		};
+	});
 
 	function boxmodel(){
 		if (!doc.body) return null; //in HEAD

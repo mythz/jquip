@@ -28,6 +28,7 @@
   <i id="i10" class="b c d e f g">i10</i>
   <textarea id="t1"></textarea>
 
+  <div id="append"></div>
 
 <script type="text/javascript" src="../src/jquip.js"></script>
 <script>
@@ -40,9 +41,11 @@
     return sb;
   }
   function test(rule, expected) {
-    var actual = $.query(rule,document);
-    //console.log(actual);
-    console.log((ids(actual) == expected ? "OK " : "FAIL was " + ids(actual) + " > ") + rule);
+    var actual = ids($.query(rule,document));
+    eq(actual, expected, rule);
+  }
+  function eq(actual, expected, rule){
+    console.log((actual == expected ? "OK " : "FAIL was " + actual + " > ") + rule);
   }
 
   test(".a", "i1,i3,i5,f1,i6");
@@ -60,6 +63,12 @@
   test("form#f1.a .n .d", "i8,i9");
   test("#f1.a .n .d", "i8,i9");
   test("textarea", "t1");
+
+  var input = $("<p>text</p>").appendTo("#append").html();
+  eq(input, "text", '.appendTo("#append")');
+  var $append = $("#append");
+  input = $("<p>text</p>").appendTo($append).html();
+  eq(input, "text", '.appendTo($append)');
 
 </script>
 </body>
