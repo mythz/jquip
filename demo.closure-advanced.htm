@@ -2,39 +2,37 @@
 <html lang="en-us">
 <head>
     <title>jQuip - jQuery in parts</title>
-    <script type="text/javascript" src="dist/jquip.min.js"></script>
-    <script type="text/javascript" src="dist/jquip.events.min.js"></script>
-    <script type="text/javascript" src="dist/jquip.docready.min.js"></script>
-    <script type="text/javascript" src="dist/jquip.css.min.js"></script>
-    <script type="text/javascript" src="dist/jquip.ajax.min.js"></script>
-    <script type="text/javascript" src="dist/jquip.custom.min.js"></script>
+    <script type="text/javascript" src="dist/jquip.all.closure-advanced.js"></script>
     <script type="text/javascript">
         $(function() {
             $(document.body)
                 .css({'font-family':'Arial'})
                 .append("<p>This message added on document ready</p>");
-            $(".attrs button").click(function ()
-            {
+
+            $(".attrs button").click(function () {
                 var $dl = $(this).next();
-                $.each($(this).parent().data(), function (name, val)
-                {
+                $.each($(this).parent().data(), function (name, val) {
                     $dl.append("<dt>" + name + "</dt>").append("<dd>" + val + "</dd>");
                 });
             });
+
             var compiledTpl = $._template($("#tpl").html()), $win = $(window);
-            $win.resize(function(){
+            var updateTpl = function(){
                 var html = compiledTpl({width: $win.width(), height: $win.height()});
                 $("#winsize").html(html);
-            });
-            $win.resize();
+            };
+
+            $win.resize(updateTpl);
             
-            function rgb()
-            {
+            function rgb() {
                 return Math.floor(Math.random() * 255);
             }
+            
             $("body > button").click(function(){
                 $(document.body).css({background:"rgb(" + rgb() + "," + rgb() + "," + rgb() + ")"});
             });
+
+            updateTpl();
         });
     </script>
 </head>

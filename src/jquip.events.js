@@ -131,7 +131,8 @@ $['plug']("events", function($){
 				this.dispatchEvent(e, e.initEvent(evt, true, true));
 			} else if (this.fireEvent)
 				try {
-					this.fireEvent("on" + evt);
+					if (evt !== "ready")
+						this.fireEvent("on" + evt);
 				} catch(e){}
 		});
 	};

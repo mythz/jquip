@@ -464,7 +464,7 @@ window['$'] = window['jquip'] = (function(){
 
 	var useQuery = queryEngines();
 	$['setQuery'](useQuery || function(sel, ctx){
-		return doc.querySelectorAll ? (ctx || doc).querySelectorAll(sel) : [];
+		return doc.querySelectorAll ? makeArray((ctx || doc).querySelectorAll(sel)) : [];
 	});
 
 	function loadScript(url, cb, async){
@@ -1449,7 +1449,8 @@ $['plug']("events", function($){
 				this.dispatchEvent(e, e.initEvent(evt, true, true));
 			} else if (this.fireEvent)
 				try {
-					this.fireEvent("on" + evt);
+					if (evt !== "ready")
+						this.fireEvent("on" + evt);
 				} catch(e){}
 		});
 	};
