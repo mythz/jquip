@@ -1327,7 +1327,7 @@ $['plug']("events", function($){
 		else {
 			o['e' + type + fn] = fn;
 			o[type + fn] = function(){
-				o['e' + type + fn](win.event);
+				o['e' + type + fn](window.event);
 			};
 			o.attachEvent('on' + type, o[type + fn]);
 		}
