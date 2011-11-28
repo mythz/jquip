@@ -40,6 +40,8 @@ Licence: http://www.opensource.org/licenses/mit-license.php (Same as jQuery and 
 
 ### Build customizable jquip packages with the [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/)
 
+The [jquip Simple Demo](http://servicestack.net/jqbuilder/demo.htm) is also available to try online, whilst a version [compiled with Google's Closure Library (Advanced mode) is in the repo](https://github.com/mythz/jquip/blob/master/demo.closure-advanced.htm).
+
 #### Disclaimer
 
 This is **NOT** an official [jQuery.com](http://jquery.com/) project.

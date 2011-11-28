@@ -85,12 +85,12 @@ window['$'] = window['jquip'] = (function(){
 		return this['make'](sel);
 	}
 
-	var ctors = [], plugins = {}, jquid = 0;
+	var ctors=[], plugins={}, jquid=0, p;
 	function $(sel, ctx){
 		return new Ctor(sel, ctx);
 	}
 
-	var p = $['fn'] = $.prototype = {
+	p = $['fn'] = $.prototype = {
 		constructor: $,
 		'selector': "",
 		dm: function(args, tbl, cb){
@@ -778,7 +778,7 @@ window['$'] = window['jquip'] = (function(){
 		? function(a, b){ return a !== b && (a.contains ? a.contains(b) : true) }
 		: function(){ return false };
 	sortOrder = docEl.compareDocumentPosition
-		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //just assigning contains
+		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //assigning contains
 		  && function(a, b){
 			if (a === b){ hasDup = true; return 0; }
 			if (!a.compareDocumentPosition || !b.compareDocumentPosition)
