@@ -246,6 +246,7 @@ modfied to work like jQuery's ajax.
 
 ### [custom](https://github.com/mythz/jquip/blob/master/src/jquip.custom.js)
 
+  - [$._template](http://documentcloud.github.com/underscore/#template) - Underscore's template
   - $.queryString - cached map of queryString variables 
   - $.is[Tab|Enter|Shift|...] - static functions to detect named keys pressed, e.g. `if ($.isEnter(e)) console.log("pressed enter")`
   - $.cancelEvent - cross-browser fn to `preventDefault()` and `stopPropogation()`, returns false.

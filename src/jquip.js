@@ -93,6 +93,7 @@ window['$'] = window['jquip'] = (function(){
 	p = $['fn'] = $.prototype = {
 		constructor: $,
 		'selector': "",
+		'length': 0,
 		dm: function(args, tbl, cb){
 			var value = args[0], parent, frag, first, i;
 			if (value){
@@ -244,7 +245,7 @@ window['$'] = window['jquip'] = (function(){
 		}
 		var ret = this.ps("", "find", sel), len, n, r;
 		for(i=0, l=this.length; i<l; i++){
-			len = ret.len;
+			len = ret.length;
 			merge(ret, $(sel, this[i]));
 			if (i == 0){
 				for(n = len; n < ret.length; n++)
@@ -486,24 +487,25 @@ window['$'] = window['jquip'] = (function(){
 	} $['loadScript'] = loadScript;
 
 	/** @param {...string} var_args */
-	function warn(var_args){ typeof win.console != "undefined" && win.console.warn(arguments) }
+	function warn(var_args){ 'console' in win && win.console.warn(arguments) }
 
 	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
 		if (args){
-			if (isObj)
+			if (isObj) {
 				for(k in o)
 					if (cb.apply(o[k], args) === false) break;
-					else
-						for(; i < l;)
-							if (cb.apply(o[i++], args) === false) break;
+			} else
+				for(; i < l;)
+					if (cb.apply(o[i++], args) === false) break;
 		} else {
-			if (isObj)
+			if (isObj) {
 				for(k in o)
 					if (cb.call(o[k], k, o[k]) === false) break;
-					else
-						for(; i < l;)
-							if (cb.call(o[i], i, o[i++]) === false) break;
+			}
+			else
+				for(; i < l;)
+					if (cb.call(o[i], i, o[i++]) === false) break;
 		}
 		return o;
 	};

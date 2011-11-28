@@ -93,6 +93,7 @@ window['$'] = window['jquip'] = (function(){
 	p = $['fn'] = $.prototype = {
 		constructor: $,
 		'selector': "",
+		'length': 0,
 		dm: function(args, tbl, cb){
 			var value = args[0], parent, frag, first, i;
 			if (value){
@@ -244,7 +245,7 @@ window['$'] = window['jquip'] = (function(){
 		}
 		var ret = this.ps("", "find", sel), len, n, r;
 		for(i=0, l=this.length; i<l; i++){
-			len = ret.len;
+			len = ret.length;
 			merge(ret, $(sel, this[i]));
 			if (i == 0){
 				for(n = len; n < ret.length; n++)
@@ -486,24 +487,25 @@ window['$'] = window['jquip'] = (function(){
 	} $['loadScript'] = loadScript;
 
 	/** @param {...string} var_args */
-	function warn(var_args){ typeof win.console != "undefined" && win.console.warn(arguments) }
+	function warn(var_args){ 'console' in win && win.console.warn(arguments) }
 
 	$['each'] = function(o, cb, args){
 		var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
 		if (args){
-			if (isObj)
+			if (isObj) {
 				for(k in o)
 					if (cb.apply(o[k], args) === false) break;
-					else
-						for(; i < l;)
-							if (cb.apply(o[i++], args) === false) break;
+			} else
+				for(; i < l;)
+					if (cb.apply(o[i++], args) === false) break;
 		} else {
-			if (isObj)
+			if (isObj) {
 				for(k in o)
 					if (cb.call(o[k], k, o[k]) === false) break;
-					else
-						for(; i < l;)
-							if (cb.call(o[i], i, o[i++]) === false) break;
+			}
+			else
+				for(; i < l;)
+					if (cb.call(o[i], i, o[i++]) === false) break;
 		}
 		return o;
 	};
@@ -954,7 +956,7 @@ $['plug']("ajax", function ($) {
 			case "text/javascript":
 			case "application/javascript":
 			case "application/x-javascript":
-				return window.JSON ? JSON.parse(xhr.responseText) : eval(xhr.responseText);
+				return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
 			default:
 				return xhr.responseText;
 		}
@@ -964,31 +966,45 @@ $['plug']("ajax", function ($) {
 		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
 		return kvps.join('&');
 	};
+	$['each']("ajaxStart ajaxStop ajaxComplete ajaxError ajaxSuccess ajaxSend".split(" "), function(i,o){
+		$['fn'][o] = function(f){
+			return this['bind'](o, f);
+		};
+	});
+
 	function ajax(o) {
 		var xhr = _xhr(), timer, n = 0;
-		o = $['_defaults'](o, { userAgent: "XMLHttpRequest", lang: "en", type: "GET", data: null, contentType: "application/x-www-form-urlencoded", dataType: "application/json" });
+		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
+		var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4)
-			{
+			if (xhr.readyState == 4){
 				if (timer) clearTimeout(timer);
-				if (xhr.status < 300)
-				{
-					if (o.success) o.success(_xhrResp(xhr, o.dataType));
+				if (xhr.status < 300){
+					var res = _xhrResp(xhr, o.dataType);
+					if (o['success'])
+						o['success'](res);
+					evtCtx['trigger']("ajaxSuccess", [xhr, res, o]);
 				}
-				else if (o.error) o.error(xhr, xhr.status, xhr.statusText);
-				if (o.complete) o.complete(xhr, xhr.statusText);
+				else {
+					if (o.error)
+						o.error(xhr, xhr.status, xhr.statusText);
+					evtCtx['trigger'](cbCtx, "ajaxError", [xhr, xhr.statusText, o]);
+				}
+				if (o['complete'])
+					o['complete'](xhr, xhr.statusText);
+				evtCtx['trigger'](cbCtx, "ajaxComplete", [xhr, o]);
 			}
-			else if (o.progress) o.progress(++n);
+			else if (o['progress']) o['progress'](++n);
 		};
-		var url = o.url, data = null;
-		var isPost = o.type == "POST" || o.type == "PUT";
-		if (!isPost && o.data) url += "?" + formData(o.data);
-		xhr.open(o.type, url);
+		var url = o['url'], data = null;
+		var isPost = o['type'] == "POST" || o['type'] == "PUT";
+		if (!isPost && o['data']) url += "?" + formData(o['data']);
+		xhr.open(o['type'], url);
 
 		if (isPost) {
-			var isJson = o.dataType.indexOf("json") >= 0;
-			data = isJson ? JSON.stringify(o.data) : formData(o.data);
+			var isJson = o['dataType'].indexOf("json") >= 0;
+			data = isJson ? JSON.stringify(o['data']) : formData(o['data']);
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
@@ -999,7 +1015,7 @@ $['plug']("ajax", function ($) {
 			success = data;
 			data = null;
 		}
-		ajax({ url: url, dataType: "json", data: data, success: success, error: error });
+		ajax({'url': url, 'data': data, 'success': success, 'dataType': 'json'});
 	};
 	$['get'] = function (url, data, success, dataType) {
 		if ($['isFunction'](data)) {
@@ -1007,7 +1023,7 @@ $['plug']("ajax", function ($) {
 			success = data;
 			data = null;
 		}
-		ajax({url: url, type: "GET", data: data, success: success, dataType: dataType || "text/plain"});
+		ajax({'url': url, 'type': "GET", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
 	$['post'] = function (url, data, success, dataType) {
 		if ($['isFunction'](data)) {
@@ -1015,7 +1031,7 @@ $['plug']("ajax", function ($) {
 			success = data;
 			data = null;
 		}
-		ajax({url: url, type: "POST", data: data, success: success, dataType: dataType || "text/plain"});
+		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
     //TODO $.getScript
 });
@@ -1266,7 +1282,7 @@ $['plug']("custom", function($){
              .replace(/\n/g, '\\n')
              .replace(/\t/g, '\\t')
              + "');}return __p.join('');";
-        var func = new Function('obj', '_', tmpl);
+        var func = new Function('obj', '$', tmpl);
         return data ? func(data, $) : function(data) { return func(data, $) };
     };
 });

@@ -55,7 +55,7 @@ $['plug']("custom", function($){
              .replace(/\n/g, '\\n')
              .replace(/\t/g, '\\t')
              + "');}return __p.join('');";
-        var func = new Function('obj', '_', tmpl);
+        var func = new Function('obj', '$', tmpl);
         return data ? func(data, $) : function(data) { return func(data, $) };
     };
 });
