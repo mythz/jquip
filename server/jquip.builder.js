@@ -65,7 +65,7 @@ http.createServer(function (req, res) {
 		res.end(fileContents);
 	}
 	else if (binaryFiles[path]) { //incase the website needs to
-		var filePath = binaryFiles[path];
+		var filePath = binaryFiles[path]; 
 		fs.createReadStream(filePath, {
 		  'bufferSize': 4 * 1024
 		}).pipe(res);
