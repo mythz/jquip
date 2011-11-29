@@ -27,7 +27,7 @@ fs.readdirSync(targetDir).forEach(function(file) {
 	staticFiles["/" + file] = fs.readFileSync(filePath).toString('utf-8');
 });
 fs.readdirSync("./").forEach(function(file) {
-	var isText = contentTypes[getExt(file)].indexOf("text") === 0;
+	var isText = (contentTypes[getExt(file)]||"").startsWith("text");
 	if (isText)
 		staticFiles["/" + file] = fs.readFileSync(file).toString('utf-8');
 	else 
