@@ -124,17 +124,20 @@ $['plug']("events", function($){
 		$(doc.body)['undelegate'](this['selector'], evt, cb);
 		return this;
 	};
-	p['trigger'] = function(evt){
-		return this['each'](function(){
-			if (doc.createEvent) {
-				var e = doc.createEvent('Events');
-				this.dispatchEvent(e, e.initEvent(evt, true, true));
-			} else if (this.fireEvent)
-				try {
-					if (evt !== "ready")
-						this.fireEvent("on" + evt);
-				} catch(e){}
-		});
-	};
+    p['trigger'] = function (evt) {
+        return this['each'](function () {
+            if (evt == "click" || evt == "blur" || evt == "focus")
+                return this[evt]();
+            if (doc.createEvent) {
+                var e = doc.createEvent('Events');
+                this.dispatchEvent(e, e.initEvent(evt, true, true));
+            } else if (this.fireEvent)
+                try {
+                    if (evt !== "ready") {
+                        this.fireEvent("on" + evt);
+                    }
+                } catch (e) { }
+        });
+    };
 	if (!$['init']) $(window)['bind']("load",$['onload']);
 });

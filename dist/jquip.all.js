@@ -154,9 +154,7 @@ window['$'] = window['jquip'] = (function(){
 	p['attr'] = function(name, val){
 		var el = this[0];
 		return (isS(name) && val === undefined)
-			? (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
-				? this['val']()
-				: (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null)
+	        ? attr(el, name)
 			: this['each'](function(idx){
 				var nt = this.nodeType;
 				if (nt !== 3 && nt !== 8 && nt !== 2){
@@ -196,24 +194,24 @@ window['$'] = window['jquip'] = (function(){
 	};
 	p['after'] = function(){
 		if (this[0] && this[0].parentNode){
-			this.dm(arguments, false, function(el){
+			return this.dm(arguments, false, function(el){
 				this.parentNode.insertBefore(el, this.nextSibling);
 			});
 		}
 		return this;
 	};
 	p['hide'] = function(){
-		this['each'](function(){
+		return this['each'](function(){
 			this.style.display = "none";
 		});
 	};
 	p['show'] = function(){
-		this['each'](function(){
+		return this['each'](function(){
 			this.style.display = "block";
 		});
 	};
 	p['toggle'] = function(){
-		this['each'](function(){
+		return this['each'](function(){
 			this.style.display = this.style.display === "none" ? "block" : "none";
 		});
 	};
@@ -446,9 +444,9 @@ window['$'] = window['jquip'] = (function(){
 					? slice.call(qry(sel, ctx))
 					: (firstChar == "#"
 						? ((el = doc.getElementById(arg)) ? [el] : emptyArr)
-							: slice.call(firstChar == "."
-							? ctx.getElementsByClassName(arg)
-						: ctx.getElementsByTagName(sel))
+						: makeArray(firstChar == "."
+							? (ctx.getElementsByClassName ? ctx.getElementsByClassName(arg) : qry(sel, ctx))
+							: ctx.getElementsByTagName(sel))
 					);
 			}catch(e){
 				warn(e);
@@ -522,6 +520,33 @@ window['$'] = window['jquip'] = (function(){
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	} $['_each'] = _each;
+    function attr(el, name) {
+        return (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
+            ? el.value
+            : (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
+    };
+    var rmatchf = [ //[ "ID", "TAG", "CLASS", "ATTR" ], 
+        /#((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
+        /^((?:[\w\u00c0-\uFFFF\*\-]|\\.)+)/,
+        /\.((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
+        /\[\s*((?:[\w\u00c0-\uFFFF\-]|\\.)+)\s*(?:(\S?=)\s*(?:(['"])(.*?)\3|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
+    ];
+    function filter(sel, els) {
+        var ret = [], i, j, l, el, m;
+        for (i = 0, l = rmatchf.length; i < l; i++)
+            if (m = rmatchf[i].exec(sel)) break;
+        if (i < rmatchf.length) {
+            for (j = 0; (el = els[j]); j++)
+                if ((i == 0 && m[1] == el.id)
+                   || (i == 1 && m[1] == el.tagName)
+                   || (i == 2 && m[1] == el.className)
+                   || (i == 3 && m[2] == attr(el, m[1])))
+                    ret.push(el);
+        }
+        else
+            warn(sel + " not supported");
+        return ret;
+    } $['filter'] = filter;
 	function _indexOf(arr, val){
 		if (arr == null) return -1;
 		var i, l;
@@ -832,7 +857,8 @@ window['$'] = window['jquip'] = (function(){
 		$['fn'][name] = function(until, sel){
 			var ret = map(this, fn, until), args = slice.call(arguments);
 			if (!runtil.test(name)) sel = until;
-			if (sel && isS(sel)) ret = $$(sel, ret); //TODO
+			if (typeof sel == "string") 
+                ret = filter(sel, ret);
 			ret = this.length > 1 && !guaranteedUnique[name] ? unique(ret) : ret;
 			if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
 			return this.ps(ret, name, args.join(","));
@@ -1480,17 +1506,20 @@ $['plug']("events", function($){
 		$(doc.body)['undelegate'](this['selector'], evt, cb);
 		return this;
 	};
-	p['trigger'] = function(evt){
-		return this['each'](function(){
-			if (doc.createEvent) {
-				var e = doc.createEvent('Events');
-				this.dispatchEvent(e, e.initEvent(evt, true, true));
-			} else if (this.fireEvent)
-				try {
-					if (evt !== "ready")
-						this.fireEvent("on" + evt);
-				} catch(e){}
-		});
-	};
+    p['trigger'] = function (evt) {
+        return this['each'](function () {
+            if (evt == "click" || evt == "blur" || evt == "focus")
+                return this[evt]();
+            if (doc.createEvent) {
+                var e = doc.createEvent('Events');
+                this.dispatchEvent(e, e.initEvent(evt, true, true));
+            } else if (this.fireEvent)
+                try {
+                    if (evt !== "ready") {
+                        this.fireEvent("on" + evt);
+                    }
+                } catch (e) { }
+        });
+    };
 	if (!$['init']) $(window)['bind']("load",$['onload']);
 });
