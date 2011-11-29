@@ -3,6 +3,9 @@ var http = require('http');
 var fs = require("fs");
 var url = require("url");
 
+var BASE_URL="http://www.servicestack.net", 
+	VIRTUAL_PATH="/jqbuilder"; 
+
 var getExt = function(path) {
 	return path.substring(path.lastIndexOf('.')+1);
 };
@@ -38,7 +41,13 @@ console.log("loaded: ", Object.keys(staticFiles));
 var isCore = { "/jquip.js": true, "/jquip.min.js": true };
 
 http.createServer(function (req, res) {
-	var reqUrl = url.parse(req.url), path = reqUrl.pathname;
+	var reqUrl = url.parse(req.url), path = reqUrl.pathname.replace(VIRTUAL_PATH,'');
+	if (reqUrl.pathname == VIRTUAL_PATH){
+		res.writeHead(302,BASE_URL+VIRTUAL_PATH+"/");
+		res.end();
+		return;
+	}
+
 	var fileContents = staticFiles[path];
 
 	if (fileContents) {
@@ -80,13 +89,13 @@ http.createServer(function (req, res) {
 			return;
 		}
 
-		res.writeHead(404, {'Content-Type': 'text/plain'});
+		res.writeHead(200, {'Content-Type': 'text/plain'});
 		var sb = "";
 		for (var i in reqUrl) {
 			if (sb) sb += "\n";
 			sb += i + ": " + reqUrl[i];
 		}
-		res.end(sb);
+		res.end("Path not found:\n" + sb);
 	}
 })
 .listen(90, "127.0.0.1");

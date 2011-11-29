@@ -75,6 +75,7 @@
   eq(ids($form.find(".d")), "i6,i8,i9",'$form.find(".d")');
   eq(ids($form.find("input")), "in1,in2",'$form.find("input")');
   eq(ids($form.find("input[value=b]")), "in2",'$form.find("input[value=b]")');
+  eq(ids($form.find("input[value=none]")), "",'$form.find("input[value=none]")');
   eq(ids($form.find("div[data-attr=meta]")), "d1",'$form.find("div[data-attr=meta]")');
   eq(ids($form.find("*[data-attr=meta]")), "d1",'$form.find("*[data-attr=meta]")');
   eq(ids($form.find("[data-attr=meta]")), "",'$form.find("[data-attr=meta]")');

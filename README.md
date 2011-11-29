@@ -290,7 +290,7 @@ We prefer not to take the perf and code-bloat hit of this quarantine - if your a
 
 ## Best Practices 
 
-Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will fire before DOMContentReady which is no longer required. This is the guidance from the [Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
+Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will fire before DOMContentReady which will no longer be required. This guidance is from the [Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
 
 We thought we'd clarify as we've received a lot of feedback (aka strong opinions) on this subject - this is why jQuery's popular **docready** is a plugin that's not included by default - simply include it as a plugin if you wish.
 
@@ -298,7 +298,7 @@ Simarily related, for best page load times you should [move scripts to the botto
 
 If you're not referencing jquip near the bottom of your page and don't have either the **events** or **docready** plugins included, you should call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js (for <=IE7), calculates browser feature support, etc.
 
-### Mini Query Engine (jquip.q-min.js)
+## Mini Query Engine (jquip.q-min.js)
 
 Weighing at just **0.6k** query-min is an ultra fast selector engine for browsers that don't provide native support for the **querySelectorAll** APIs (e.g. <=IE7). It works by offloading as much work as possible to the browsers primitive `document.getElementById()`, `document.getElementsByTagName()` and `document.getElementsByClassName()` apis.
 
@@ -321,12 +321,12 @@ All selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each chil
 
 For optimal performance in <= IE7, the first child selector should be a tag or an #id as it cuts down the amount of DOM traversing needed to be done in JavaScript since there is no `document.getElementsByClassName()` available.
 
-### jquip Library Builder Service
+## jquip Library Builder Service
 
 The project now includes the node.js **/server/jquip.builder.js**
 so you can host your own jquip Library builder service internally.
 
-### Contributing
+## Contributing
 
 I'd love help with this so Contributors and pull requests are very welcome!
 
