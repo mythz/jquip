@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Zepto gesture functional test</title>
-  <meta name="viewport" content="maximum-scale=1,initial-scale=1,user-scalable=0">
+  <title>jQuip adhoc tests</title>
 </head>
 <body>
   <h1>Find tests</h1>
@@ -18,7 +17,7 @@
     <i id="i7" class="b">i7</i>
     <input name="a" value="a" id="in1" class="c" />
     <input name="a" value="b" id="in2" class="c" />
-    <div class="n">
+    <div id="d1" class="n" data-attr="meta">
       <i id="i8" class="d">i8</i>
       <i id="i9" class="d">i9</i>
     </div>
@@ -69,6 +68,16 @@
   var $append = $("#append");
   input = $("<p>text</p>").appendTo($append).html();
   eq(input, "text", '.appendTo($append)');
+
+  var $form = $("#f1");
+  eq(ids($form.find("#i7")), "i7",'$form.find("#i7")');
+  eq(ids($form.find(".b")), "i6,i7",'$form.find(".b")');
+  eq(ids($form.find(".d")), "i6,i8,i9",'$form.find(".d")');
+  eq(ids($form.find("input")), "in1,in2",'$form.find("input")');
+  eq(ids($form.find("input[value=b]")), "in2",'$form.find("input[value=b]")');
+  eq(ids($form.find("div[data-attr=meta]")), "d1",'$form.find("div[data-attr=meta]")');
+  eq(ids($form.find("*[data-attr=meta]")), "d1",'$form.find("*[data-attr=meta]")');
+  eq(ids($form.find("[data-attr=meta]")), "",'$form.find("[data-attr=meta]")');
 
 </script>
 </body>

@@ -524,8 +524,8 @@ window['$'] = window['jquip'] = (function(){
         return (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
             ? el.value
             : (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
-    };
-    var rmatchf = [ //[ "ID", "TAG", "CLASS", "ATTR" ], 
+    }
+    var rfilter = [ //[ID, TAG, CLASS, ATTR]
         /#((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
         /^((?:[\w\u00c0-\uFFFF\*\-]|\\.)+)/,
         /\.((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
@@ -533,9 +533,9 @@ window['$'] = window['jquip'] = (function(){
     ];
     function filter(sel, els) {
         var ret = [], i, j, l, el, m;
-        for (i = 0, l = rmatchf.length; i < l; i++)
-            if (m = rmatchf[i].exec(sel)) break;
-        if (i < rmatchf.length) {
+        for (i = 0, l = rfilter.length; i < l; i++)
+            if (m = rfilter[i].exec(sel)) break;
+        if (i < rfilter.length){
             for (j = 0; (el = els[j]); j++)
                 if ((i == 0 && m[1] == el.id)
                    || (i == 1 && m[1] == el.tagName)
