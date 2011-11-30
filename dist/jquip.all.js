@@ -216,7 +216,7 @@ window['$'] = window['jquip'] = (function(){
 	};
 	p['toggle'] = function(){
 		return this['each'](function(){
-			this.style.display = this.style.display === "none" ? "block" : "none";
+			this.style.display = ($['Expr'][':hidden'](this)) ? "block" : "none";
 		});
 	};
 	p['eq'] = function(i){
@@ -275,6 +275,24 @@ window['$'] = window['jquip'] = (function(){
 	p['remove'] = function(){
 		for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
 		return this;
+	};
+	p['closest'] = function(sel, ctx) {
+		var ret=[], i;
+		for (i=0, l=this.length; i<l; i++){
+			cur = this[i];
+			while (cur){
+				if (filter(sel, [cur]).length>0){
+					ret.push(cur);
+					break;
+				}else{
+					cur = cur.parentNode;
+					if (!cur || !cur.ownerDocument || cur === ctx|| cur.nodeType === 11)
+						break;
+				}
+			}
+		}
+		ret = ret.length > 1 ? unique(ret) : ret;
+		return this.ps(ret, "closest", sel);
 	};
 	p['val'] = function(setVal){
 		if (setVal == null) return (this[0] && this[0].value) || "";
@@ -383,6 +401,15 @@ window['$'] = window['jquip'] = (function(){
 
 	Ctor.prototype = p;
 
+	$['Expr'] = {
+		':hidden': function(el){
+			return el.offsetWidth === 0 || el.offsetHeight == 0
+				|| (el.style.display || ($["css"] && $["css"](el,"display")) === "none");
+		},
+		':visible': function(el) {
+			return !this[':hidden'](el);
+		}
+	};
 
 	function winnow(els, sel, keep){
 		sel = sel || 0;
@@ -396,7 +423,9 @@ window['$'] = window['jquip'] = (function(){
 			});
 		else if (isS(sel))
 			return grep(els, function(el) {
-				return el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
+				return $['Expr'][sel]
+					? $['Expr'][sel](el)
+					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
 			});
 		return grep(els, function(el) {
 			return (_indexOf(sel, el) >= 0) === keep;
@@ -1090,19 +1119,24 @@ $['plug']("ajax", function ($) {
 		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
 
-	if (!win.JSON)
+	if (!window.JSON)
 		$['loadAsync']("http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js");
 
     //TODO $.getScript
 });
 $['plug']("css", function ($) {
     var doc = document,
-        ralpha = /alpha\([^)]*\)/i,
+	    docEl = doc.documentElement,
+	    ralpha = /alpha\([^)]*\)/i,
         ropacity = /opacity=([^)]*)/,
         rdashAlpha = /-([a-z])/ig,
         rupper = /([A-Z])/g,
         rnumpx = /^-?\d+(?:px)?$/i,
         rnum = /^-?\d/,
+	    rroot = /^(?:body|html)$/i,
+	    cssShow = { position: "absolute", visibility: "hidden", display: "block" },
+	    cssWidth = [ "Left", "Right" ],
+	   	cssHeight = [ "Top", "Bottom" ],
         curCSS,
         getComputedStyle,
         currentStyle,
@@ -1117,6 +1151,50 @@ $['plug']("css", function ($) {
             }
         }
     };
+	$['_each'](["height", "width"], function(k) {
+		jQuery.cssHooks[k] = {
+			get: function(el, comp, extra) {
+				var val;
+				if (comp) {
+					if (el.offsetWidth !== 0)
+						return getWH(el, k, extra);
+
+					swap(el, cssShow, function() {
+						val = getWH( el, k, extra );
+					});
+					return val;
+				}
+			},
+			set: function(el, val) {
+				if (rnumpx.test(val)) {
+					val = parseFloat( val );
+
+					if (val >= 0)
+						return val + "px";
+				} else
+					return val;
+			}
+		};
+	});
+	function getWH(el, name, extra) {
+		var val = name === "width" ? el.offsetWidth : el.offsetHeight,
+			which = name === "width" ? cssWidth : cssHeight;
+		if (val > 0) {
+			if (extra !== "border") {
+				jQuery.each( which, function() {
+					if ( !extra )
+						val -= parseFloat(css(el, "padding" + this) ) || 0;
+					if ( extra === "margin" )
+						val += parseFloat(css(el, extra + this) ) || 0;
+					else
+						val -= parseFloat(css(el, "border" + this + "Width") ) || 0;
+				});
+			}
+			return val + "px";
+		}
+		return "";
+	}
+
     if (!$['support']['opacity']) {
 	    $['support']['opacity'] = {
             get: function (el, computed) {
@@ -1225,6 +1303,81 @@ $['plug']("css", function ($) {
         }
         return l ? fn(els[0], key) : undefined;
     }
+
+	var init, noMarginBodyOff, subBorderForOverflow, suppFixedPos, noAddBorder, noAddBorderForTables,
+		initialize = function() {
+			if (init) return;
+			var body = doc.body, c = doc.createElement("div"), iDiv, cDiv , table, td, bodyMarginTop = parseFloat(css(body, "marginTop")) || 0,
+				html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
+			$['extend'](c.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" });
+			c.innerHTML = html;
+			body.insertBefore(c, body.firstChild);
+			iDiv = c.firstChild;
+			cDiv = iDiv.firstChild;
+			td = iDiv.nextSibling.firstChild.firstChild;
+			noAddBorder = (cDiv .offsetTop !== 5);
+			noAddBorderForTables = (td.offsetTop === 5);
+			cDiv .style.position = "fixed";
+			cDiv .style.top = "20px";
+			suppFixedPos = (cDiv .offsetTop === 20 || cDiv .offsetTop === 15);
+			cDiv .style.position = cDiv .style.top = "";
+			iDiv.style.overflow = "hidden";
+			iDiv.style.position = "relative";
+			subBorderForOverflow = (cDiv .offsetTop === -5);
+			noMarginBodyOff = (body.offsetTop !== bodyMarginTop);
+			body.removeChild(c);
+			init = true;
+		},
+		bodyOffset = function(body){
+			var top = body.offsetTop, left = body.offsetLeft;
+			initialize();
+			if (noMarginBodyOff){
+				top  += parseFloat( css(body, "marginTop") ) || 0;
+				left += parseFloat( css(body, "marginLeft") ) || 0;
+			}
+			return { top: top, left: left };
+		};
+
+	$['fn']['offset'] = function(){
+		var el = this[0], box;
+		if (!el || !el.ownerDocument) return null;
+		if (el === el.ownerDocument.body) return bodyOffset(el);
+		try {
+			box = el.getBoundingClientRect();
+		} catch(e) {}
+		if (!box || !$['contains'](docEl, el))
+			return box ? { top: box.top, left: box.left } : { top: 0, left: 0 };
+		var body = doc.body,
+			win = getWin(doc),
+			clientTop  = docEl.clientTop  || body.clientTop  || 0,
+			clientLeft = docEl.clientLeft || body.clientLeft || 0,
+			scrollTop  = win['pageYOffset'] || $['support']['boxModel'] && docEl.scrollTop  || body.scrollTop,
+			scrollLeft = win['pageXOffset'] || $['support']['boxModel'] && docEl.scrollLeft || body.scrollLeft,
+			top  = box.top + scrollTop - clientTop,
+			left = box.left + scrollLeft - clientLeft;
+		return { top: top, left: left };
+	};
+	$['fn']['position'] = function() {
+		if (!this[0]) return null;
+		var el = this[0],
+		offPar = this['offsetParent'](),
+		off = this['offset'](),
+		parOff = rroot.test(offPar[0].nodeName) ? { top: 0, left: 0 } : offPar['offset']();
+		off.top -= parseFloat(css(el, "marginTop")) || 0;
+		off.left -= parseFloat(css(el, "marginLeft")) || 0;
+		parOff.top += parseFloat(css(offPar[0], "borderTopWidth")) || 0;
+		parOff.left += parseFloat(css(offPar[0], "borderLeftWidth")) || 0;
+		return { top: off.top - parOff.top, left: off.left - parOff.left };
+	};
+	$['fn']['offsetParent'] = function(){
+		return this['map'](function(){
+			var op = this.offsetParent || doc.body;
+			while (op && (!rroot.test(op.nodeName) && css(op,"position") === "static"))
+				op = op.offsetParent;
+			return op;
+		});
+	};
+
     $['_each'](["Height", "Width"], function (name, i) {
         var type = name.toLowerCase();
         $['fn']["inner" + name] = function () {
