@@ -216,7 +216,7 @@ window['$'] = window['jquip'] = (function(){
 	};
 	p['toggle'] = function(){
 		return this['each'](function(){
-			this.style.display = this.style.display === "none" ? "block" : "none";
+			this.style.display = ($['Expr'][':hidden'](this)) ? "block" : "none";
 		});
 	};
 	p['eq'] = function(i){
@@ -275,6 +275,24 @@ window['$'] = window['jquip'] = (function(){
 	p['remove'] = function(){
 		for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
 		return this;
+	};
+	p['closest'] = function(sel, ctx) {
+		var ret=[], i;
+		for (i=0, l=this.length; i<l; i++){
+			cur = this[i];
+			while (cur){
+				if (filter(sel, [cur]).length>0){
+					ret.push(cur);
+					break;
+				}else{
+					cur = cur.parentNode;
+					if (!cur || !cur.ownerDocument || cur === ctx|| cur.nodeType === 11)
+						break;
+				}
+			}
+		}
+		ret = ret.length > 1 ? unique(ret) : ret;
+		return this.ps(ret, "closest", sel);
 	};
 	p['val'] = function(setVal){
 		if (setVal == null) return (this[0] && this[0].value) || "";
@@ -383,6 +401,15 @@ window['$'] = window['jquip'] = (function(){
 
 	Ctor.prototype = p;
 
+	$['Expr'] = {
+		':hidden': function(el){
+			return el.offsetWidth === 0 || el.offsetHeight == 0
+				|| (el.style.display || ($["css"] && $["css"](el,"display")) === "none");
+		},
+		':visible': function(el) {
+			return !this[':hidden'](el);
+		}
+	};
 
 	function winnow(els, sel, keep){
 		sel = sel || 0;
@@ -396,7 +423,9 @@ window['$'] = window['jquip'] = (function(){
 			});
 		else if (isS(sel))
 			return grep(els, function(el) {
-				return el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
+				return $['Expr'][sel]
+					? $['Expr'][sel](el)
+					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
 			});
 		return grep(els, function(el) {
 			return (_indexOf(sel, el) >= 0) === keep;

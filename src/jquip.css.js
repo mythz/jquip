@@ -8,6 +8,9 @@ $['plug']("css", function ($) {
         rnumpx = /^-?\d+(?:px)?$/i,
         rnum = /^-?\d/,
 	    rroot = /^(?:body|html)$/i,
+	    cssShow = { position: "absolute", visibility: "hidden", display: "block" },
+	    cssWidth = [ "Left", "Right" ],
+	   	cssHeight = [ "Top", "Bottom" ],
         curCSS,
         getComputedStyle,
         currentStyle,
@@ -22,6 +25,50 @@ $['plug']("css", function ($) {
             }
         }
     };
+	$['_each'](["height", "width"], function(k) {
+		jQuery.cssHooks[k] = {
+			get: function(el, comp, extra) {
+				var val;
+				if (comp) {
+					if (el.offsetWidth !== 0)
+						return getWH(el, k, extra);
+
+					swap(el, cssShow, function() {
+						val = getWH( el, k, extra );
+					});
+					return val;
+				}
+			},
+			set: function(el, val) {
+				if (rnumpx.test(val)) {
+					val = parseFloat( val );
+
+					if (val >= 0)
+						return val + "px";
+				} else
+					return val;
+			}
+		};
+	});
+	function getWH(el, name, extra) {
+		var val = name === "width" ? el.offsetWidth : el.offsetHeight,
+			which = name === "width" ? cssWidth : cssHeight;
+		if (val > 0) {
+			if (extra !== "border") {
+				jQuery.each( which, function() {
+					if ( !extra )
+						val -= parseFloat(css(el, "padding" + this) ) || 0;
+					if ( extra === "margin" )
+						val += parseFloat(css(el, extra + this) ) || 0;
+					else
+						val -= parseFloat(css(el, "border" + this + "Width") ) || 0;
+				});
+			}
+			return val + "px";
+		}
+		return "";
+	}
+
     if (!$['support']['opacity']) {
 	    $['support']['opacity'] = {
             get: function (el, computed) {
@@ -130,11 +177,45 @@ $['plug']("css", function ($) {
         }
         return l ? fn(els[0], key) : undefined;
     }
+
+	var init, noMarginBodyOff, subBorderForOverflow, suppFixedPos, noAddBorder, noAddBorderForTables,
+		initialize = function() {
+			if (init) return;
+			var body = doc.body, c = doc.createElement("div"), iDiv, cDiv , table, td, bodyMarginTop = parseFloat(css(body, "marginTop")) || 0,
+				html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
+			$['extend'](c.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" });
+			c.innerHTML = html;
+			body.insertBefore(c, body.firstChild);
+			iDiv = c.firstChild;
+			cDiv = iDiv.firstChild;
+			td = iDiv.nextSibling.firstChild.firstChild;
+			noAddBorder = (cDiv .offsetTop !== 5);
+			noAddBorderForTables = (td.offsetTop === 5);
+			cDiv .style.position = "fixed";
+			cDiv .style.top = "20px";
+			suppFixedPos = (cDiv .offsetTop === 20 || cDiv .offsetTop === 15);
+			cDiv .style.position = cDiv .style.top = "";
+			iDiv.style.overflow = "hidden";
+			iDiv.style.position = "relative";
+			subBorderForOverflow = (cDiv .offsetTop === -5);
+			noMarginBodyOff = (body.offsetTop !== bodyMarginTop);
+			body.removeChild(c);
+			init = true;
+		},
+		bodyOffset = function(body){
+			var top = body.offsetTop, left = body.offsetLeft;
+			initialize();
+			if (noMarginBodyOff){
+				top  += parseFloat( css(body, "marginTop") ) || 0;
+				left += parseFloat( css(body, "marginLeft") ) || 0;
+			}
+			return { top: top, left: left };
+		};
+
 	$['fn']['offset'] = function(){
 		var el = this[0], box;
 		if (!el || !el.ownerDocument) return null;
-		if (el === el.ownerDocument.body)
-			return { top: el.offsetTop, left: el.offsetLeft };
+		if (el === el.ownerDocument.body) return bodyOffset(el);
 		try {
 			box = el.getBoundingClientRect();
 		} catch(e) {}

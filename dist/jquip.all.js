@@ -1695,7 +1695,7 @@ $['plug']("events", function($){
 	};
     p['trigger'] = function (evt) {
         return this['each'](function () {
-            if (evt == "click" || evt == "blur" || evt == "focus")
+            if ((evt == "click" || evt == "blur" || evt == "focus") && this[evt])
                 return this[evt]();
             if (doc.createEvent) {
                 var e = doc.createEvent('Events');

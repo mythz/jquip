@@ -108,7 +108,7 @@ $['plug']("ajax", function ($) {
 		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
 
-	if (!win.JSON)
+	if (!window.JSON)
 		$['loadAsync']("http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js");
 
     //TODO $.getScript
