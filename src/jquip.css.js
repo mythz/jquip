@@ -1,11 +1,13 @@
 $['plug']("css", function ($) {
     var doc = document,
-        ralpha = /alpha\([^)]*\)/i,
+	    docEl = doc.documentElement,
+	    ralpha = /alpha\([^)]*\)/i,
         ropacity = /opacity=([^)]*)/,
         rdashAlpha = /-([a-z])/ig,
         rupper = /([A-Z])/g,
         rnumpx = /^-?\d+(?:px)?$/i,
         rnum = /^-?\d/,
+	    rroot = /^(?:body|html)$/i,
         curCSS,
         getComputedStyle,
         currentStyle,
@@ -128,6 +130,47 @@ $['plug']("css", function ($) {
         }
         return l ? fn(els[0], key) : undefined;
     }
+	$['fn']['offset'] = function(){
+		var el = this[0], box;
+		if (!el || !el.ownerDocument) return null;
+		if (el === el.ownerDocument.body)
+			return { top: el.offsetTop, left: el.offsetLeft };
+		try {
+			box = el.getBoundingClientRect();
+		} catch(e) {}
+		if (!box || !$['contains'](docEl, el))
+			return box ? { top: box.top, left: box.left } : { top: 0, left: 0 };
+		var body = doc.body,
+			win = getWin(doc),
+			clientTop  = docEl.clientTop  || body.clientTop  || 0,
+			clientLeft = docEl.clientLeft || body.clientLeft || 0,
+			scrollTop  = win['pageYOffset'] || $['support']['boxModel'] && docEl.scrollTop  || body.scrollTop,
+			scrollLeft = win['pageXOffset'] || $['support']['boxModel'] && docEl.scrollLeft || body.scrollLeft,
+			top  = box.top + scrollTop - clientTop,
+			left = box.left + scrollLeft - clientLeft;
+		return { top: top, left: left };
+	};
+	$['fn']['position'] = function() {
+		if (!this[0]) return null;
+		var el = this[0],
+		offPar = this['offsetParent'](),
+		off = this['offset'](),
+		parOff = rroot.test(offPar[0].nodeName) ? { top: 0, left: 0 } : offPar['offset']();
+		off.top -= parseFloat(css(el, "marginTop")) || 0;
+		off.left -= parseFloat(css(el, "marginLeft")) || 0;
+		parOff.top += parseFloat(css(offPar[0], "borderTopWidth")) || 0;
+		parOff.left += parseFloat(css(offPar[0], "borderLeftWidth")) || 0;
+		return { top: off.top - parOff.top, left: off.left - parOff.left };
+	};
+	$['fn']['offsetParent'] = function(){
+		return this['map'](function(){
+			var op = this.offsetParent || doc.body;
+			while (op && (!rroot.test(op.nodeName) && css(op,"position") === "static"))
+				op = op.offsetParent;
+			return op;
+		});
+	};
+
     $['_each'](["Height", "Width"], function (name, i) {
         var type = name.toLowerCase();
         $['fn']["inner" + name] = function () {
