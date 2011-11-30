@@ -1,7 +1,9 @@
 window['$'] = window['jquip'] = (function(){
-	var win = window, queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
-		queryEngines = function(){ return win["Sizzle"] || win["qwery"]; },
-		doc = document, docEl = doc.documentElement,
+	var win = window, 	
+	queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
+	queryEngines = function(){ return win["Sizzle"] || win["qwery"]; },		
+		doc = document, docEl = doc.documentElement, 
+		scriptFns=[], load=[], sLoaded,
 		runtil = /Until$/, rmultiselector = /,/,
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
@@ -31,7 +33,7 @@ window['$'] = window['jquip'] = (function(){
 			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
 			area: [1, "<map>", "</map>"],
 			_default: [0, "", ""] },
-		rComplexQuery = /[,\s.\[>+]/, emptyArr = [],
+		rComplexQuery = /[,\s.#\[>+]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
 		hasOwn = ObjProto.hasOwnProperty,
@@ -58,8 +60,9 @@ window['$'] = window['jquip'] = (function(){
 			if (ctors[i].apply(this, arguments)) return this;
 
 		if (!sel) return this;
-		if (typeof sel == "function"){
-			warn("require docready");
+		if (isF(sel)){
+			if (sLoaded) sel();
+			else scriptFns.push(sel);
 			return this;
 		} else if (isA(sel)) return this['make'](sel);
 		if (sel.nodeType || isWin(sel)) return this['make']([sel]);
@@ -89,6 +92,7 @@ window['$'] = window['jquip'] = (function(){
 	function $(sel, ctx){
 		return new Ctor(sel, ctx);
 	}
+
 
 	p = $['fn'] = $.prototype = {
 		constructor: $,
@@ -922,20 +926,46 @@ window['$'] = window['jquip'] = (function(){
 		b = $['browser'] = { version: match[2] || "0" };
 		b[match[1] || ""] = true;
 	})();
+	$['scriptsLoaded'] = function(cb) {
+		if (isF(cb)) scriptFns.push(cb);
+	}
+	function loadAsync(url, cb){
+		load.push({url:url,cb:cb});
+	}; $['loadAsync'] = loadAsync;
+
+	if (!useQuery && !doc.querySelectorAll) 
+		loadAsync(queryShimCdn, function(){
+			$['setQuery'](queryEngines());
+		});
+
+	function fireSL(){
+		_each(scriptFns, function(cb){
+			cb();
+		});
+		sLoaded = true;
+	}
 
 	$['init'] = false;
 	$['onload'] = function(){
 		if (!$['init'])
 		try {
 			$['support']['boxModel'] = boxmodel();
-			if (!useQuery && !doc.querySelectorAll)
-				loadScript(queryShimCdn, function(){
-					$['setQuery'] = queryEngines();
+			var cbs = 0;
+			_each(load, function(o){
+				cbs++;
+				loadScript(o.url, function(){
+					try { if (o.cb) o.cb(); } catch(e){}
+					if (!--cbs)fireSL();
 				});
+			});
 			$['init'] = true;
-		} catch(e){}
+			if (!cbs)fireSL();
+		} catch(e){
+			warn(e);
+		}
 	};
-	if (doc['body'] && !$['init']) $['onload']();
+	if (doc['body'] && !$['init']) 
+		setTimeout($['onload'],1); //let plugins loadAsync
 
 	$['hook'] = function(fn){
 		ctors.push(fn);
@@ -1059,6 +1089,10 @@ $['plug']("ajax", function ($) {
 		}
 		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
+
+	if (!win.JSON)
+		$['loadAsync']("http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js");
+
     //TODO $.getScript
 });
 $['plug']("css", function ($) {
