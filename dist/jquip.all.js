@@ -54,7 +54,7 @@ window['$'] = window['jquip'] = (function(){
 	 * @param {Object|Element|string|Array.<string>} sel
 	 * @param {Object=} ctx
 	 */
-	function Ctor(sel, ctx){
+	function J(sel, ctx){
 		var ret;
 		for(var i = 0, l = ctors.length; i < l; i++)
 			if (ctors[i].apply(this, arguments)) return this;
@@ -90,11 +90,10 @@ window['$'] = window['jquip'] = (function(){
 
 	var ctors=[], plugins={}, jquid=0, p;
 	function $(sel, ctx){
-		return new Ctor(sel, ctx);
+		return new J(sel, ctx);
 	}
 
-
-	p = $['fn'] = $.prototype = {
+	p = J.prototype = $.prototype = $['fn'] = {
 		constructor: $,
 		'selector': "",
 		'length': 0,
@@ -102,22 +101,24 @@ window['$'] = window['jquip'] = (function(){
 			var value = args[0], parent, frag, first, i;
 			if (value){
 				if (this[0]) {
-					parent = value && value.parentNode;
-					frag = parent && parent.nodeType === 11 && parent.childNodes.length === this.length
-						? parent
-						: htmlFrag(value);
-					first = frag.firstChild;
-					if (frag.childNodes.length === 1) frag = first;
-					if (first)
-						for (i=0, l=this.length; i<l; i++)
-							cb.call(this[i],frag);
+					if (!(frag = value.nodeType === 3 && value)){
+						parent = value && value.parentNode;
+						frag = parent && parent.nodeType === 11 && parent.childNodes.length === this.length
+							? parent
+							: htmlFrag(value);
+						first = frag.firstChild;
+						if (frag.childNodes.length === 1) frag = first;
+						if (!first) return this;
+					}
+					for (i=0, l=this.length; i<l; i++)
+						cb.call(this[i],frag);
 				}
 			}
 			return this;
 		},
 		/**
 		 * @param {Object} els
-		 * @param {string} name
+		 * @param {string=} name
 		 * @param {string=} selector
 		 * */
 		ps: function(els, name, selector){
@@ -147,8 +148,15 @@ window['$'] = window['jquip'] = (function(){
 			: (num < 0 ? this[this.length + num] : this[num]);
 	};
 	p['add'] = function(sel, ctx){
-			return this['make']($(sel, ctx));
+		var set = typeof sel == "string"
+			? $(sel, ctx)
+			: makeArray(sel && sel.nodeType ? [sel] : sel),
+			all = merge(this.get(), set);
+		return this.ps(detached(set[0]) || detached(all[0]) ? all : unique(all));
 	};
+	function detached(el) {
+		return !el || !el.parentNode || el.parentNode.nodeType == 11;
+	}
 	p['each'] = function(fn){
 			if (!isF(fn)) return this;
 			for(var i = 0, l = this.length; i < l; i++)
@@ -216,7 +224,7 @@ window['$'] = window['jquip'] = (function(){
 	};
 	p['toggle'] = function(){
 		return this['each'](function(){
-			this.style.display = ($['Expr'][':hidden'](this)) ? "block" : "none";
+			this.style.display = ($['Expr']['hidden'](this)) ? "block" : "none";
 		});
 	};
 	p['eq'] = function(i){
@@ -314,7 +322,7 @@ window['$'] = window['jquip'] = (function(){
 					? (typeof el.textContent == "string" ? el.textContent : el.innerText.replace(rReturn, ''))
 					: (nt === 3 || nt === 4) ? el.nodeValue : null)
 				: null)
-			: this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(txt));
+			: this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(val));
 	};
 	p['empty'] = function(){
 		for(var i = 0, el; (el = this[i]) != null; i++)
@@ -399,15 +407,13 @@ window['$'] = window['jquip'] = (function(){
 		}).get();
 	};
 
-	Ctor.prototype = p;
-
 	$['Expr'] = {
-		':hidden': function(el){
+		'hidden': function(el){
 			return el.offsetWidth === 0 || el.offsetHeight == 0
-				|| (el.style.display || ($["css"] && $["css"](el,"display")) === "none");
+				|| (($["css"] && $["css"](el,"display") || el.style.display) === "none");
 		},
-		':visible': function(el) {
-			return !this[':hidden'](el);
+		'visible': function(el) {
+			return !$['Expr']['hidden'](el);
 		}
 	};
 
@@ -421,12 +427,14 @@ window['$'] = window['jquip'] = (function(){
 			return grep(els, function(el){
 				return (el === sel) === keep;
 			});
-		else if (isS(sel))
+		else if (isS(sel)) {
+			var expr = sel.charAt(0) == ":" && $['Expr'][sel.substring(1)];
 			return grep(els, function(el) {
-				return $['Expr'][sel]
-					? $['Expr'][sel](el)
+				return expr
+					? expr(el)
 					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
 			});
+		}
 		return grep(els, function(el) {
 			return (_indexOf(sel, el) >= 0) === keep;
 		});
@@ -441,10 +449,13 @@ window['$'] = window['jquip'] = (function(){
 	function hasClass(els, cls){
 		var cls = " " + cls + " ";
 		for(var i = 0, l = els.length; i < l; i++)
-			if (els[i].nodeType === 1 && (" " + els[i].className + " ").replace(rclass, " ").indexOf(cls) > -1)
+			if (eqClass(els[i], cls))
 				return true;
 		return false;
 	} $['hasClass'] = hasClass;
+	function eqClass(el, cls){
+		return el.nodeType === 1 && (" " + el.className + " ").replace(rclass, " ").indexOf(cls) > -1;
+	}
 	function walk(fn, ctx, ret){
 		ctx = ctx || doc;
 		ret = ret || [];
@@ -572,7 +583,7 @@ window['$'] = window['jquip'] = (function(){
             for (j = 0; (el = els[j]); j++)
                 if ((i == 0 && m[1] == el.id)
                    || (i == 1 && m[1] == el.tagName)
-                   || (i == 2 && m[1] == el.className)
+                   || (i == 2 && eqClass(el, m[1]))
                    || (i == 3 && m[2] == attr(el, m[1])))
                     ret.push(el);
         }
@@ -835,7 +846,8 @@ window['$'] = window['jquip'] = (function(){
 		return 1;
 	};
 	contains = $['contains'] = docEl.contains
-		? function(a, b){ return a !== b && (a.contains ? a.contains(b) : true) }
+		? function(a, b){
+			return a !== b && (a.contains ? a.contains(b) : true); }
 		: function(){ return false };
 	sortOrder = docEl.compareDocumentPosition
 		? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //assigning contains
