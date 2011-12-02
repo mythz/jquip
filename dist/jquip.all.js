@@ -1164,7 +1164,7 @@ $['plug']("css", function ($) {
         }
     };
 	$['_each'](["height", "width"], function(k) {
-		jQuery.cssHooks[k] = {
+		$['cssHooks'][k] = {
 			get: function(el, comp, extra) {
 				var val;
 				if (comp) {
@@ -1193,7 +1193,7 @@ $['plug']("css", function ($) {
 			which = name === "width" ? cssWidth : cssHeight;
 		if (val > 0) {
 			if (extra !== "border") {
-				jQuery.each( which, function() {
+				$['each']( which, function() {
 					if ( !extra )
 						val -= parseFloat(css(el, "padding" + this) ) || 0;
 					if ( extra === "margin" )
