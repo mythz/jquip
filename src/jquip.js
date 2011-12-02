@@ -88,7 +88,7 @@ window['$'] = window['jquip'] = (function(){
 		return this['make'](sel);
 	}
 
-	var ctors=[], plugins={}, jquid=0, p;
+	var ctors=[], plugins={}, jquid=0, _cache={_id:0}, _display = {}, p;
 	function $(sel, ctx){
 		return new J(sel, ctx);
 	}
@@ -214,17 +214,20 @@ window['$'] = window['jquip'] = (function(){
 	};
 	p['hide'] = function(){
 		return this['each'](function(){
+			cache(this, "display", this.style.display);
 			this.style.display = "none";
 		});
 	};
 	p['show'] = function(){
 		return this['each'](function(){
-			this.style.display = "block";
+			this.style.display = cache(this, "display") || display(this.tagName);
 		});
 	};
 	p['toggle'] = function(){
 		return this['each'](function(){
-			this.style.display = ($['Expr']['hidden'](this)) ? "block" : "none";
+			this.style.display = $['Expr']['hidden'](this)
+				? cache(this, "display") || display(this.tagName)
+				: cache(this, "display", this.style.display) && "none";
 		});
 	};
 	p['eq'] = function(i){
@@ -438,6 +441,23 @@ window['$'] = window['jquip'] = (function(){
 		return grep(els, function(el) {
 			return (_indexOf(sel, el) >= 0) === keep;
 		});
+	}
+	function cache(el, name, val)
+	{
+		var id = $.data(el,"_J");
+		if (typeof val === "undefined")
+			return id && _cache[id] && _cache[id][name];
+		if (!id) $.data(el,"_J", (id=++_cache.id));
+		return (_cache[id] || (_cache[id]={}))[name] = val;
+	}
+	function display(tag) {
+		if (!_display[tag]) {
+			var el = $("<" + tag + ">").appendTo(doc.body),
+				d = ($['css'] && $['css'](el[0], "d")) || el.style.display;
+			el.remove();
+			_display[tag] = d;
+		}
+		return _display[tag];
 	}
 	function make(arr, els){
 		arr.length = (els && els.length || 0);
