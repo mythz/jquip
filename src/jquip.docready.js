@@ -2,7 +2,7 @@ $['plug']("docready", function ($) {
     var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
     $['hook'](function (sel, ctx) {
         if (typeof sel == "function") {
-            this.ready(sel);
+            this['ready'](sel);
             return true;
         }
     });

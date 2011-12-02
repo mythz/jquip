@@ -128,9 +128,9 @@ window['$'] = window['jquip'] = (function(){
 			ret.prevObject = this;
 			ret.context = this.context;
 			if (name === "find")
-				ret.selector = this.selector + (this.selector ? " " : "") + selector;
+				ret.selector = this['selector'] + (this['selector'] ? " " : "") + selector;
 			else if (name)
-				ret.selector = this.selector + "." + name + "(" + selector + ")";
+				ret.selector = this['selector'] + "." + name + "(" + selector + ")";
 			return ret;
 		}
 	};
@@ -227,7 +227,7 @@ window['$'] = window['jquip'] = (function(){
 		return this['each'](function(){
 			this.style.display = $['Expr']['hidden'](this)
 				? cache(this, "display") || display(this.tagName)
-				: cache(this, "display", this.style.display) && "none";
+				: (cache(this, "display", this.style.display), "none");
 		});
 	};
 	p['eq'] = function(i){
@@ -444,16 +444,16 @@ window['$'] = window['jquip'] = (function(){
 	}
 	function cache(el, name, val)
 	{
-		var id = $.data(el,"_J");
+		var id = $['data'](el,"_J");
 		if (typeof val === "undefined")
 			return id && _cache[id] && _cache[id][name];
-		if (!id) $.data(el,"_J", (id=++_cache.id));
+		if (!id) $['data'](el,"_J", (id=++_cache.id));
 		return (_cache[id] || (_cache[id]={}))[name] = val;
 	}
 	function display(tag) {
 		if (!_display[tag]) {
-			var el = $("<" + tag + ">").appendTo(doc.body),
-				d = ($['css'] && $['css'](el[0], "d")) || el.style.display;
+			var el = $("<" + tag + ">")['appendTo'](doc.body),
+				d = ($['css'] && $['css'](el[0], "d")) || el[0].style.display;
 			el.remove();
 			_display[tag] = d;
 		}
@@ -1535,7 +1535,7 @@ $['plug']("docready", function ($) {
     var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
     $['hook'](function (sel, ctx) {
         if (typeof sel == "function") {
-            this.ready(sel);
+            this['ready'](sel);
             return true;
         }
     });
