@@ -453,7 +453,7 @@ window['$'] = window['jquip'] = (function(){
 	function display(tag) {
 		if (!_display[tag]) {
 			var el = $("<" + tag + ">")['appendTo'](doc.body),
-				d = ($['css'] && $['css'](el[0], "d")) || el[0].style.display;
+				d = ($['css'] && $['css'](el[0], "display")) || el[0].style.display;
 			el.remove();
 			_display[tag] = d;
 		}
