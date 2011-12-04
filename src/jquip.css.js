@@ -266,13 +266,13 @@ $['plug']("css", function ($) {
             var el = this[0];
             if (!el) return size == null ? null : this;
             if ($['isFunction'](size))
-                return this.each(function (i) {
+                return this['each'](function (i) {
                     var self = $(this);
                     self[type](size.call(this, i, self[type]()));
                 });
             if ($['isWindow'](el)) {
-                var docElemProp = el.document.documentElement["client" + name], body = el.document.body;
-                return el.document.compatMode === "CSS1Compat" && docElemProp || body && body["client" + name] || docElemProp;
+                var docElProp = el.document.documentElement["client" + name], body = el.document.body;
+                return el.document.compatMode === "CSS1Compat" && docElProp || body && body["client" + name] || docElProp;
             } else if (el.nodeType === 9) {
                 return Math.max(
 			        el.documentElement["client" + name],
@@ -301,10 +301,10 @@ $['plug']("css", function ($) {
                     ? win[i ? "pageYOffset" : "pageXOffset"]
                     : $['support']['boxModel'] && win.document.documentElement[method] || win.document.body[method] : el[method];
             }
-            return this.each(function() {
+            return this['each'](function() {
                 win = getWin(this);
                 if (win)
-                    win.scrollTo(!i ? val : $(win).scrollLeft(), i ? val : $(win).scrollTop());
+                    win['scrollTo'](!i ? val : $(win)['scrollLeft'](), i ? val : $(win)['scrollTop']());
                 else
                     this[method] = val;
             });

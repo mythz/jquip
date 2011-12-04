@@ -32,17 +32,17 @@ files.forEach(function(file) {
 var topFile = 'jquip.js';
 
 //write /dist/jquip.all.js
-var allJs = allJsMap[topFile];
+var allJs = allJsMap[topFile] + ";";
 for (var file in allJsMap) {
 	if (file == topFile) continue;
-	allJs += allJsMap[file];
+	allJs += allJsMap[file] + ";";
 }
 fs.writeFileSync(targetDir + '/jquip.all.js', allJs);
 
 //write /dist/jquip.all.min.js
-var allMinJs = allMinJsMap[topFile];
+var allMinJs = allMinJsMap[topFile] + ";";
 for (var file in allMinJsMap) {
 	if (file == topFile) continue;
-	allMinJs += allMinJsMap[file];
+	allMinJs += allMinJsMap[file] + ";";
 }
 fs.writeFileSync(targetDir + '/jquip.all.min.js', allMinJs);

@@ -1041,7 +1041,7 @@ window['$'] = window['jquip'] = (function(){
 
 	return $;
 })();
-$['plug']("ajax", function ($) {
+;$['plug']("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
@@ -1156,7 +1156,7 @@ $['plug']("ajax", function ($) {
 
     //TODO $.getScript
 });
-$['plug']("css", function ($) {
+;$['plug']("css", function ($) {
     var doc = document,
 	    docEl = doc.documentElement,
 	    ralpha = /alpha\([^)]*\)/i,
@@ -1424,13 +1424,13 @@ $['plug']("css", function ($) {
             var el = this[0];
             if (!el) return size == null ? null : this;
             if ($['isFunction'](size))
-                return this.each(function (i) {
+                return this['each'](function (i) {
                     var self = $(this);
                     self[type](size.call(this, i, self[type]()));
                 });
             if ($['isWindow'](el)) {
-                var docElemProp = el.document.documentElement["client" + name], body = el.document.body;
-                return el.document.compatMode === "CSS1Compat" && docElemProp || body && body["client" + name] || docElemProp;
+                var docElProp = el.document.documentElement["client" + name], body = el.document.body;
+                return el.document.compatMode === "CSS1Compat" && docElProp || body && body["client" + name] || docElProp;
             } else if (el.nodeType === 9) {
                 return Math.max(
 			        el.documentElement["client" + name],
@@ -1459,10 +1459,10 @@ $['plug']("css", function ($) {
                     ? win[i ? "pageYOffset" : "pageXOffset"]
                     : $['support']['boxModel'] && win.document.documentElement[method] || win.document.body[method] : el[method];
             }
-            return this.each(function() {
+            return this['each'](function() {
                 win = getWin(this);
                 if (win)
-                    win.scrollTo(!i ? val : $(win).scrollLeft(), i ? val : $(win).scrollTop());
+                    win['scrollTo'](!i ? val : $(win)['scrollLeft'](), i ? val : $(win)['scrollTop']());
                 else
                     this[method] = val;
             });
@@ -1470,7 +1470,7 @@ $['plug']("css", function ($) {
     });
 
 });
-$['plug']("custom", function($){
+;$['plug']("custom", function($){
     var win=window, doc=document, qsMap = {}, 
         vars = win.location.search.substring(1).split("&");
 
@@ -1531,7 +1531,7 @@ $['plug']("custom", function($){
         return data ? func(data, $) : function(data) { return func(data, $) };
     };
 });
-$['plug']("docready", function ($) {
+;$['plug']("docready", function ($) {
     var win = window, doc = document, DOMContentLoaded, readyBound, readyList = [], isReady = false, readyWait = 1;        
     $['hook'](function (sel, ctx) {
         if (typeof sel == "function") {
@@ -1599,7 +1599,7 @@ $['plug']("docready", function ($) {
 
 	if (!$['init']) $(document)['ready']($['onload']);
 });
-$['plug']("events", function($){
+;$['plug']("events", function($){
 	var doc = document, handlers = {}, _jquid = 1;
 	function jquid(el){
 		return el._jquid || (el._jquid = _jquid++);
@@ -1741,4 +1741,4 @@ $['plug']("events", function($){
         });
     };
 	if (!$['init']) $(window)['bind']("load",$['onload']);
-});
+});;

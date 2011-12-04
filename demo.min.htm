@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <title>jquip - jQuery-in-parts</title>
+    <script type="text/javascript" src="dist/jquip.all.min.js"></script>
+    <!--script type="text/javascript" src="dist/jquip.events.min.js"></script>
+    <script type="text/javascript" src="dist/jquip.docready.min.js"></script>
+    <script type="text/javascript" src="dist/jquip.css.min.js"></script>
+    <script type="text/javascript" src="dist/jquip.ajax.min.js"></script>
+    <script type="text/javascript" src="dist/jquip.custom.min.js"></script-->
+    <script type="text/javascript">
+        $(function() {
+            $(document.body)
+                .css({'font-family':'Arial'})
+                .append("<p>This message added on document ready</p>");
+
+            $(".attrs button").click(function () {
+                var $dl = $(this).next();
+                $.each($(this).parent().data(), function (name, val) {
+                    $dl.append("<dt>" + name + "</dt>").append("<dd>" + val + "</dd>");
+                });
+            });
+
+            var compiledTpl = $._template($("#tpl").html()), $win = $(window);
+            var updateTpl = function(){
+                var html = compiledTpl({width: $win.width(), height: $win.height()});
+                $("#winsize").html(html);
+            };
+
+            $win.resize(updateTpl);
+            
+            function rgb() {
+                return Math.floor(Math.random() * 255);
+            }
+            
+            $("body > button").click(function(){
+                $(document.body).css({background:"rgb(" + rgb() + "," + rgb() + "," + rgb() + ")"});
+            });
+
+            updateTpl();
+        });
+    </script>
+</head>
+<body>
+    <script id="tpl" type="text/tpl">
+        <p>The Size of this window is <%= width %>x<%= height %> (uses $.template - resize to update).</p>
+    </script>
+    
+    <h2>Simple Demo</h2>
+
+    <div id="winsize"></div>
+    <button>Change Background</button>
+
+    <div class="attrs" data-one="uno" data-two="due" data-three="tre">
+        <button>Print Data Attributes</button>
+       <dl></dl>
+    </div>
+
+</body>
+</html>

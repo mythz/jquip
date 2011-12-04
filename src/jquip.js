@@ -602,7 +602,7 @@ window['$'] = window['jquip'] = (function(){
         if (i < rfilter.length){
             for (j = 0; (el = els[j]); j++)
                 if ((i == 0 && m[1] == el.id)
-                   || (i == 1 && m[1] == el.tagName)
+                   || (i == 1 && eqSI(m[1], el.tagName))
                    || (i == 2 && eqClass(el, m[1]))
                    || (i == 3 && m[2] == attr(el, m[1])))
                     ret.push(el);
