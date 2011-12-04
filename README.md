@@ -32,7 +32,7 @@ The core **jquip.js** is only **6.6KB** (minified and gzipped) - a fraction of t
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference. 
 
 ### Automatically downloads parts needed for older browsers
-Sizzle.js is only added on demand from [cdnjs.com](http://cdnjs.com) for browers that need it (i.e. <=IE7) which we believe this is the optimal way to download shims for browsers that need it. We still have some testing to do, but that is at least our goal.
+Sizzle.js is only added on demand (if needed) from [cdnjs.com](http://cdnjs.com) for browsers that need it (i.e. <=IE7) as we believe is the optimal way to download shims for browsers that need it.
 
 Most code has been ported from jQuery or Zepto.js and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
