@@ -13,13 +13,13 @@ Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
-Minified & gzipped code sizes (v.02):
+Minified & gzipped code sizes (v.03):
   
-  - jquip.js (5.7k)
+  - jquip.js (6.6k)
   - jquip.events.js (1k)
   - jquip.docready.js (.5k)
-  - jquip.css.js (1.6k)
-  - jquip.ajax.js (.9k)
+  - jquip.css.js (2.5k)
+  - jquip.ajax.js (1k)
 
 ### Query Engine options (not required for modern browsers)
 
@@ -27,7 +27,7 @@ Minified & gzipped code sizes (v.02):
   - jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js
   - jquip.q-sizzle.js (5.29k) - Sizzle.js
 
-The core **jquip.js** is only **5.7KB** (minified and gzipped) - a fraction of the size of jQuery.
+The core **jquip.js** is only **6.6KB** (minified and gzipped) - a fraction of the size of jQuery.
 
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference. 
 
@@ -52,6 +52,25 @@ We would still like to hear feedback on issues/non-implemented core functionalit
 
 ## News
 
+### v.03
+
+  - Intended to be last code change to significantly effect the size and API in the core jquip.js.
+  - `$.loadAsync(url,cb)` script loader added to load plugin and user scripts on demand.
+  - For older browsers that don't **querySelector** support, Sizzle.js is downloaded on demand from [cdnjs.com](http://cdnjs.com).
+  - If the **ajax** plugin is included and browser doesn't have **JSON**, it is also downloaded from cdnjs.com.
+    - When all scripts loaded the callbacks registered in `$.scriptsLoaded` and `$(callback)` are fired.
+      Or if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**.
+  - Modern browsers won't need any additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded.
+  - Added Expr support with **:hidden** and **:visible** baked in. More support can be added by extending `$.Expr`
+  - In addition to Expr's filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**.
+    - `$().is`, `$().not`, `$().filter` and `$().find` take advantage of the above filtering + Expr support.
+  - `$().show`, `$().hide` and `$().toggle` improved. With the **css** plugin it behaves like jQuery,
+    without it only checks the visibility of the selected elements.
+  - **css** plugin better improved to report correct dimensions.
+  - Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to [compile jquip.js and plugins](http://closure-compiler.appspot.com/home).
+    - An uptodate bundle with all of jquip is kept in the repo at [/dist/jquip.all.closure-advanced.js](https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js)
+
+
 ### v.02
 
   - We now are able to compile in Closure Compiler's advanced compilation mode! 
@@ -59,41 +78,32 @@ We would still like to hear feedback on issues/non-implemented core functionalit
   - The source code was modified (somewhat unnaturally) so it would work with the Closure Compiler, i.e. have all the API methods exported correctly.
   - The total code-size (min+gzip) for jquip and non-query plugins (i.e. docready,events,css,ajax,custom) is **9.67k** in advanced mode and **9.86k** in Simple mode.
 
-
 ### v.01
 
   - Abstracted Events, pluggable query engines and new `$().find` and `Events` system courtesy of the much leaner implementation in [Zepto.js](http://zeptojs.com/), refactored to support multiple browsers.  
-  - We are now passing Backbone.js latest test-suite in all the latest browsers!
+  - We are now passing Backbone.js latest test-suite in all the latest browsers! Now included in the **/test** folder.
+  - New Spine.js tests added as well, now passing all but 1 test (in latest browsers)
     - (we'll get to older IE browsers as soon as we find a PC with them installed :)
+  - New Event system added as a plugin, now with abstracted events.
+    - We expect most devs would want to include events, but can now be stripped if you dont.
+  - Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from [cdnjs.com](http://cdnjs.com) if a browser doesn't support `document.querySelectorAll` (i.e. <=IE7). Note: because there's no Sizzle.js it's important to be aware of limitations when relying on browsers native querySelector implementations, i.e. there are [restrictions in IE8](http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml) where the HTML page must be in standards mode and Safari in quirks mode [can't handle uppercase or unicode characters](http://www.wordsbyf.at/2011/11/23/selectors-selectoring/).
 
 ### pre-alpha, first release
 
   - Customizable Library builder service at 
   - Node js build scripts added to minify jquip with UglifyJS.
-  
-## Roadmap
-
-  - Getting jquip to work in Google Closure Compiler's advanced compilation mode without warnings so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
-  - Add missing shims to Abstracted Events (decided to add them after all due to popular demand)
-  - Add caching to improve performance
-
-## Changes
-  
-#### v.01 
-  
-  - New Spine.js tests added as well, now passing all but 1 test (in latest browsers)
-  - New tests added and bug fixes. Backbone.js latest test suite now passes in all the latest browsers - now included in the **/test** folder.
-  - New Event system added as a plugin, now with abstracted events. 
-    - We expect most devs would want to include events, but can now be stripped if you dont.
-  - Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from [cdnjs.com](http://cdnjs.com) if a browser doesn't support `document.querySelectorAll` (i.e. <=IE7). Note: because there's no Sizzle.js it's important to be aware of limitations when relying on browsers native querySelector implementations, i.e. there are [restrictions in IE8](http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml) where the HTML page must be in standards mode and Safari in quirks mode [can't handle uppercase or unicode characters](http://www.wordsbyf.at/2011/11/23/selectors-selectoring/).
-
-#### pre-alpha
-
   - $.addConstructor is now `$.hook`
   - $.addPlugin is now `$.plug`
   - **scrollLeft** and **scrollTop** is now in the **css** plugin
-  - Due to a request by the jQuery team we're no longer assigning the **jQuery** variable, you will now need to manually change this yourself on the first line of jquip.js:    
-    `window.jquip = window.$ = (function()..` 
+  - Due to a request by the jQuery team we're no longer assigning the **jQuery** variable, you will now need to manually change this yourself on the first line of jquip.js:
+    `window.jquip = window.$ = (function()..`
+
+## Roadmap
+
+  - Getting jquip to work in Google Closure Compiler's advanced compilation mode without warnings so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
+  - Add the Closure Advanced Compiler option to the [jquip library service](http://www.servicestack.net/jqbuilder/)
+  - Add missing shims to Abstracted Events (decided to add them after all due to popular demand)
+  - Add caching to improve performance
 
 
 ## What's in the box? - i.e. the 90% good parts
@@ -121,19 +131,22 @@ Methods marked with * are only partially implemented.
   - insertBefore
   - after
   - insertAfter
-  - toggle*
-  - hide, show, fadeIn and fadeOut - does so without animation, consider using [jquery.animate-enhanced plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
+  - toggle
+  - hide
+  - show
+  - fadeIn and fadeOut - does so without animation, consider using [jquery.animate-enhanced plugin](http://playground.benbarnett.net/jquery-animate-enhanced/)*
   - eq
   - first
   - last
-  - slice
-  - find
-  - not
-  - filter
   - indexOf
-  - is
+  - slice
+  - find*
+  - not*
+  - filter*
+  - is*
   - remove
-  - val - does not do checkbox, select, etc.
+  - closest
+  - val* - does not do checkbox, select, etc.
   - html
   - text
   - empty
@@ -161,6 +174,7 @@ Methods marked with * are only partially implemented.
   - [$._indexOf](http://documentcloud.github.com/underscore/#indexOf) - Underscore's indexOf
   - [$._defaults](http://documentcloud.github.com/underscore/#defaults) - Underscore's defaults
   - [$._filter](http://documentcloud.github.com/underscore/#filter) - Underscore's filter
+  - $.Expr - :hidden :visible now supported, can plugin other expressions as needed.
   - $.filter
   - $.dir
   - $.nth
@@ -180,6 +194,8 @@ Methods marked with * are only partially implemented.
   - $.hasClass
   - $.typeOf - safe type of an variable
   - $.loadScript - (url, callback [, async]) load an external script dynamically
+  - $.loadAsync - load js async and call `$(callback)` or `$.scriptsLoaded` when all scripts have been loaded
+  - $.scriptsLoaded - register callbacks to be fired when all async scripts have been loaded.
   - $.htmlFrag - creates a document fragment from a html string **(name changed)**
   - $.walk - traveres all childElems including self `(predicateFn, [[, context], results])`
   - $.query - query Engine i.r. doc.querySelector || queryEngine Shim
@@ -290,13 +306,45 @@ We prefer not to take the perf and code-bloat hit of this quarantine - if your a
 
 ## Best Practices 
 
-Contrary to the strong-held opinions of many "javascipt experts" DOMContentReady is rarely the fastest solution to run your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will fire before DOMContentReady which will no longer be required. This guidance is from the [Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ) and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentReady is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides a good overview over when to use it. 
+Contrary to the strong-held opinions of many "javascript experts" DOMContentLoaded is rarely the fastest solution to run
+your app's logic. It is a *safer option* but in most cases your app will run faster if you execute your
+javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will
+fire before DOMContentLoaded which will no longer be required. This guidance is from the
+[Google Apps](https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ)
+and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentLoaded
+is still a suitable option. This [answer on StackOverflow](http://stackoverflow.com/q/1439382/85785) provides
+a good overview over when to use it.
 
-We thought we'd clarify as we've received a lot of feedback (aka strong opinions) on this subject - this is why jQuery's popular **docready** is a plugin that's not included by default - simply include it as a plugin if you wish.
+We thought we'd clarify as we've received a lot of feedback (aka strong opinions) on this subject - this is
+why jQuery's popular **docready** is a plugin that's not included by default - simply include it as a plugin
+if you wish.
 
-Simarily related, for best page load times you should [move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/) of your page, e.g. before the closing `</body>` tag.
+Similarly related, for best page load times you should
+[move scripts to the bottom](http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/)
+of your page, e.g. before the closing `</body>` tag.
 
-If you're not referencing jquip near the bottom of your page and don't have either the **events** or **docready** plugins included, you should call `$.onload()` in your own post DOMReady event. It performs post processsing tasks like downloading Sizzle.js (for <=IE7), calculates browser feature support, etc.
+If you're not referencing jquip near the bottom of your page and don't have either the **events** or
+**docready** plugins included, you should call `$.onload()` in your own post DOMReady event. It performs
+post processing tasks like downloading Sizzle.js (for <=IE7), calculates browser feature support, etc.
+
+### async script loading
+
+As of **v.03** the recommended approach to load scripts is now in `$(callback)` which gets fired right after
+all on async loaded scripts (inc user scripts) have been downloaded, which is still straight away for modern
+browsers (i.e. when no async downloads are needed). This recommendation can be ignored if you are only
+performing primitive queries (i.e. by #id, tag or .class) where querySelectorAll or Sizzle.js are not needed.
+
+For older browsers (<=IE7) Sizzle.js is downloaded on demand, if **ajax** plugin is included **JSON** is also
+downloaded if it doesn't exist.
+
+User and plugin scripts can be loaded dynamically with `$.loadAsync(url, cb)` which get loaded before
+`$(callback)` is fired. Additional scripts that are not needed on first page loaded can be downloaded with
+`$.loadScript(url, cb)`.
+
+Our recommendation is to have a single reference to bundled and minified scripts needed immediately when the page is loaded.
+Followed by async downloading of all scripts required by your websites later.
+Pre-fetching scripts needed on subsequent pages so its hot in your browsers cache is also a good idea.
+
 
 ## Mini Query Engine (jquip.q-min.js)
 

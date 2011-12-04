@@ -989,10 +989,10 @@ window['$'] = window['jquip'] = (function(){
 	})();
 	$['scriptsLoaded'] = function(cb) {
 		if (isF(cb)) scriptFns.push(cb);
-	}
+	};
 	function loadAsync(url, cb){
 		load.push({url:url,cb:cb});
-	}; $['loadAsync'] = loadAsync;
+	} $['loadAsync'] = loadAsync;
 
 	if (!useQuery && !doc.querySelectorAll) 
 		loadAsync(queryShimCdn, function(){
