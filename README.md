@@ -56,19 +56,22 @@ We would still like to hear feedback on issues/non-implemented core functionalit
 
   - Intended to be last code change to significantly effect the size and API in the core jquip.js.
   - `$.loadAsync(url,cb)` script loader added to load plugin and user scripts on demand.
-  - For older browsers that don't **querySelector** support, Sizzle.js is downloaded on demand from [cdnjs.com](http://cdnjs.com).
+  - For older browsers that don't have **querySelector** support, Sizzle.js is downloaded on demand from [cdnjs.com](http://cdnjs.com).
   - If the **ajax** plugin is included and browser doesn't have **JSON**, it is also downloaded from cdnjs.com.
     - When all scripts loaded the callbacks registered in `$.scriptsLoaded` and `$(callback)` are fired.
-      Or if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**.
+    - Although if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**.
   - Modern browsers won't need any additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded.
-  - Added Expr support with **:hidden** and **:visible** baked in. More support can be added by extending `$.Expr`
-  - In addition to Expr's filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**.
+  - Added Expr support with **:hidden** and **:visible** baked in. Further **:expression** support can be plugged in by extending `$.Expr`
+  - In addition to :expr's, filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**.
     - `$().is`, `$().not`, `$().filter` and `$().find` take advantage of the above filtering + Expr support.
-  - `$().show`, `$().hide` and `$().toggle` improved. With the **css** plugin it behaves like jQuery,
-    without it only checks the visibility of the selected elements.
-  - **css** plugin better improved to report correct dimensions.
+  - `$().show`, `$().hide` and `$().toggle` improved. With **css** plugin it behaves like jQuery,
+    without, it only checks the visibility of selected elements.
+  - **css** plugin improved to report correct dimensions on Height/Width/Left/Top methods.
   - Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to [compile jquip.js and plugins](http://closure-compiler.appspot.com/home).
-    - An uptodate bundle with all of jquip is kept in the repo at [/dist/jquip.all.closure-advanced.js](https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js)
+    - An up-to-date bundle with all of jquip is kept in the repo at [/dist/jquip.all.closure-advanced.js](https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js)
+    - [ServiceStack's MiniProfiler](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/includes.js)
+      is another example of a jQuery UI changed to using [jquip (advanced compiled version)](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/jquip.all.js)
+      Small changes were required to workaround use of advanced Expressions or jQuery's animation features (all changes left in comments).
 
 
 ### v.02
@@ -341,8 +344,9 @@ User and plugin scripts can be loaded dynamically with `$.loadAsync(url, cb)` wh
 `$(callback)` is fired. Additional scripts that are not needed on first page loaded can be downloaded with
 `$.loadScript(url, cb)`.
 
-Our recommendation is to have a single reference to bundled and minified scripts needed immediately when the page is loaded.
-Followed by async downloading of all scripts required by your websites later.
+Our recommendation for ultimate performance is to have a single reference to bundled and minified scripts needed
+immediately when the page is loaded. Followed by async downloading of all scripts required by your websites later.
+
 Pre-fetching scripts needed on subsequent pages so its hot in your browsers cache is also a good idea.
 
 
