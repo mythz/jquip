@@ -32,7 +32,7 @@ The core **jquip.js** is only **6.6KB** (minified and gzipped) - a fraction of t
 Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference. 
 
 ### Automatically downloads parts needed for older browsers
-Sizzle.js is only added on demand (if needed) from [cdnjs.com](http://cdnjs.com) for browsers that need it (i.e. <=IE7) as we believe is the optimal way to download shims for browsers that need it.
+Sizzle.js is only added on demand (if it's not already included) from [cdnjs.com](http://cdnjs.com) for browsers that need it (i.e. <=IE7) as we believe it's the optimal way to download shims for browsers that need it.
 
 Most code has been ported from jQuery or Zepto.js and optimized where possible, e.g. internals use underscore's native `_.each` over jquery's slower `$.each` etc.
 
@@ -54,25 +54,24 @@ We would still like to hear feedback on issues/non-implemented core functionalit
 
 ### v.03
 
-  - Intended to be last code change to significantly effect the size and API in the core jquip.js.
-  - `$.loadAsync(url,cb)` script loader added to load plugin and user scripts on demand.
-  - For older browsers that don't have **querySelector** support, Sizzle.js is downloaded on demand from [cdnjs.com](http://cdnjs.com).
-  - If the **ajax** plugin is included and browser doesn't have **JSON**, it is also downloaded from cdnjs.com.
-    - When all scripts loaded the callbacks registered in `$.scriptsLoaded` and `$(callback)` are fired.
-    - Although if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**.
-  - Modern browsers won't need any additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded.
+  - Intended to be last code change to significantly effect the size and API in the core jquip.js
+  - `$.loadAsync(url,cb)` script loader added to load plugin and user scripts on demand
+  - For older browsers that don't have **querySelector** support, Sizzle.js is downloaded on demand from [cdnjs.com](http://cdnjs.com)
+  - If the **ajax** plugin is included and browser doesn't have **JSON**, it is also downloaded from cdnjs.com
+    - When all scripts loaded the callbacks registered in `$.scriptsLoaded` and `$(callback)` are fired
+    - Although if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**
+  - Modern browsers won't need any additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded
   - Added Expr support with **:hidden** and **:visible** baked in. Further **:expression** support can be plugged in by extending `$.Expr`
-  - In addition to :expr's, filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**.
-    - `$().is`, `$().not`, `$().filter` and `$().find` take advantage of the above filtering + Expr support.
+  - In addition to :expr's, filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**
+    - `$().is`, `$().not`, `$().filter` and `$().find` take advantage of the above filtering + Expr support
   - `$().show`, `$().hide` and `$().toggle` improved. With **css** plugin it behaves like jQuery,
-    without, it only checks the visibility of selected elements.
-  - **css** plugin improved to report correct dimensions on Height/Width/Left/Top methods.
-  - Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to [compile jquip.js and plugins](http://closure-compiler.appspot.com/home).
+    without, it only checks the visibility of selected elements
+  - **css** plugin improved to report correct dimensions on Height/Width/Left/Top methods
+  - Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to [compile jquip.js and plugins](http://closure-compiler.appspot.com/home)
     - An up-to-date bundle with all of jquip is kept in the repo at [/dist/jquip.all.closure-advanced.js](https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js)
     - [ServiceStack's MiniProfiler](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/includes.js)
       is another example of a jQuery UI changed to using [jquip (advanced compiled version)](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/jquip.all.js)
-      Small changes were required to workaround use of advanced Expressions or jQuery's animation features (all changes left in comments).
-
+      Small changes were required to workaround use of advanced Expressions or jQuery's animation features (all changes made are left in the comments)
 
 ### v.02
 
@@ -259,9 +258,10 @@ modfied to work like jQuery's ajax.
 
   - $.xhr (cross-browser XHR Native Object)
   - [$.ajax](http://api.jquery.com/jQuery.ajax/)
-  - [$.getJSON](http://api.jquery.com/jQuery.getJSON/)
   - $.get
   - $.post
+  - $.getJSON
+  - $.getScript
   - $.formData - convert object hash into a url Encoded string component
 
 ### [custom](https://github.com/mythz/jquip/blob/master/src/jquip.custom.js)
@@ -303,7 +303,7 @@ Non supported examples:
 
   - Script tags in inserted HTML are not automatically evaluated 
   - Attributes and event handlers of cloned html fragments are not copied across
-  - No expression support beyond the browsers native **querySelector** APIs or Sizzle.js shim
+  - Expression support is limited see v.03 release notes
 
 We prefer not to take the perf and code-bloat hit of this quarantine - if your app does hit one of these edge cases you will either need to code a specific workaround for your apps usage (which will in all likely be more optimized than jQuery's general purpose solution) or simply move back to using jQuery.
 

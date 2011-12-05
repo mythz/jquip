@@ -989,10 +989,10 @@ window['$'] = window['jquip'] = (function(){
 	})();
 	$['scriptsLoaded'] = function(cb) {
 		if (isF(cb)) scriptFns.push(cb);
-	}
+	};
 	function loadAsync(url, cb){
 		load.push({url:url,cb:cb});
-	}; $['loadAsync'] = loadAsync;
+	} $['loadAsync'] = loadAsync;
 
 	if (!useQuery && !doc.querySelectorAll) 
 		loadAsync(queryShimCdn, function(){
@@ -1063,20 +1063,14 @@ window['$'] = window['jquip'] = (function(){
 		return function () { };
 	} $['xhr'] = _xhr;
 	function _xhrResp(xhr, dataType) {
-		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
-		switch (dataType) {
-			case "text/xml":
-				return xhr.responseXML;
-			case "json":
-			case "text/json":
-			case "application/json":
-			case "text/javascript":
-			case "application/javascript":
-			case "application/x-javascript":
-				return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
-			default:
-				return xhr.responseText;
-		}
+		dataType = (dataType || xhr.getResponseHeader("Content-Type").split(";")[0]).toLowerCase();
+		if (dataType.indexOf("json") >= 0)
+			return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
+		if (dataType.indexOf("script") >= 0)
+			return eval(xhr.responseText);
+		if (dataType.indexOf("xml") >= 0)
+			return xhr.responseXML;
+		return xhr.responseText;
 	} $['_xhrResp'] = _xhrResp;
 	$['formData'] = function formData(o) {
 		var kvps = [], regEx = /%20/g;
@@ -1121,7 +1115,7 @@ window['$'] = window['jquip'] = (function(){
 
 		if (isPost) {
 			var isJson = o['dataType'].indexOf("json") >= 0;
-			data = isJson ? JSON.stringify(o['data']) : formData(o['data']);
+			data = isJson ? window.JSON.stringify(o['data']) : formData(o['data']);
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
@@ -1150,11 +1144,12 @@ window['$'] = window['jquip'] = (function(){
 		}
 		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
+	$['getScript'] = function (url, success) {
+		return $['get'](url, undefined, success, "script");
+	};
 
 	if (!window.JSON)
 		$['loadAsync']("http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js");
-
-    //TODO $.getScript
 });
 ;$['plug']("css", function ($) {
     var doc = document,

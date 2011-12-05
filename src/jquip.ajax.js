@@ -20,20 +20,14 @@ $['plug']("ajax", function ($) {
 		return function () { };
 	} $['xhr'] = _xhr;
 	function _xhrResp(xhr, dataType) {
-		dataType = dataType || xhr.getResponseHeader("Content-Type").split(";")[0];
-		switch (dataType) {
-			case "text/xml":
-				return xhr.responseXML;
-			case "json":
-			case "text/json":
-			case "application/json":
-			case "text/javascript":
-			case "application/javascript":
-			case "application/x-javascript":
-				return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
-			default:
-				return xhr.responseText;
-		}
+		dataType = (dataType || xhr.getResponseHeader("Content-Type").split(";")[0]).toLowerCase();
+		if (dataType.indexOf("json") >= 0)
+			return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
+		if (dataType.indexOf("script") >= 0)
+			return eval(xhr.responseText);
+		if (dataType.indexOf("xml") >= 0)
+			return xhr.responseXML;
+		return xhr.responseText;
 	} $['_xhrResp'] = _xhrResp;
 	$['formData'] = function formData(o) {
 		var kvps = [], regEx = /%20/g;
@@ -78,7 +72,7 @@ $['plug']("ajax", function ($) {
 
 		if (isPost) {
 			var isJson = o['dataType'].indexOf("json") >= 0;
-			data = isJson ? JSON.stringify(o['data']) : formData(o['data']);
+			data = isJson ? window.JSON.stringify(o['data']) : formData(o['data']);
 			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
 		}
 		xhr.send(data);
@@ -107,9 +101,10 @@ $['plug']("ajax", function ($) {
 		}
 		ajax({'url': url, 'type': "POST", 'data': data, 'success': success, 'dataType': dataType || "text/plain"});
 	};
+	$['getScript'] = function (url, success) {
+		return $['get'](url, undefined, success, "script");
+	};
 
 	if (!window.JSON)
 		$['loadAsync']("http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js");
-
-    //TODO $.getScript
 });
