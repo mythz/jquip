@@ -60,7 +60,7 @@ We would still like to hear feedback on issues/non-implemented core functionalit
   - If the **ajax** plugin is included and browser doesn't have **JSON**, it is also downloaded from cdnjs.com
     - When all scripts loaded the callbacks registered in `$.scriptsLoaded` and `$(callback)` are fired
     - Although if **docready** plugin is installed, `$(callback)` is only called on **DOMContentLoaded**
-  - Modern browsers won't need any additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded
+  - Modern browsers won't need additional downloads, so `$(callback)` fires straight away or after any user scripts are loaded with `$.loadAsync`
   - Added Expr support with **:hidden** and **:visible** baked in. Further **:expression** support can be plugged in by extending `$.Expr`
   - In addition to :expr's, filtering can also be **#id**, **tagName**, **.className** or **[attr=value]**
     - `$().is`, `$().not`, `$().filter` and `$().find` take advantage of the above filtering + Expr support
@@ -69,7 +69,7 @@ We would still like to hear feedback on issues/non-implemented core functionalit
   - **css** plugin improved to report correct dimensions on Height/Width/Left/Top methods
   - Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to [compile jquip.js and plugins](http://closure-compiler.appspot.com/home)
     - An up-to-date bundle with all of jquip is kept in the repo at [/dist/jquip.all.closure-advanced.js](https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js)
-    - [ServiceStack's MiniProfiler](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/includes.js)
+    - [ServiceStack's MvcMiniProfiler Port](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/includes.js)
       is another example of a jQuery UI changed to using [jquip (advanced compiled version)](https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/jquip.all.js)
       Small changes were required to workaround use of advanced Expressions or jQuery's animation features (all changes made are left in the comments)
 
@@ -194,7 +194,7 @@ Methods marked with * are only partially implemented.
   - $.extend
   - $.makeArray
   - $.hasClass
-  - $.typeOf - safe type of an variable
+  - $.typeOf - safe type of a variable
   - $.loadScript - (url, callback [, async]) load an external script dynamically
   - $.loadAsync - load js async and call `$(callback)` or `$.scriptsLoaded` when all scripts have been loaded
   - $.scriptsLoaded - register callbacks to be fired when all async scripts have been loaded.
