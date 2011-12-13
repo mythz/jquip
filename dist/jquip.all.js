@@ -98,7 +98,7 @@ window['$'] = window['jquip'] = (function(){
 		'selector': "",
 		'length': 0,
 		dm: function(args, tbl, cb){
-			var value = args[0], parent, frag, first, i;
+			var value = args[0], parent, frag, first, l, i;
 			if (value){
 				if (this[0]) {
 					if (!(frag = value.nodeType === 3 && value)){
@@ -936,7 +936,7 @@ window['$'] = window['jquip'] = (function(){
 		'insertAfter': "after"
 	}, function(orig, name) {
 		$['fn'][name] = function(sel){
-			var ret = [], to = $(sel), i, els,
+			var ret = [], to = $(sel), i, els, l,
 				p = this.length === 1 && this[0].parentNode;
 			if (p && p.nodeType === 11 && p.childNodes.length === 1 && to.length === 1) {
 				to[orig](this[0]);
@@ -1040,8 +1040,7 @@ window['$'] = window['jquip'] = (function(){
 	};
 
 	return $;
-})();
-;$['plug']("ajax", function ($) {
+})();;$['plug']("ajax", function ($) {
 	var xhrs = [
            function () { return new XMLHttpRequest(); },
            function () { return new ActiveXObject("Microsoft.XMLHTTP"); },
