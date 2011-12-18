@@ -127,15 +127,15 @@ $(document).ready(function() {
     var g = new Backbone.Model({id: 21, label : 'g'});
     var h = new Backbone.Model({id: 22, label : 'h'});
     var col = new Backbone.Collection();
-    
+
     var counts = [];
-     
+
     col.bind('add', function(model, collection, options) {
-      counts.push(options.index);  
+      counts.push(options.index);
     });
-    col.add(f); 
-    col.add(g); 
-    col.add(h); 
+    col.add(f);
+    col.add(g);
+    col.add(h);
     ok(_.isEqual(counts, [0,1,2]));
   });
 
@@ -195,15 +195,15 @@ $(document).ready(function() {
     var g = new Backbone.Model({id: 21, label : 'g'});
     var h = new Backbone.Model({id: 22, label : 'h'});
     var col = new Backbone.Collection([f,g,h]);
-    
+
     var counts = [];
-     
+
     col.bind('remove', function(model, collection, options) {
-      counts.push(options.index);  
+      counts.push(options.index);
     });
-    col.remove(h); 
-    col.remove(g); 
-    col.remove(f); 
+    col.remove(h);
+    col.remove(g);
+    col.remove(f);
     ok(_.isEqual(counts, [2,1,0]));
   });
 
