@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
   module("Backbone.noConflict");
-  
+
   test('Backbone.noConflict', function() {
     var noconflictBackbone = Backbone.noConflict();
     equals(window.Backbone, undefined, 'Returned window.Backbone');
