@@ -1082,8 +1082,10 @@ window['$'] = window['jquip'] = (function(){
 		};
 	});
 
-	function ajax(o) {
+	function ajax(url, o) {
 		var xhr = _xhr(), timer, n = 0;
+		if (typeof url === "object") o = url;
+		else o['url'] = url;
 		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': "application/json" });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
