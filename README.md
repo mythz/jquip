@@ -391,3 +391,4 @@ Feedback is welcome, drop me a line on [@demisbellot](http://twitter.com/demisbe
 
   - [@mythz](https://github.com/mythz) (Demis Bellot)
   - [@jeyb](https://github.com/jeyb) (Jey Balachandran)
+  - [@solarissmoke](https://github.com/solarissmoke) (solarissmoke)
