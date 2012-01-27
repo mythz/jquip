@@ -1086,7 +1086,7 @@ window['$'] = window['jquip'] = (function(){
 		var xhr = _xhr(), timer, n = 0;
 		if (typeof url === "object") o = url;
 		else o['url'] = url;
-		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': null, 'processData': true });
+		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': null, 'processData': true, 'headers': {"X-Requested-With": "XMLHttpRequest" }});
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
 		xhr.onreadystatechange = function() {
@@ -1116,6 +1116,11 @@ window['$'] = window['jquip'] = (function(){
 
 		if (!isPost && data) url += "?" + data;
 		xhr.open(o['type'], url);
+
+		try {
+			for (var i in o.headers) 
+				xhr.setRequestHeader(i, o.headers[i]);			
+		} catch(_) { console.log(_) }
 
 		if (isPost)
 			xhr.setRequestHeader("Content-Type", o['contentType']);
