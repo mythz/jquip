@@ -1086,7 +1086,7 @@ window['$'] = window['jquip'] = (function(){
 		var xhr = _xhr(), timer, n = 0;
 		if (typeof url === "object") o = url;
 		else o['url'] = url;
-		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': "application/json" });
+		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': null, 'processData': true });
 		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
 		var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
 		xhr.onreadystatechange = function() {
@@ -1111,14 +1111,15 @@ window['$'] = window['jquip'] = (function(){
 		};
 		var url = o['url'], data = null;
 		var isPost = o['type'] == "POST" || o['type'] == "PUT";
-		if (!isPost && o['data']) url += "?" + formData(o['data']);
+		if( o['data'] && o['processData'] && typeof o['data'] == 'object' )
+			data = $['formData'](o['data']);
+
+		if (!isPost && data) url += "?" + data;
 		xhr.open(o['type'], url);
 
-		if (isPost) {
-			var isJson = o['dataType'].indexOf("json") >= 0;
-			data = isJson ? window.JSON.stringify(o['data']) : formData(o['data']);
-			xhr.setRequestHeader("Content-Type", isJson ? "application/json" : "application/x-www-form-urlencoded");
-		}
+		if (isPost)
+			xhr.setRequestHeader("Content-Type", o['contentType']);
+
 		xhr.send(data);
 	} $['ajax'] = ajax;
 	$['getJSON'] = function (url, data, success, error) {
