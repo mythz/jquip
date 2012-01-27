@@ -7,14 +7,22 @@ function echo(req,res) {
   res.send({
     method: req.method,
     headers: req.headers,
-    params: req.params,
-    body: req.body
+    query: req.query,
+    body: req.rawBody
   });
+  console.log(req.method);
 }
 app.configure(function(){
   app.use(express.static(__dirname + '/../../src'));
   app.use(express.static(__dirname + '/public'));
   app.use(express.methodOverride());
+  app.use (function(req, res, next) {
+    if ('GET' == req.method || 'HEAD' == req.method) return next();
+    req.rawBody = '';
+    req.setEncoding('utf8');
+    req.on('data', function(chunk) { req.rawBody += chunk; });
+    req.on('end', function() { next(); });
+  });
 });
 
 app.get('/echo', echo);
