@@ -72,16 +72,22 @@ $['plug']("ajax", function ($) {
 		if( o['data'] && o['processData'] && typeof o['data'] == 'object' )
 			data = $['formData'](o['data']);
 
-		if (!isPost && data) url += "?" + data;
+		if (!isPost && data) {
+			url += "?" + data;
+			data = null;
+		}
 		xhr.open(o['type'], url);
 
 		try {
 			for (var i in o.headers) 
-				xhr.setRequestHeader(i, o.headers[i]);			
+				xhr.setRequestHeader(i, o.headers[i]);
 		} catch(_) { console.log(_) }
 
-		if (isPost)
+		if (isPost) {
+			if(o['contentType'].indexOf('json')>=0)
+				data = o['data'];
 			xhr.setRequestHeader("Content-Type", o['contentType']);
+		}
 
 		xhr.send(data);
 	} $['ajax'] = ajax;
