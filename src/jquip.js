@@ -707,7 +707,7 @@ window['$'] = window['jquip'] = (function(){
 	function data(el, name, setVal){
 		if (!el) return {};
 		if (name && setVal){
-			el.setAttribute(name, setVal);
+			el.setAttribute("data-"+name, setVal);
 			return null;
 		}
 		var o = {};
