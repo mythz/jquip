@@ -185,7 +185,11 @@ window['$'] = window['jquip'] = (function(){
 		});
 	};
 	p['data'] = function(name, setVal){
-		return data(this[0], name, setVal);
+		return	(isS(name) && setVal === undefined)
+	        	? data(this[0], name)
+	        	: this['each'](function(){
+				data(this, name, setVal);
+			});
 	};
 	p['append'] = function(){
 		return this.dm(arguments, true, function(el){
