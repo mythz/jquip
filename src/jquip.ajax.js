@@ -19,10 +19,22 @@ $['plug']("ajax", function ($) {
 		}
 		return function () { };
 	} $['xhr'] = _xhr;
-	function _xhrResp(xhr, dataType) {
+	function _xhrResp(xhr, dataType, o) {
 		dataType = (dataType || xhr.getResponseHeader("Content-Type").split(";")[0]).toLowerCase();
-		if (dataType.indexOf("json") >= 0)
-			return window.JSON ? window.JSON['parse'](xhr.responseText) : eval(xhr.responseText);
+		if (dataType.indexOf("json") >= 0){
+			var j = false; 
+			if(window.JSON){
+				try{ 
+					j = window.JSON['parse'](xhr.responseText); 
+				}
+				catch(e){ 
+					o.error(xhr, xhr.status, e.message);
+				}
+			}else{
+				j = eval(xhr.responseText);
+			}
+			return j;
+		}
 		if (dataType.indexOf("script") >= 0)
 			return eval(xhr.responseText);
 		if (dataType.indexOf("xml") >= 0)
@@ -51,8 +63,8 @@ $['plug']("ajax", function ($) {
 			if (xhr.readyState == 4){
 				if (timer) clearTimeout(timer);
 				if (xhr.status < 300){
-					var res = _xhrResp(xhr, o.dataType);
-					if (o['success'])
+					var res = _xhrResp(xhr, o.dataType, o);
+					if (o['success'] && !!res)
 						o['success'](res);
 					evtCtx['trigger']("ajaxSuccess", [xhr, res, o]);
 				}
