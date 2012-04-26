@@ -185,7 +185,11 @@ window['$'] = window['jquip'] = (function(){
 		});
 	};
 	p['data'] = function(name, setVal){
-		return data(this[0], name, setVal);
+		return	(isS(name) && setVal === undefined)
+	        	? data(this[0], name)
+	        	: this['each'](function(){
+				data(this, name, setVal);
+			});
 	};
 	p['append'] = function(){
 		return this.dm(arguments, true, function(el){
@@ -707,7 +711,7 @@ window['$'] = window['jquip'] = (function(){
 	function data(el, name, setVal){
 		if (!el) return {};
 		if (name && setVal){
-			el.setAttribute(name, setVal);
+			el.setAttribute("data-"+name, setVal);
 			return null;
 		}
 		var o = {};

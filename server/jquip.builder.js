@@ -40,6 +40,8 @@ console.log("loaded: ", Object.keys(staticFiles));
 
 var isCore = { "/jquip.js": true, "/jquip.min.js": true };
 
+var port = process.argv[2] || 90;
+
 http.createServer(function (req, res) {
 	var reqUrl = url.parse(req.url), path = reqUrl.pathname.replace(VIRTUAL_PATH,'');
 	if (reqUrl.pathname == VIRTUAL_PATH){
@@ -98,5 +100,5 @@ http.createServer(function (req, res) {
 		res.end("Path not found:\n" + sb);
 	}
 })
-.listen(90, "127.0.0.1");
-console.log('Server running at http://127.0.0.1:90/');
+.listen(port, "127.0.0.1");
+console.log('Server running at http://127.0.0.1:'+port+'/');
