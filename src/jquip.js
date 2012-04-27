@@ -185,7 +185,7 @@ window['$'] = window['jquip'] = (function(){
 		});
 	};
 	p['data'] = function(name, setVal){
-		return	(isS(name) && setVal === undefined)
+		return	(setVal === undefined)
 	        	? data(this[0], name)
 	        	: this['each'](function(){
 				data(this, name, setVal);
