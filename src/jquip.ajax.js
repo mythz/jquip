@@ -19,90 +19,92 @@ $['plug']("ajax", function ($) {
 		}
 		return function () { };
 	} $['xhr'] = _xhr;
-	function _xhrResp(xhr, dataType, o) {
-		dataType = (dataType || xhr.getResponseHeader("Content-Type").split(";")[0]).toLowerCase();
-		if (dataType.indexOf("json") >= 0){
-			var j = false; 
-			if(window.JSON){
-				try{ 
-					j = window.JSON['parse'](xhr.responseText); 
-				}
-				catch(e){ 
-					o.error(xhr, xhr.status, e.message);
-				}
-			}else{
-				j = eval(xhr.responseText);
-			}
-			return j;
-		}
-		if (dataType.indexOf("script") >= 0)
-			return eval(xhr.responseText);
-		if (dataType.indexOf("xml") >= 0)
-			return xhr.responseXML;
-		return xhr.responseText;
-	} $['_xhrResp'] = _xhrResp;
-	$['formData'] = function formData(o) {
-		var kvps = [], regEx = /%20/g;
-		for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
-		return kvps.join('&');
-	};
-	$['each']("ajaxStart ajaxStop ajaxComplete ajaxError ajaxSuccess ajaxSend".split(" "), function(i,o){
-		$['fn'][o] = function(f){
-			return this['bind'](o, f);
-		};
-	});
+	function _xhrResp(xhr, dataType) {
+        dataType = (dataType || xhr.getResponseHeader("Content-Type").split(";")[0]).toLowerCase();
+        if (dataType.indexOf("json") >= 0){
+            var j = false;
+            if(window.JSON){
+                j = window.JSON['parse'](xhr.responseText);
+            }else{
+                j = eval(xhr.responseText);
+            }
+            return j;
+        }
+        if (dataType.indexOf("script") >= 0)
+            return eval(xhr.responseText);
+        if (dataType.indexOf("xml") >= 0)
+            return xhr.responseXML;
+        return xhr.responseText;
+    } $['_xhrResp'] = _xhrResp;
+    $['formData'] = function formData(o) {
+        var kvps = [], regEx = /%20/g;
+        for (var k in o) kvps.push(encodeURIComponent(k).replace(regEx, "+") + "=" + encodeURIComponent(o[k].toString()).replace(regEx, "+"));
+        return kvps.join('&');
+    };
+    $['each']("ajaxStart ajaxStop ajaxComplete ajaxError ajaxSuccess ajaxSend".split(" "), function(i,o){
+        $['fn'][o] = function(f){
+            return this['bind'](o, f);
+        };
+    });
 
-	function ajax(url, o) {
-		var xhr = _xhr(), timer, n = 0;
-		if (typeof url === "object") o = url;
-		else o['url'] = url;
-		o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': null, 'processData': true, 'headers': {"X-Requested-With": "XMLHttpRequest" }});
-		if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
-		var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4){
-				if (timer) clearTimeout(timer);
-				if (xhr.status < 300){
-					var res = _xhrResp(xhr, o.dataType, o);
-					if (o['success'] && !!res)
-						o['success'](res);
-					evtCtx['trigger']("ajaxSuccess", [xhr, res, o]);
-				}
-				else {
-					if (o.error)
-						o.error(xhr, xhr.status, xhr.statusText);
-					evtCtx['trigger'](cbCtx, "ajaxError", [xhr, xhr.statusText, o]);
-				}
-				if (o['complete'])
-					o['complete'](xhr, xhr.statusText);
-				evtCtx['trigger'](cbCtx, "ajaxComplete", [xhr, o]);
-			}
-			else if (o['progress']) o['progress'](++n);
-		};
-		var url = o['url'], data = null;
-		var isPost = o['type'] == "POST" || o['type'] == "PUT";
-		if( o['data'] && o['processData'] && typeof o['data'] == 'object' )
-			data = $['formData'](o['data']);
+    function ajax(url, o) {
+        var xhr = _xhr(), timer, n = 0;
+        if (typeof url === "object") o = url;
+        else o['url'] = url;
+        o = $['_defaults'](o, { 'userAgent': "XMLHttpRequest", 'lang': "en", 'type': "GET", 'data': null, 'contentType': "application/x-www-form-urlencoded", 'dataType': null, 'processData': true, 'headers': {"X-Requested-With": "XMLHttpRequest" }});
+        if (o.timeout) timer = setTimeout(function () { xhr.abort(); if (o.timeoutFn) o.timeoutFn(o.url); }, o.timeout);
+        var cbCtx = $(o['context'] || document), evtCtx = cbCtx;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4){
+                if (timer) clearTimeout(timer);
+                if (xhr.status < 300){
+                    var res;
+                    try{
+                        res = _xhrResp(xhr, o.dataType, o);
+                    if (o['success'] && (o.dataType.indexOf('json')>=0 || !!res))
+                        o['success'](res);
+                    evtCtx['trigger'](cbCtx,"ajaxSuccess", [xhr, res, o]);
+                    }catch(e){
+                        if (o.error)
+                        o.error(xhr, xhr.status, xhr.statusText);
+                    evtCtx['trigger'](cbCtx, "ajaxError", [xhr, xhr.statusText, o]);
+                    }
+                }
+                else {
+                    if (o.error)
+                        o.error(xhr, xhr.status, xhr.statusText);
+                    evtCtx['trigger'](cbCtx, "ajaxError", [xhr, xhr.statusText, o]);
+                }
+                if (o['complete'])
+                    o['complete'](xhr, xhr.statusText);
+                evtCtx['trigger'](cbCtx, "ajaxComplete", [xhr, o]);
+            }
+            else if (o['progress']) o['progress'](++n);
+        };
+        var url = o['url'], data = null;
+        var isPost = o['type'] == "POST" || o['type'] == "PUT";
+        if( o['data'] && o['processData'] && typeof o['data'] == 'object' )
+            data = $['formData'](o['data']);
 
-		if (!isPost && data) {
-			url += "?" + data;
-			data = null;
-		}
-		xhr.open(o['type'], url);
+        if (!isPost && data) {
+            url += "?" + data;
+            data = null;
+        }
+        xhr.open(o['type'], url);
 
-		try {
-			for (var i in o.headers) 
-				xhr.setRequestHeader(i, o.headers[i]);
-		} catch(_) { console.log(_) }
+        try {
+            for (var i in o.headers)
+                xhr.setRequestHeader(i, o.headers[i]);
+        } catch(_) { console.log(_) }
 
-		if (isPost) {
-			if(o['contentType'].indexOf('json')>=0)
-				data = o['data'];
-			xhr.setRequestHeader("Content-Type", o['contentType']);
-		}
+        if (isPost) {
+            if(o['contentType'].indexOf('json')>=0)
+                data = o['data'];
+            xhr.setRequestHeader("Content-Type", o['contentType']);
+        }
 
-		xhr.send(data);
-	} $['ajax'] = ajax;
+        xhr.send(data);
+    } $['ajax'] = ajax;
 	$['getJSON'] = function (url, data, success, error) {
 		if ($['isFunction'](data)){
 			error = success;
