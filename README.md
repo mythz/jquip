@@ -38,9 +38,9 @@ Most code has been ported from jQuery or Zepto.js and optimized where possible, 
 
 Licence: http://www.opensource.org/licenses/mit-license.php (Same as jQuery and Zepto.js)
 
-### Build customizable jquip packages with the [jQuip Library Builder service](http://www.servicestack.net/jqbuilder/)
+### Build customizable jquip packages with the [jQuip Library Builder service](http://jquip.ubixar.com/)
 
-The [jquip Simple Demo](http://servicestack.net/jqbuilder/demo.htm) is also available to try online, whilst a version [compiled with Google's Closure Library (Advanced mode) is in the repo](https://github.com/mythz/jquip/blob/master/demo.closure-advanced.htm).
+The [jquip Simple Demo](http://jquip.ubixar.com/demo.htm) is also available to try online, whilst a version [compiled with Google's Closure Library (Advanced mode) is in the repo](https://github.com/mythz/jquip/blob/master/demo.closure-advanced.htm).
 
 #### Disclaimer
 
@@ -103,7 +103,7 @@ We would still like to hear feedback on issues/non-implemented core functionalit
 ## Roadmap
 
   - Getting jquip to work in Google Closure Compiler's advanced compilation mode without warnings so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!
-  - Add the Closure Advanced Compiler option to the [jquip library service](http://www.servicestack.net/jqbuilder/)
+  - Add the Closure Advanced Compiler option to the [jquip library service](http://jquip.ubixar.com/)
   - Add missing shims to Abstracted Events (decided to add them after all due to popular demand)
   - Add caching to improve performance
 
