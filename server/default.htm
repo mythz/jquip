@@ -84,7 +84,7 @@
     <h5 id="len"></h5>
 
 <!-- eating our own dogfood :) -->
-<script type="text/javascript" src="jquip.events.ajax.js"></script>
+<script type="text/javascript" src="jquip.events.css.ajax.js"></script>
 <script type="text/javascript">
 
 var plugins = [
@@ -131,6 +131,9 @@ function generate() {
 	});
 }
 generate();
+
+$("textarea").height($(document).height() - 450);
+
 </script>
 
 <script type="text/javascript">
