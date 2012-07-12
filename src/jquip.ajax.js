@@ -58,16 +58,16 @@ $['plug']("ajax", function ($) {
             if (xhr.readyState == 4){
                 if (timer) clearTimeout(timer);
                 if (xhr.status < 300){
-                    var res, decode = true;
+                    var res, decode = true, dt = o.dataType || "";
                     try{
-                        res = _xhrResp(xhr, o.dataType, o);
+                        res = _xhrResp(xhr, dt, o);
                     }catch(e){
                         decode = false;
                         if (o.error)
                         o.error(xhr, xhr.status, xhr.statusText);
                     evtCtx['trigger'](cbCtx, "ajaxError", [xhr, xhr.statusText, o]);
                     }
-                    if (o['success'] && decode && (o.dataType.indexOf('json')>=0 || !!res))
+                    if (o['success'] && decode && (dt.indexOf('json')>=0 || !!res))
                         o['success'](res);
                     evtCtx['trigger'](cbCtx,"ajaxSuccess", [xhr, res, o]);
 
