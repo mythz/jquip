@@ -62,9 +62,11 @@ $['plug']("events", function($){
 	function createProxy(evt){
 		var proxy = $['extend']({originalEvent: evt}, evt);
 		$['_each'](evtMethods, function(key){
-			proxy[key] = function(){
-				return evt[key].apply(evt, arguments);
-			};
+			if(evt[key]){
+				proxy[key] = function(){
+					return evt[key].apply(evt, arguments);
+				};
+			}
 		});
 		return proxy;
 	}
@@ -100,7 +102,7 @@ $['plug']("events", function($){
 	p['delegate'] = function(sel, evt, cb){
 		return this['each'](function(i, el){
 			addEvt(el, evt, cb, sel, function(e){
-				var target = e.target, nodes = $['$$'](sel, el);
+				var target = e.target||e.srcElement, nodes = $['$$'](sel, el);
 				while (target && nodes.indexOf(target) < 0)
 					target = target.parentNode;
 				if (target && !(target === el) && !(target === document)){
