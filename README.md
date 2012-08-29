@@ -387,8 +387,10 @@ and a comprehensive test suite so we can properly identify the parts of jQuery s
 
 Feedback is welcome, drop me a line on [@demisbellot](http://twitter.com/demisbellot).
 
+<a name="contributors"></a>
 ## Contributors
 
   - [@mythz](https://github.com/mythz) (Demis Bellot)
   - [@jeyb](https://github.com/jeyb) (Jey Balachandran)
   - [@solarissmoke](https://github.com/solarissmoke) (solarissmoke)
+  - [@statianzo](https://github.com/statianzo) (Jason Staten)
