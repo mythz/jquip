@@ -424,6 +424,13 @@ window['$'] = window['jquip'] = (function(){
 			wrapperClone.append($(this));
 		});
 	};
+	p['prop'] = function(name, setVal) {
+		if (typeof setVal === "undefined")
+			return this[0] && this[0][name];
+		return this.each(function() {
+			this[name] = setVal;
+		});
+	};
 
 	$['Expr'] = {
 		'hidden': function(el){

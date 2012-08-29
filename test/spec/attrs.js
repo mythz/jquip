@@ -1,5 +1,5 @@
 (function(){
-  describe('jquip.attrs', function() {
+  describe('jquip.attrs and jquip.prop', function() {
     var el;
     beforeEach(function() {
       el = jquip('<div id="joe" data-age="35">');
@@ -12,5 +12,21 @@
     it('returns an empty object if it is the document element', function() {
       expect(jquip.attrs(document)).toEqual({});
     });
+
+    it('reads property of inner element', function() {
+      var checkbox = jquip('<input type="checkbox" />');
+      checkbox.attr('checked', '');
+
+      expect(checkbox.prop('checked')).toBe(true);
+    });
+
+    it('sets property of all selected elements', function() {
+      var root = jquip('<div><i>a</i><i>b</i><i>c</i></div>');
+      root.find('i').prop('innerText', 'x');
+
+      expect(root.text()).toBe('xxx');
+    });
+
+
   });
 }());
