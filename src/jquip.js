@@ -205,9 +205,12 @@ window['$'] = window['jquip'] = (function(){
 		});
 	};
 	p['before'] = function(){
-		return this.dm(arguments, false, function(el){
-			this.parentNode.insertBefore(el, this);
-		});
+		if (this[0] && this[0].parentNode) {
+			return this.dm(arguments, false, function(el){
+				this.parentNode.insertBefore(el, this);
+			});
+		}
+		return this;
 	};
 	p['after'] = function(){
 		if (this[0] && this[0].parentNode){
@@ -413,6 +416,13 @@ window['$'] = window['jquip'] = (function(){
                   })
 				: { name: el.name, value: val.replace(rCRLF, "\r\n") };
 		}).get();
+	};
+	p['wrap'] = function(wrapper) {
+		return this['each'](function() {
+			var wrapperClone = $($(wrapper)[0].cloneNode(false));
+			$(this).before(wrapperClone);
+			wrapperClone.append($(this));
+		});
 	};
 
 	$['Expr'] = {
