@@ -42,7 +42,8 @@ window['$'] = window['jquip'] = (function(){
 		indexOf = ArrayProto.indexOf,
 		nativeForEach = ArrayProto.forEach,
 		nativeFilter = ArrayProto.filter,
-		nativeIndexOf = ArrayProto.indexOf;
+		nativeIndexOf = ArrayProto.indexOf,
+		expando = 'jq-' + (+new Date());
 
 	if (rnotwhite.test("\xA0")){
 		trimLeft = /^[\s\xA0]+/;
@@ -88,7 +89,7 @@ window['$'] = window['jquip'] = (function(){
 		return this['make'](sel);
 	}
 
-	var ctors=[], plugins={}, jquid=0, _cache={_id:0}, _display = {}, p;
+	var ctors=[], plugins={}, jquid=1, _cache={_id:0}, _display = {}, p;
 	function $(sel, ctx){
 		return new J(sel, ctx);
 	}
@@ -204,9 +205,12 @@ window['$'] = window['jquip'] = (function(){
 		});
 	};
 	p['before'] = function(){
-		return this.dm(arguments, false, function(el){
-			this.parentNode.insertBefore(el, this);
-		});
+		if (this[0] && this[0].parentNode) {
+			return this.dm(arguments, false, function(el){
+				this.parentNode.insertBefore(el, this);
+			});
+		}
+		return this;
 	};
 	p['after'] = function(){
 		if (this[0] && this[0].parentNode){
@@ -413,6 +417,20 @@ window['$'] = window['jquip'] = (function(){
 				: { name: el.name, value: val.replace(rCRLF, "\r\n") };
 		}).get();
 	};
+	p['wrap'] = function(wrapper) {
+		return this['each'](function() {
+			var wrapperClone = $($(wrapper)[0].cloneNode(false));
+			$(this).before(wrapperClone);
+			wrapperClone.append($(this));
+		});
+	};
+	p['prop'] = function(name, setVal) {
+		if (typeof setVal === "undefined")
+			return this[0] && this[0][name];
+		return this.each(function() {
+			this[name] = setVal;
+		});
+	};
 
 	$['Expr'] = {
 		'hidden': function(el){
@@ -448,10 +466,11 @@ window['$'] = window['jquip'] = (function(){
 	}
 	function cache(el, name, val)
 	{
-		var id = $['data'](el,"_J");
+		var id = el[expando];
 		if (typeof val === "undefined")
-			return id && _cache[id] && _cache[id][name];
-		if (!id) $['data'](el,"_J", (id=++_cache.id));
+			return id && _cache[id] && (name ? _cache[id][name] : _cache[id]);
+
+		if (!id) id = el[expando] = jquid++;
 		return (_cache[id] || (_cache[id]={}))[name] = val;
 	}
 	function display(tag) {
@@ -710,22 +729,14 @@ window['$'] = window['jquip'] = (function(){
 	} $['map'] = map;
 	function data(el, name, setVal){
 		if (!el) return {};
-		if (name && setVal){
-			el.setAttribute("data-"+name, setVal);
-			return null;
-		}
-		var o = {};
-		_each(attrs(el), function(val, aName){
-			if (aName.indexOf("data-") !== 0 || !val) return;
-			o[aName.substr("data-".length)] = val;
-		});
-		if (isS(name)) return o[name];
-		return o;
+		var res = cache(el, name, setVal);
+		return res || attrs(el)['data-' + name];
 	} $['data'] = data;
 	function attrs(el){
 		var o = {};
-		for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
-			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
+		if (el.nodeType == 1)
+			for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
+				o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
 	} $['attrs'] = attrs;
 	function eqSI(str1, str2){
