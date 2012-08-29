@@ -727,8 +727,9 @@ window['$'] = window['jquip'] = (function(){
 	} $['data'] = data;
 	function attrs(el){
 		var o = {};
-		for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
-			o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
+		if (el.nodeType == 1)
+			for(var i = 0, elAttrs = el.attributes, len = elAttrs.length; i < len; i++)
+				o[elAttrs.item(i).nodeName] = elAttrs.item(i).nodeValue;
 		return o;
 	} $['attrs'] = attrs;
 	function eqSI(str1, str2){
