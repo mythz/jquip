@@ -431,6 +431,9 @@ window['$'] = window['jquip'] = (function(){
 			this[name] = setVal;
 		});
 	};
+	p['clone'] = function() {
+		return $(this.map(function() { return this.cloneNode(true); }));
+	};
 
 	$['Expr'] = {
 		'hidden': function(el){
