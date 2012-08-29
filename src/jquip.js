@@ -42,7 +42,8 @@ window['$'] = window['jquip'] = (function(){
 		indexOf = ArrayProto.indexOf,
 		nativeForEach = ArrayProto.forEach,
 		nativeFilter = ArrayProto.filter,
-		nativeIndexOf = ArrayProto.indexOf;
+		nativeIndexOf = ArrayProto.indexOf,
+		expando = 'jq-' + (+new Date());
 
 	if (rnotwhite.test("\xA0")){
 		trimLeft = /^[\s\xA0]+/;
@@ -88,7 +89,7 @@ window['$'] = window['jquip'] = (function(){
 		return this['make'](sel);
 	}
 
-	var ctors=[], plugins={}, jquid=0, _cache={_id:0}, _display = {}, p;
+	var ctors=[], plugins={}, jquid=1, _cache={_id:0}, _display = {}, p;
 	function $(sel, ctx){
 		return new J(sel, ctx);
 	}
@@ -448,10 +449,11 @@ window['$'] = window['jquip'] = (function(){
 	}
 	function cache(el, name, val)
 	{
-		var id = $['data'](el,"_J");
+		var id = el[expando];
 		if (typeof val === "undefined")
-			return id && _cache[id] && _cache[id][name];
-		if (!id) $['data'](el,"_J", (id=++_cache.id));
+			return id && _cache[id] && (name ? _cache[id][name] : _cache[id]);
+
+		if (!id) id = el[expando] = jquid++;
 		return (_cache[id] || (_cache[id]={}))[name] = val;
 	}
 	function display(tag) {
@@ -710,17 +712,8 @@ window['$'] = window['jquip'] = (function(){
 	} $['map'] = map;
 	function data(el, name, setVal){
 		if (!el) return {};
-		if (name && setVal){
-			el.setAttribute("data-"+name, setVal);
-			return null;
-		}
-		var o = {};
-		_each(attrs(el), function(val, aName){
-			if (aName.indexOf("data-") !== 0 || !val) return;
-			o[aName.substr("data-".length)] = val;
-		});
-		if (isS(name)) return o[name];
-		return o;
+		var res = cache(el, name, setVal);
+		return res || attrs(el)['data-' + name];
 	} $['data'] = data;
 	function attrs(el){
 		var o = {};
