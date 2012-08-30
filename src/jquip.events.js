@@ -126,6 +126,14 @@ $['plug']("events", function($){
 		$(doc.body)['undelegate'](this['selector'], evt, cb);
 		return this;
 	};
+
+	p['on'] = function(evt, sel, cb){
+		return typeof sel === 'function' ? this.bind(evt, sel) : this.delegate(evt, sel, cb);
+	};
+
+	p['off'] = function(evt, sel, cb){
+		return typeof sel === 'string' ? this.undelegate(evt, sel, cb) : this.unbind(evt, cb);
+	};
     p['trigger'] = function (evt) {
         return this['each'](function () {
             if ((evt == "click" || evt == "blur" || evt == "focus") && this[evt])
