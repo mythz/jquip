@@ -434,6 +434,13 @@ window['$'] = window['jquip'] = (function(){
 	p['clone'] = function() {
 		return $(this.map(function() { return this.cloneNode(true); }));
 	};
+	p['toggleClass'] = function(className, val) {
+		return this['each'](function() {
+			var el = $(this);
+			(typeof val === 'undefined' ? !el.hasClass(className) : val)
+				? el.addClass(className) : el.removeClass(className);
+		});
+	};
 
 	$['Expr'] = {
 		'hidden': function(el){
