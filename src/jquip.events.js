@@ -94,8 +94,8 @@ $['plug']("events", function($){
 		return this['each'](function(){
 			var self = this;
 			addEvt(this, evt, function wrapper(){
-				cb();
-				 remEvt(self, evt, arguments.callee);
+				cb.apply(self, arguments);
+				remEvt(self, evt, arguments.callee);
 			});
 		});
 	};
@@ -125,6 +125,14 @@ $['plug']("events", function($){
 	p['die'] = function(evt, cb){
 		$(doc.body)['undelegate'](this['selector'], evt, cb);
 		return this;
+	};
+
+	p['on'] = function(evt, sel, cb){
+		return typeof sel === 'function' ? this.bind(evt, sel) : this.delegate(evt, sel, cb);
+	};
+
+	p['off'] = function(evt, sel, cb){
+		return typeof sel === 'string' ? this.undelegate(evt, sel, cb) : this.unbind(evt, cb);
 	};
     p['trigger'] = function (evt) {
         return this['each'](function () {
