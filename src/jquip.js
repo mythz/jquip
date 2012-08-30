@@ -85,7 +85,7 @@ window['$'] = window['jquip'] = (function(){
 					? $["fn"]["attr"].call(sel, ctx) && sel
 					: sel
 				: htmlFrag(sel).childNodes
-			: $$(sel, ctx);
+			: $$((this['selector'] = sel), ctx);
 		return this['make'](sel);
 	}
 

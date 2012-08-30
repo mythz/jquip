@@ -136,6 +136,31 @@
       });
     });
 
+    describe('live and die', function() {
+      it('subscribes to event of the selector', function(){
+        var spy = jasmine.createSpy('cb'),
+            liver;
+
+        $('.liver').live('click', spy);
+        liver = $('<div class="liver">').appendTo('body');
+        liver.click()
+
+        expect(spy).toHaveBeenCalled();
+      });
+
+      it('unsubscribes from of the selector', function(){
+        var spy = jasmine.createSpy('cb'),
+            liver;
+
+        $('.liver').live('click', spy);
+        $('.liver').die('click');
+        liver = $('<div class="liver">').appendTo('body');
+        liver.click()
+
+        expect(spy).not.toHaveBeenCalled();
+      });
+    });
+
 
 
   });
