@@ -94,8 +94,8 @@ $['plug']("events", function($){
 		return this['each'](function(){
 			var self = this;
 			addEvt(this, evt, function wrapper(){
-				cb();
-				 remEvt(self, evt, arguments.callee);
+				cb.apply(self, arguments);
+				remEvt(self, evt, arguments.callee);
 			});
 		});
 	};

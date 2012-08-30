@@ -161,6 +161,24 @@
       });
     });
 
+    describe('one', function() {
+      it('subscribes for a single trigger', function() {
+        var spy = jasmine.createSpy('cb');
+        el.one('click', spy);
+        el.click();
+        el.click();
+
+        expect(spy.calls.length).toBe(1);
+      });
+
+      it('keeps the correct "this" context', function() {
+        el.one('click', function() {
+          expect(this).toBe(el[0]);
+        });
+        el.click();
+      });
+    });
+
 
 
   });
