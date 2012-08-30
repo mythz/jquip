@@ -9,7 +9,7 @@ To this end, follow this project if you want jquery.com to measure the demand fo
 
 Based on recent posts it does looks like jQuery wants to [build a slimmer jQuery](http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/). Although we don't think giving a trim is going far enough, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their [recent conversations into future file size reduction](https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion) do sound promising. 
 
-# Introducing jquip - aka jQuery-in-parts.
+# Introducing jquip - aka jQuery-in-parts. [![Build Status](https://secure.travis-ci.org/mythz/jquip.png)](http://travis-ci.org/mythz/jquip)
 
 Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.
 
