@@ -44,4 +44,18 @@
       list.remove();
     });
   });
+  describe('jquip.clone', function() {
+
+    it('creates a copy', function() {
+      var els = jquip('<div><i>1</i><i>2</i></div>').find('i');
+      var clones = els.clone();
+      clones.html('x')
+
+      expect(els[0].innerText).toBe('1')
+      expect(els[1].innerText).toBe('2')
+
+      expect(clones[0].innerText).toBe('x')
+      expect(clones[1].innerText).toBe('x')
+    });
+  });
 }());
