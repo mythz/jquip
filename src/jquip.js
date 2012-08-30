@@ -617,33 +617,14 @@ window['$'] = window['jquip'] = (function(){
 					if (fn.call(ctx, o[key], key, o) === breaker) return;
 		}
 	} $['_each'] = _each;
-    function attr(el, name) {
-        return (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
-            ? el.value
-            : (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
-    }
-    var rfilter = [ //[ID, TAG, CLASS, ATTR]
-        /#((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
-        /^((?:[\w\u00c0-\uFFFF\*\-]|\\.)+)/,
-        /\.((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
-        /\[\s*((?:[\w\u00c0-\uFFFF\-]|\\.)+)\s*(?:(\S?=)\s*(?:(['"])(.*?)\3|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
-    ];
-    function filter(sel, els) {
-        var ret = [], i, j, l, el, m;
-        for (i = 0, l = rfilter.length; i < l; i++)
-            if (m = rfilter[i].exec(sel)) break;
-        if (i < rfilter.length){
-            for (j = 0; (el = els[j]); j++)
-                if ((i == 0 && m[1] == el.id)
-                   || (i == 1 && eqSI(m[1], el.tagName))
-                   || (i == 2 && eqClass(el, m[1]))
-                   || (i == 3 && m[2] == attr(el, m[1])))
-                    ret.push(el);
-        }
-        else
-            warn(sel + " not supported");
-        return ret;
-    } $['filter'] = filter;
+	function attr(el, name) {
+			return (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
+					? el.value
+					: (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
+	}
+	function filter(sel, els) {
+		return typeof sel === 'undefined' ? $(els) : $(els).filter(sel);
+	} $['filter'] = filter;
 	function _indexOf(arr, val){
 		if (arr == null) return -1;
 		var i, l;

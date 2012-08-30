@@ -115,5 +115,33 @@
       expect(ids(res)).toBe('i6,i7');
     });
 
+    describe('children', function() {
+      var template = [
+      '<div class="outer">',
+      '  <div id="d1"></div>',
+      '  <div id="d2" class="b"></div>',
+      '  <div id="d3"></div>',
+      '</div>'
+      ].join(''), el;
+
+      beforeEach(function() { el = $(template).appendTo('body'); });
+      afterEach(function() { el.remove(); });
+
+      it('selects children by tag name', function() {
+        var res = el.children('div')
+        expect(ids(res)).toBe('d1,d2,d3');
+      });
+
+      it('selects children by class name', function() {
+        var res = el.children('.b')
+        expect(ids(res)).toBe('d2');
+      });
+
+      it('selects children by tag and class name', function() {
+        var res = el.children('div.b')
+        expect(ids(res)).toBe('d2');
+      });
+    });
+
   });
 }(jquip));
