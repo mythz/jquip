@@ -115,6 +115,14 @@
       expect(ids(res)).toBe('i6,i7');
     });
 
+    it('finds on multi-root document', function() {
+      spyOn(console, 'warn');
+      var res = $('<p>foo</p> <p><i class="yo">bar</i></p>').find('.yo')
+      expect(res.length).toBe(1);
+      expect(res[0].innerText).toBe('bar');
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
     describe('children', function() {
       var template = [
       '<div class="outer">',

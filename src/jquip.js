@@ -560,7 +560,7 @@ window['$'] = window['jquip'] = (function(){
 
 	var useQuery = queryEngines();
 	$['setQuery'](useQuery || function(sel, ctx){
-		return doc.querySelectorAll ? makeArray((ctx || doc).querySelectorAll(sel)) : [];
+		return (ctx = ctx || doc).querySelectorAll ? makeArray(ctx.querySelectorAll(sel)) : [];
 	});
 
 	function loadScript(url, cb, async){
