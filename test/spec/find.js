@@ -123,6 +123,16 @@
       expect(console.warn).not.toHaveBeenCalled();
     });
 
+    it('filters selections', function() {
+      var res = $('.c').filter('input');
+      expect(ids(res)).toBe('in1,in2');
+    });
+
+    it('filters nodes not appended to dom', function() {
+      var res = $('<input>').filter('input');
+      expect(res.length).toBe(1);
+    });
+
     describe('children', function() {
       var template = [
       '<div class="outer">',

@@ -43,7 +43,8 @@ window['$'] = window['jquip'] = (function(){
 		nativeForEach = ArrayProto.forEach,
 		nativeFilter = ArrayProto.filter,
 		nativeIndexOf = ArrayProto.indexOf,
-		expando = 'jq-' + (+new Date());
+		expando = 'jq-' + (+new Date()),
+		fosterNode = doc.createElement('p');
 
 	if (rnotwhite.test("\xA0")){
 		trimLeft = /^[\s\xA0]+/;
@@ -466,9 +467,18 @@ window['$'] = window['jquip'] = (function(){
 		else if (isS(sel)) {
 			var expr = sel.charAt(0) == ":" && $['Expr'][sel.substring(1)];
 			return grep(els, function(el) {
-				return expr
+				var parentNode = el.parentNode,
+				    orphan = !parentNode,
+				    result;
+				if (orphan) {
+					parentNode = fosterNode;
+					parentNode.appendChild(el);
+				}
+				result = expr
 					? expr(el)
-					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
+					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0;
+				orphan && parentNode.removeChild(el);
+				return result;
 			});
 		}
 		return grep(els, function(el) {
