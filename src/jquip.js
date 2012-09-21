@@ -81,12 +81,13 @@ window['$'] = window['jquip'] = (function(){
 		}
 		sel = isS(sel) && sel.charAt(0) === "<"
 			? (ret = rsingleTag.exec(sel))
-				? (sel = [doc.createElement(ret[1])]) && isPlainObj(ctx)
-					? $["fn"]["attr"].call(sel, ctx) && sel
-					: sel
+				? [doc.createElement(ret[1])]
 				: htmlFrag(sel).childNodes
 			: $$((this['selector'] = sel), ctx);
-		return this['make'](sel);
+
+		this['make'](sel);
+		isPlainObj(ctx) && this['attr'](ctx);
+		return this;
 	}
 
 	var ctors=[], plugins={}, jquid=1, _cache={_id:0}, _display = {}, p;
