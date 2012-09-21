@@ -65,6 +65,16 @@
 
         expect(spy).toHaveBeenCalled();
       });
+
+      it('supports namespaces', function() {
+        var spy = jasmine.createSpy('cb'),
+            inner = $('<span>').appendTo(el);
+
+        el.delegate('span', 'click.namespaced', spy);
+        inner.click();
+
+        expect(spy).toHaveBeenCalled();
+      });
     });
 
     describe('on and off', function() {
