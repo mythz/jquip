@@ -133,6 +133,16 @@
       expect(res.length).toBe(1);
     });
 
+    it('finds nodes not attached to dom', function() {
+      var res = $('<p><i class="a" id="foo"></i></p>').find('.a');
+      expect(ids(res)).toBe('foo');
+    });
+
+    it('finds nodes not attached to dom by id', function() {
+      var res = $('<p><i id="foo"></i></p>').find('#foo');
+      expect(ids(res)).toBe('foo');
+    });
+
     describe('children', function() {
       var template = [
       '<div class="outer">',

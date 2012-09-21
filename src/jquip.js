@@ -8,6 +8,9 @@ window['$'] = window['jquip'] = (function(){
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
 		rclass = /[\n\t\r]/g,
+		rtagSelector = /^[\w-]+$/,
+		ridSelector = /^#[\w-]+$/,
+		rclassSelector = /^\.[\w-]+$/,
 		rspace = /\s+/,
 		rdigit = /\d/,
 		rnotwhite = /\S/,
@@ -33,7 +36,6 @@ window['$'] = window['jquip'] = (function(){
 			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
 			area: [1, "<map>", "</map>"],
 			_default: [0, "", ""] },
-		rComplexQuery = /[,\s.#\[>+]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
 		hasOwn = ObjProto.hasOwnProperty,
@@ -544,21 +546,15 @@ window['$'] = window['jquip'] = (function(){
 			if (ctx instanceof $) ctx = ctx[0];
 			ctx = ctx || doc;
 			qry = qry || $['query'];
-			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
-			try{
-				if (complex)
-					return slice.call(qry(sel, ctx));
-				return complex
-					? slice.call(qry(sel, ctx))
-					: (firstChar == "#"
-						? ((el = doc.getElementById(arg)) ? [el] : emptyArr)
-						: makeArray(firstChar == "."
-							? (ctx.getElementsByClassName ? ctx.getElementsByClassName(arg) : qry(sel, ctx))
-							: ctx.getElementsByTagName(sel))
-					);
-			}catch(e){
-				warn(e);
-			}
+			var el, rest = sel.substring(1);
+			return ridSelector.test(sel) && ctx === doc
+				? ((el = doc.getElementById(rest)) ? [el] : emptyArr)
+				: slice.call(
+					rclassSelector.test(sel) && ctx.getElementsByClassName
+						? ctx.getElementsByClassName(rest)
+						: rtagSelector.test(sel)
+							? ctx.getElementsByTagName(sel)
+							: qry(sel, ctx));
 		}
 		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
 	} $['$$'] = $$;
