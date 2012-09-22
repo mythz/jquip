@@ -548,7 +548,7 @@ window['$'] = window['jquip'] = (function(){
 			qry = qry || $['query'];
 			var el, rest = sel.substring(1);
 			return ridSelector.test(sel) && ctx === doc
-				? ((el = doc.getElementById(rest)) ? [el] : emptyArr)
+				? ((el = doc.getElementById(rest)) ? [el] : [])
 				: slice.call(
 					rclassSelector.test(sel) && ctx.getElementsByClassName
 						? ctx.getElementsByClassName(rest)
@@ -556,7 +556,7 @@ window['$'] = window['jquip'] = (function(){
 							? ctx.getElementsByTagName(sel)
 							: qry(sel, ctx));
 		}
-		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
+		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : [];
 	} $['$$'] = $$;
 
 	$['setQuery'] = function(qry){
