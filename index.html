@@ -1,0 +1,501 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Jquip</title>
+
+    <link rel="stylesheet" href="docs/stylesheets/styles.css">
+    <link rel="stylesheet" href="docs/stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Jquip</h1>
+        <p>jQuery in Parts</p>
+
+        <p class="view"><a href="https://github.com/mythz/jquip">View the Project on GitHub <small>mythz/jquip</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/mythz/jquip/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mythz/jquip/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mythz/jquip">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>jQuery getting too big?</h2>
+
+<p>The primary goal of this project would be for the feedback/demand to kickstart jquery.com into re-organizing its code-base so it's more modular since we believe we've proved the most useful parts of jQuery is a fraction of its code-base. </p>
+
+<p>To this end, follow this project if you want jquery.com to measure the demand for this. Another project with similar goals is <a href="http://ender.no.de/">http://ender.no.de/</a> - for node.js. <a href="https://github.com/zgrossbart/jslim">JSLim</a> is another project that takes a novel approach to reducing code size with advanced minification techniques.</p>
+
+<p><a href="http://zeptojs.com/">Zepto.js</a> is another great alternative to jQuery, it's fast, light and optimized for mobile/webkit browsers. It's a popular option for PhoneGap developers with full support for the 
+<a href="http://documentcloud.github.com/backbone/">Backbone.js</a>, <a href="http://documentcloud.github.com/underscore/">Underscore.js</a> and <a href="http://spinejs.com">Spine.js</a> frameworks. It has very recently added support for the latest Safari, Chrome, Firefox and Opera browsers - it makes use of latest EcmaScript 5 APIs without shims so if this is your targetted market, we encourage you to try it.</p>
+
+<p>Based on recent posts it does looks like jQuery wants to <a href="http://blog.jquery.com/2011/11/08/building-a-slimmer-jquery/">build a slimmer jQuery</a>. Although we don't think giving a trim is going far enough, we hope they perform larger re-structural changes allowing us to use most of the useful parts at a fraction of their cost. Their <a href="https://groups.google.com/forum/#!topic/jquery-bugs-team/17rGK6eAAxI/discussion">recent conversations into future file size reduction</a> do sound promising. </p>
+
+<h1>Introducing jquip - aka jQuery-in-parts. <a href="http://travis-ci.org/mythz/jquip"><img src="https://secure.travis-ci.org/mythz/jquip.png" alt="Build Status"></a>
+</h1>
+
+<p>Smaller, Lighter, Faster, more modular jQuery - include only the parts you want! Don't use it, Don't include it.</p>
+
+<p>Minified &amp; gzipped code sizes (v.03):</p>
+
+<ul>
+<li>jquip.js (6.6k)</li>
+<li>jquip.events.js (1k)</li>
+<li>jquip.docready.js (.5k)</li>
+<li>jquip.css.js (2.5k)</li>
+<li>jquip.ajax.js (1k)</li>
+</ul><h3>Query Engine options (not required for modern browsers)</h3>
+
+<ul>
+<li>jquip.q-min.js (.6k) - An extremely fast but limited query engine (see below)</li>
+<li>jquip.q-qwery.js (2.6k) - A New fast replacement for Sizzle.js</li>
+<li>jquip.q-sizzle.js (5.29k) - Sizzle.js</li>
+</ul><p>The core <strong>jquip.js</strong> is only <strong>6.6KB</strong> (minified and gzipped) - a fraction of the size of jQuery.</p>
+
+<p>Has 90% of the good parts of jQuery (rest to be added plugins as needed), small enough to drop-in as source saving an external js reference. </p>
+
+<h3>Automatically downloads parts needed for older browsers</h3>
+
+<p>Sizzle.js is only added on demand (if it's not already included) from <a href="http://cdnjs.com">cdnjs.com</a> for browsers that need it (i.e. &lt;=IE7) as we believe it's the optimal way to download shims for browsers that need it.</p>
+
+<p>Most code has been ported from jQuery or Zepto.js and optimized where possible, e.g. internals use underscore's native <code>_.each</code> over jquery's slower <code>$.each</code> etc.</p>
+
+<p>Licence: <a href="http://www.opensource.org/licenses/mit-license.php">http://www.opensource.org/licenses/mit-license.php</a> (Same as jQuery and Zepto.js)</p>
+
+<h3>Build customizable jquip packages with the <a href="http://jquip.ubixar.com/">jQuip Library Builder service</a>
+</h3>
+
+<p>The <a href="http://jquip.ubixar.com/demo.htm">jquip Simple Demo</a> is also available to try online, whilst a version <a href="https://github.com/mythz/jquip/blob/master/demo.closure-advanced.htm">compiled with Google's Closure Library (Advanced mode) is in the repo</a>.</p>
+
+<h4>Disclaimer</h4>
+
+<p>This is <strong>NOT</strong> an official <a href="http://jquery.com/">jQuery.com</a> project.</p>
+
+<p>Code-base will now be more stable as we've reached our goal of jquip.js (with the <strong>events</strong> + <strong>docready</strong> plugins) working in Backbone.js, there are likely a few fixes still to be added but the core is close to feature complete and wont require the major refactoring done recently.</p>
+
+<p>We would still like to hear feedback on issues/non-implemented core functionality so we can measure the API popularity of missing pieces.</p>
+
+<h2>News</h2>
+
+<h3>v.03</h3>
+
+<ul>
+<li>Intended to be last code change to significantly effect the size and API in the core jquip.js</li>
+<li>
+<code>$.loadAsync(url,cb)</code> script loader added to load plugin and user scripts on demand</li>
+<li>For older browsers that don't have <strong>querySelector</strong> support, Sizzle.js is downloaded on demand from <a href="http://cdnjs.com">cdnjs.com</a>
+</li>
+<li>If the <strong>ajax</strong> plugin is included and browser doesn't have <strong>JSON</strong>, it is also downloaded from cdnjs.com
+
+<ul>
+<li>When all scripts loaded the callbacks registered in <code>$.scriptsLoaded</code> and <code>$(callback)</code> are fired</li>
+<li>Although if <strong>docready</strong> plugin is installed, <code>$(callback)</code> is only called on <strong>DOMContentLoaded</strong>
+</li>
+</ul>
+</li>
+<li>Modern browsers won't need additional downloads, so <code>$(callback)</code> fires straight away or after any user scripts are loaded with <code>$.loadAsync</code>
+</li>
+<li>Added Expr support with <strong>:hidden</strong> and <strong>:visible</strong> baked in. Further <strong>:expression</strong> support can be plugged in by extending <code>$.Expr</code>
+</li>
+<li>In addition to :expr's, filtering can also be <strong>#id</strong>, <strong>tagName</strong>, <strong>.className</strong> or <strong>[attr=value]</strong>
+
+<ul>
+<li>
+<code>$().is</code>, <code>$().not</code>, <code>$().filter</code> and <code>$().find</code> take advantage of the above filtering + Expr support</li>
+</ul>
+</li>
+<li>
+<code>$().show</code>, <code>$().hide</code> and <code>$().toggle</code> improved. With <strong>css</strong> plugin it behaves like jQuery,
+without, it only checks the visibility of selected elements</li>
+<li>
+<strong>css</strong> plugin improved to report correct dimensions on Height/Width/Left/Top methods</li>
+<li>Remaining Advanced Closure issues resolved (ie tests pass in both) should be safe to <a href="http://closure-compiler.appspot.com/home">compile jquip.js and plugins</a>
+
+<ul>
+<li>An up-to-date bundle with all of jquip is kept in the repo at <a href="https://github.com/mythz/jquip/blob/master/dist/jquip.all.closure-advanced.js">/dist/jquip.all.closure-advanced.js</a>
+</li>
+<li>
+<a href="https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/includes.js">ServiceStack's MvcMiniProfiler Port</a>
+is another example of a jQuery UI changed to using <a href="https://github.com/ServiceStack/ServiceStack/blob/master/src/ServiceStack/MiniProfiler/UI/jquip.all.js">jquip (advanced compiled version)</a>
+Small changes were required to workaround use of advanced Expressions or jQuery's animation features (all changes made are left in the comments)</li>
+</ul>
+</li>
+</ul><h3>v.02</h3>
+
+<ul>
+<li>We now are able to compile in Closure Compiler's advanced compilation mode! 
+The minified output passes Backbone.js test suite and reports only 1 not implemented feature in Spine.js tests. We still have Closure Compiler warnings as a result of un-annotated methods which we'll look at adding in the near future.</li>
+<li>The source code was modified (somewhat unnaturally) so it would work with the Closure Compiler, i.e. have all the API methods exported correctly.</li>
+<li>The total code-size (min+gzip) for jquip and non-query plugins (i.e. docready,events,css,ajax,custom) is <strong>9.67k</strong> in advanced mode and <strong>9.86k</strong> in Simple mode.</li>
+</ul><h3>v.01</h3>
+
+<ul>
+<li>Abstracted Events, pluggable query engines and new <code>$().find</code> and <code>Events</code> system courtesy of the much leaner implementation in <a href="http://zeptojs.com/">Zepto.js</a>, refactored to support multiple browsers.<br>
+</li>
+<li>We are now passing Backbone.js latest test-suite in all the latest browsers! Now included in the <strong>/test</strong> folder.</li>
+<li>New Spine.js tests added as well, now passing all but 1 test (in latest browsers)
+
+<ul>
+<li>(we'll get to older IE browsers as soon as we find a PC with them installed :)</li>
+</ul>
+</li>
+<li>New Event system added as a plugin, now with abstracted events.
+
+<ul>
+<li>We expect most devs would want to include events, but can now be stripped if you dont.</li>
+</ul>
+</li>
+<li>Query engines are now pluggable and none are included by default but will auto detect window.Sizzle or window.qwery if available and automatically download Sizzle.js from <a href="http://cdnjs.com">cdnjs.com</a> if a browser doesn't support <code>document.querySelectorAll</code> (i.e. &lt;=IE7). Note: because there's no Sizzle.js it's important to be aware of limitations when relying on browsers native querySelector implementations, i.e. there are <a href="http://www.javascriptkit.com/dhtmltutors/css_selectors_api.shtml">restrictions in IE8</a> where the HTML page must be in standards mode and Safari in quirks mode <a href="http://www.wordsbyf.at/2011/11/23/selectors-selectoring/">can't handle uppercase or unicode characters</a>.</li>
+</ul><h3>pre-alpha, first release</h3>
+
+<ul>
+<li>Customizable Library builder service at </li>
+<li>Node js build scripts added to minify jquip with UglifyJS.</li>
+<li>$.addConstructor is now <code>$.hook</code>
+</li>
+<li>$.addPlugin is now <code>$.plug</code>
+</li>
+<li>
+<strong>scrollLeft</strong> and <strong>scrollTop</strong> is now in the <strong>css</strong> plugin</li>
+<li>Due to a request by the jQuery team we're no longer assigning the <strong>jQuery</strong> variable, you will now need to manually change this yourself on the first line of jquip.js:
+<code>window.jquip = window.$ = (function()..</code>
+</li>
+</ul><h2>Roadmap</h2>
+
+<ul>
+<li>Getting jquip to work in Google Closure Compiler's advanced compilation mode without warnings so it can be used to programatically strip out dead code your application doesn't use for an even smaller footprint!</li>
+<li>Add the Closure Advanced Compiler option to the <a href="http://jquip.ubixar.com/">jquip library service</a>
+</li>
+<li>Add missing shims to Abstracted Events (decided to add them after all due to popular demand)</li>
+<li>Add caching to improve performance</li>
+</ul><h2>What's in the box? - i.e. the 90% good parts</h2>
+
+<p>Methods marked with * are only partially implemented.</p>
+
+<ul>
+<li>
+<a href="http://api.jquery.com/jQuery/">$(selector)</a> 
+
+<ul>
+<li>$(selector, context), $(element), $(array)</li>
+<li>$(callback) requires <strong>docready</strong> plugin.</li>
+</ul>
+</li>
+</ul><h3>Methods operating on a <code>$(selctor)</code>
+</h3>
+
+<ul>
+<li>add</li>
+<li>each</li>
+<li>attr</li>
+<li>removeAttr</li>
+<li>get</li>
+<li>toArray</li>
+<li>data</li>
+<li>append</li>
+<li>appendTo</li>
+<li>prepend</li>
+<li>prependTo</li>
+<li>before</li>
+<li>insertBefore</li>
+<li>after</li>
+<li>insertAfter</li>
+<li>toggle</li>
+<li>hide</li>
+<li>show</li>
+<li>fadeIn and fadeOut - does so without animation, consider using <a href="http://playground.benbarnett.net/jquery-animate-enhanced/">jquery.animate-enhanced plugin</a>*</li>
+<li>eq</li>
+<li>first</li>
+<li>last</li>
+<li>indexOf</li>
+<li>slice</li>
+<li>find*</li>
+<li>not*</li>
+<li>filter*</li>
+<li>is*</li>
+<li>remove</li>
+<li>closest</li>
+<li>val* - does not do checkbox, select, etc.</li>
+<li>html</li>
+<li>text</li>
+<li>empty</li>
+<li>addClass</li>
+<li>removeClass</li>
+<li>hasClass</li>
+<li>parent</li>
+<li>parents</li>
+<li>parentsUntil</li>
+<li>next</li>
+<li>prev</li>
+<li>nextAll</li>
+<li>nextUntil</li>
+<li>prevUntil</li>
+<li>siblings</li>
+<li>children</li>
+<li>contents</li>
+<li>serializeArray</li>
+</ul><h3>static methods off $</h3>
+
+<ul>
+<li>$$ - querySelectorAll or query engine shim</li>
+<li>$.each </li>
+<li>
+<a href="http://documentcloud.github.com/underscore/#each">$._each</a> - Underscore's native each</li>
+<li>
+<a href="http://documentcloud.github.com/underscore/#indexOf">$._indexOf</a> - Underscore's indexOf</li>
+<li>
+<a href="http://documentcloud.github.com/underscore/#defaults">$._defaults</a> - Underscore's defaults</li>
+<li>
+<a href="http://documentcloud.github.com/underscore/#filter">$._filter</a> - Underscore's filter</li>
+<li>$.Expr - :hidden :visible now supported, can plugin other expressions as needed.</li>
+<li>$.filter</li>
+<li>$.dir</li>
+<li>$.nth</li>
+<li>$.sibling</li>
+<li>$.grep</li>
+<li>$.map</li>
+<li>$.data</li>
+<li>$.attrs</li>
+<li>$.trim</li>
+<li>$.isFunction</li>
+<li>$.isArray</li>
+<li>$.isWindow</li>
+<li>$.isNaN</li>
+<li>$.merge</li>
+<li>$.extend</li>
+<li>$.makeArray</li>
+<li>$.hasClass</li>
+<li>$.typeOf - safe type of a variable</li>
+<li>$.loadScript - (url, callback [, async]) load an external script dynamically</li>
+<li>$.loadAsync - load js async and call <code>$(callback)</code> or <code>$.scriptsLoaded</code> when all scripts have been loaded</li>
+<li>$.scriptsLoaded - register callbacks to be fired when all async scripts have been loaded.</li>
+<li>$.htmlFrag - creates a document fragment from a html string <strong>(name changed)</strong>
+</li>
+<li>$.walk - traveres all childElems including self <code>(predicateFn, [[, context], results])</code>
+</li>
+<li>$.query - query Engine i.r. doc.querySelector || queryEngine Shim</li>
+<li>$.attrs - an elements attributes</li>
+<li>$.unique - return a unique list of elements in document order</li>
+<li>$.contains - parent element contains sibling</li>
+</ul><h2>Plugins</h2>
+
+<p>Pick and choose the parts of jQuery when and add you use them.</p>
+
+<p>Other parts of jQuery can be Added via Plugins which is simply a matter of copying or including the 
+script after the core <code>jquip.js</code>.</p>
+
+<h3><a href="https://github.com/mythz/jquip/blob/master/src/jquip.events.js">events</a></h3>
+
+<h3>Methods on <code>$(selector)</code>
+</h3>
+
+<ul>
+<li>bind</li>
+<li>unbind</li>
+<li>one</li>
+<li>delegate</li>
+<li>undelegate</li>
+<li>live</li>
+<li>die</li>
+<li>trigger</li>
+<li>$.bind</li>
+<li>$.unbind</li>
+</ul><h3>Helpers on <code>$(selector)</code>
+</h3>
+
+<p>blur focus focusin focusout load resize scroll unload click dblclick 
+mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave 
+change select submit keydown keypress keyup error</p>
+
+<h3><a href="https://github.com/mythz/jquip/blob/master/src/jquip.docready.js">documentReady</a></h3>
+
+<p>yep, it's a plugin!</p>
+
+<ul>
+<li><a href="http://api.jquery.com/ready/">$(function())</a></li>
+<li><a href="http://api.jquery.com/ready/">$.ready</a></li>
+</ul><h3><a href="https://github.com/mythz/jquip/blob/master/src/jquip.css.js">css</a></h3>
+
+<ul>
+<li><a href="http://api.jquery.com/css/">$.css</a></li>
+<li>width</li>
+<li>height</li>
+<li>innerHeight</li>
+<li>innerWidth</li>
+<li>outerHeight</li>
+<li>outerWidth</li>
+<li>scrollLeft</li>
+<li>scrollTop</li>
+<li>$.camelCase</li>
+</ul><h3><a href="https://github.com/mythz/jquip/blob/master/src/jquip.ajax.js">ajax</a></h3>
+
+<p>based on <a href="http://www.davidflanagan.com/javascript5/display.php?n=20-1&amp;f=20/01.js">David Flanagan HttpUtils</a> 
+modfied to work like jQuery's ajax.</p>
+
+<ul>
+<li>$.xhr (cross-browser XHR Native Object)</li>
+<li><a href="http://api.jquery.com/jQuery.ajax/">$.ajax</a></li>
+<li>$.get</li>
+<li>$.post</li>
+<li>$.getJSON</li>
+<li>$.getScript</li>
+<li>$.formData - convert object hash into a url Encoded string component</li>
+</ul><h3><a href="https://github.com/mythz/jquip/blob/master/src/jquip.custom.js">custom</a></h3>
+
+<ul>
+<li>
+<a href="http://documentcloud.github.com/underscore/#template">$._template</a> - Underscore's template</li>
+<li>$.queryString - cached map of queryString variables </li>
+<li>$.is[Tab|Enter|Shift|...] - static functions to detect named keys pressed, e.g. <code>if ($.isEnter(e)) console.log("pressed enter")</code>
+</li>
+<li>$.cancelEvent - cross-browser fn to <code>preventDefault()</code> and <code>stopPropogation()</code>, returns false.</li>
+</ul><h3>Plugin Authors (adding your own plugins)</h3>
+
+<p>Extending jquip:</p>
+
+<ul>
+<li>
+<code>plug(name, fn($))</code> - Register your own plugin, mutate <code>$</code> to extend jquip.</li>
+<li>
+<code>bool $.hook (function(selector, contxt))</code> - Intercept the constructor request.</li>
+<li>
+<code>$.setQuery (function(selector, context))</code> - plugin your own query engine</li>
+</ul><p>You can also include Sizzle.js or qwery.js above jquip.js (using IE's conditional comments is a good approach), it will automatically be registered. The q-{queryEngine}.js plugins are also self-registering.</p>
+
+<p>Intercept the <code>$(){ .. }</code> constructor and inject your own implementation. Return true to short-circuit. e.g: from the <strong>docready</strong> plugin:</p>
+
+<p>$.plug("docready", function ($) {
+    $.hook(function (selector, ctx) {
+        if (typeof selector == "function") {
+            this.ready(selector);
+            return true;
+        }
+    });
+    ... 
+  });</p>
+
+<h2>Limitations</h2>
+
+<p>Many corner cases we feel that are not likely to be hit in normal development have been intentionally stripped out, it's therefore possible for older browsers to experience some issues if you code hits these edge cases. </p>
+
+<p>In addition to its fluent API, jQuery does <strong>a lot</strong> of cross-browser normalization as well as sanitization and quarantine for edge cases in older browsers which no doubt makes it a safer but slower option. </p>
+
+<p>Non supported examples:</p>
+
+<ul>
+<li>Script tags in inserted HTML are not automatically evaluated </li>
+<li>Attributes and event handlers of cloned html fragments are not copied across</li>
+<li>Expression support is limited see v.03 release notes</li>
+</ul><p>We prefer not to take the perf and code-bloat hit of this quarantine - if your app does hit one of these edge cases you will either need to code a specific workaround for your apps usage (which will in all likely be more optimized than jQuery's general purpose solution) or simply move back to using jQuery.</p>
+
+<h2>Best Practices</h2>
+
+<p>Contrary to the strong-held opinions of many "javascript experts" DOMContentLoaded is rarely the fastest solution to run
+your app's logic. It is a <em>safer option</em> but in most cases your app will run faster if you execute your
+javascript somewhere below the HTML elements they reference even if it's at the bottom of your page it will
+fire before DOMContentLoaded which will no longer be required. This guidance is from the
+<a href="https://groups.google.com/forum/#!msg/closure-library-discuss/G-7Ltdavy0E/RjllWWJTXAcJ">Google Apps</a>
+and YUI developer teams (amongst others). If you can't control where user scripts are placed, DOMContentLoaded
+is still a suitable option. This <a href="http://stackoverflow.com/q/1439382/85785">answer on StackOverflow</a> provides
+a good overview over when to use it.</p>
+
+<p>We thought we'd clarify as we've received a lot of feedback (aka strong opinions) on this subject - this is
+why jQuery's popular <strong>docready</strong> is a plugin that's not included by default - simply include it as a plugin
+if you wish.</p>
+
+<p>Similarly related, for best page load times you should
+<a href="http://developer.yahoo.com/blogs/ydn/posts/2007/07/high_performanc_5/">move scripts to the bottom</a>
+of your page, e.g. before the closing <code>&lt;/body&gt;</code> tag.</p>
+
+<p>If you're not referencing jquip near the bottom of your page and don't have either the <strong>events</strong> or
+<strong>docready</strong> plugins included, you should call <code>$.onload()</code> in your own post DOMReady event. It performs
+post processing tasks like downloading Sizzle.js (for &lt;=IE7), calculates browser feature support, etc.</p>
+
+<h3>async script loading</h3>
+
+<p>As of <strong>v.03</strong> the recommended approach to load scripts is now in <code>$(callback)</code> which gets fired right after
+all on async loaded scripts (inc user scripts) have been downloaded, which is still straight away for modern
+browsers (i.e. when no async downloads are needed). This recommendation can be ignored if you are only
+performing primitive queries (i.e. by #id, tag or .class) where querySelectorAll or Sizzle.js are not needed.</p>
+
+<p>For older browsers (&lt;=IE7) Sizzle.js is downloaded on demand, if <strong>ajax</strong> plugin is included <strong>JSON</strong> is also
+downloaded if it doesn't exist.</p>
+
+<p>User and plugin scripts can be loaded dynamically with <code>$.loadAsync(url, cb)</code> which get loaded before
+<code>$(callback)</code> is fired. Additional scripts that are not needed on first page loaded can be downloaded with
+<code>$.loadScript(url, cb)</code>.</p>
+
+<p>Our recommendation for ultimate performance is to have a single reference to bundled and minified scripts needed
+immediately when the page is loaded. Followed by async downloading of all scripts required by your websites later.</p>
+
+<p>Pre-fetching scripts needed on subsequent pages so its hot in your browsers cache is also a good idea.</p>
+
+<h2>Mini Query Engine (jquip.q-min.js)</h2>
+
+<p>Weighing at just <strong>0.6k</strong> query-min is an ultra fast selector engine for browsers that don't provide native support for the <strong>querySelectorAll</strong> APIs (e.g. &lt;=IE7). It works by offloading as much work as possible to the browsers primitive <code>document.getElementById()</code>, <code>document.getElementsByTagName()</code> and <code>document.getElementsByClassName()</code> apis.</p>
+
+<p>On our last JavaScript heavy project, performance was improved by <strong>7-8x</strong> in older browsers. If you're having performance issues with older browsers it's worth evaluating.</p>
+
+<p>All selectors require an Id (i.e. #) Tag (e.g. INPUT) or class name in each child selector.</p>
+
+<p>Valid Examples:</p>
+
+<ul>
+<li>TBODY TD.c1 INPUT</li>
+<li>TH.c1 STRONG</li>
+<li>#btnSubmit SPAN</li>
+<li>FORM INPUT[name='chkProcess']</li>
+<li>FORM INPUT[type='text']</li>
+<li>FORM INPUT[type]</li>
+<li>FORM#id.a.b</li>
+<li>FORM#id .a.b</li>
+<li>.a.b.c</li>
+<li>.a </li>
+</ul><p>For optimal performance in &lt;= IE7, the first child selector should be a tag or an #id as it cuts down the amount of DOM traversing needed to be done in JavaScript since there is no <code>document.getElementsByClassName()</code> available.</p>
+
+<h2>jquip Library Builder Service</h2>
+
+<p>The project now includes the node.js <strong>/server/jquip.builder.js</strong>
+so you can host your own jquip Library builder service internally.</p>
+
+<h2>Contributing</h2>
+
+<p>I'd love help with this so Contributors and pull requests are very welcome!</p>
+
+<p>The main task that needs doing is to get all the missing jQuery parts in as plugins 
+and a comprehensive test suite so we can properly identify the parts of jQuery supported.</p>
+
+<p>Feedback is welcome, drop me a line on <a href="http://twitter.com/demisbellot">@demisbellot</a>.</p>
+
+<p><a name="contributors"></a></p>
+
+<h2>Contributors</h2>
+
+<ul>
+<li>
+<a href="https://github.com/mythz">@mythz</a> (Demis Bellot)</li>
+<li>
+<a href="https://github.com/jeyb">@jeyb</a> (Jey Balachandran)</li>
+<li>
+<a href="https://github.com/solarissmoke">@solarissmoke</a> (solarissmoke)</li>
+<li>
+<a href="https://github.com/statianzo">@statianzo</a> (Jason Staten)</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mythz">mythz</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
