@@ -8,6 +8,9 @@ window['$'] = window['jquip'] = (function(){
 		rparentsprev = /^(?:parents|prevUntil|prevAll)/,
 		rtagname = /<([\w:]+)/,
 		rclass = /[\n\t\r]/g,
+		rtagSelector = /^[\w-]+$/,
+		ridSelector = /^#[\w-]+$/,
+		rclassSelector = /^\.[\w-]+$/,
 		rspace = /\s+/,
 		rdigit = /\d/,
 		rnotwhite = /\S/,
@@ -33,7 +36,6 @@ window['$'] = window['jquip'] = (function(){
 			col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
 			area: [1, "<map>", "</map>"],
 			_default: [0, "", ""] },
-		rComplexQuery = /[,\s.#\[>+]/, emptyArr = [],
 		breaker = {},
 		ArrayProto = Array.prototype, ObjProto = Object.prototype,
 		hasOwn = ObjProto.hasOwnProperty,
@@ -43,7 +45,8 @@ window['$'] = window['jquip'] = (function(){
 		nativeForEach = ArrayProto.forEach,
 		nativeFilter = ArrayProto.filter,
 		nativeIndexOf = ArrayProto.indexOf,
-		expando = 'jq-' + (+new Date());
+		expando = 'jq-' + (+new Date()),
+		fosterNode = doc.createElement('p');
 
 	if (rnotwhite.test("\xA0")){
 		trimLeft = /^[\s\xA0]+/;
@@ -81,12 +84,13 @@ window['$'] = window['jquip'] = (function(){
 		}
 		sel = isS(sel) && sel.charAt(0) === "<"
 			? (ret = rsingleTag.exec(sel))
-				? (sel = [doc.createElement(ret[1])]) && isPlainObj(ctx)
-					? $["fn"]["attr"].call(sel, ctx) && sel
-					: sel
+				? [doc.createElement(ret[1])]
 				: htmlFrag(sel).childNodes
 			: $$((this['selector'] = sel), ctx);
-		return this['make'](sel);
+
+		this['make'](sel);
+		isPlainObj(ctx) && this['attr'](ctx);
+		return this;
 	}
 
 	var ctors=[], plugins={}, jquid=1, _cache={_id:0}, _display = {}, p;
@@ -465,9 +469,18 @@ window['$'] = window['jquip'] = (function(){
 		else if (isS(sel)) {
 			var expr = sel.charAt(0) == ":" && $['Expr'][sel.substring(1)];
 			return grep(els, function(el) {
-				return expr
+				var parentNode = el.parentNode,
+				    orphan = !parentNode,
+				    result;
+				if (orphan) {
+					parentNode = fosterNode;
+					parentNode.appendChild(el);
+				}
+				result = expr
 					? expr(el)
-					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0
+					: el.parentNode && _indexOf($$(sel, el.parentNode), el) >= 0;
+				orphan && parentNode.removeChild(el);
+				return result;
 			});
 		}
 		return grep(els, function(el) {
@@ -533,23 +546,17 @@ window['$'] = window['jquip'] = (function(){
 			if (ctx instanceof $) ctx = ctx[0];
 			ctx = ctx || doc;
 			qry = qry || $['query'];
-			var firstChar = sel.charAt(0), arg = sel.substring(1), complex = rComplexQuery.test(arg), el;
-			try{
-				if (complex)
-					return slice.call(qry(sel, ctx));
-				return complex
-					? slice.call(qry(sel, ctx))
-					: (firstChar == "#"
-						? ((el = doc.getElementById(arg)) ? [el] : emptyArr)
-						: makeArray(firstChar == "."
-							? (ctx.getElementsByClassName ? ctx.getElementsByClassName(arg) : qry(sel, ctx))
-							: ctx.getElementsByTagName(sel))
-					);
-			}catch(e){
-				warn(e);
-			}
+			var el, rest = sel.substring(1);
+			return ridSelector.test(sel) && ctx === doc
+				? ((el = doc.getElementById(rest)) ? [el] : [])
+				: slice.call(
+					rclassSelector.test(sel) && ctx.getElementsByClassName
+						? ctx.getElementsByClassName(rest)
+						: rtagSelector.test(sel)
+							? ctx.getElementsByTagName(sel)
+							: qry(sel, ctx));
 		}
-		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : emptyArr;
+		return sel.nodeType == 1 || sel.nodeType == 9 ? [sel] : [];
 	} $['$$'] = $$;
 
 	$['setQuery'] = function(qry){

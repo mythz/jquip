@@ -41,6 +41,15 @@
         el.trigger('foobar');
         expect(spy).not.toHaveBeenCalled();
       });
+
+      it('fires callbacks when not in dom', function() {
+        var spy = jasmine.createSpy('cb'),
+            target = $('<div>');
+        target.bind('click', spy);
+        target.click();
+        expect(spy).toHaveBeenCalled();
+
+      });
     });
 
     describe('delegate and undelegate', function() {
@@ -61,6 +70,16 @@
 
         el.delegate('span', 'click', spy);
         inner = $('<span>').appendTo(el); //added after bind
+        inner.click();
+
+        expect(spy).toHaveBeenCalled();
+      });
+
+      it('supports namespaces', function() {
+        var spy = jasmine.createSpy('cb'),
+            inner = $('<span>').appendTo(el);
+
+        el.delegate('span', 'click.namespaced', spy);
         inner.click();
 
         expect(spy).toHaveBeenCalled();

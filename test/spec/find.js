@@ -123,6 +123,26 @@
       expect(console.warn).not.toHaveBeenCalled();
     });
 
+    it('filters selections', function() {
+      var res = $('.c').filter('input');
+      expect(ids(res)).toBe('in1,in2');
+    });
+
+    it('filters nodes not appended to dom', function() {
+      var res = $('<input>').filter('input');
+      expect(res.length).toBe(1);
+    });
+
+    it('finds nodes not attached to dom', function() {
+      var res = $('<p><i class="a" id="foo"></i></p>').find('.a');
+      expect(ids(res)).toBe('foo');
+    });
+
+    it('finds nodes not attached to dom by id', function() {
+      var res = $('<p><i id="foo"></i></p>').find('#foo');
+      expect(ids(res)).toBe('foo');
+    });
+
     describe('children', function() {
       var template = [
       '<div class="outer">',
