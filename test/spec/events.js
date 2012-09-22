@@ -41,6 +41,15 @@
         el.trigger('foobar');
         expect(spy).not.toHaveBeenCalled();
       });
+
+      it('fires callbacks when not in dom', function() {
+        var spy = jasmine.createSpy('cb'),
+            target = $('<div>');
+        target.bind('click', spy);
+        target.click();
+        expect(spy).toHaveBeenCalled();
+
+      });
     });
 
     describe('delegate and undelegate', function() {
