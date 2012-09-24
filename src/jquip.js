@@ -1,3 +1,4 @@
+/*jshint sub:true, regexdash:true, laxbreak: true*/
 window['$'] = window['jquip'] = (function(){
   var win = window,
       queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
@@ -89,7 +90,7 @@ window['$'] = window['jquip'] = (function(){
       : $$((this['selector'] = sel), ctx);
 
     this['make'](sel);
-    isPlainObj(ctx) && this['attr'](ctx);
+    if (isPlainObj(ctx)) this['attr'](ctx);
     return this;
   }
 
@@ -237,9 +238,8 @@ window['$'] = window['jquip'] = (function(){
   };
   p['toggle'] = function(){
     return this['each'](function(){
-      this.style.display = $['Expr']['hidden'](this)
-        ? cache(this, "display") || display(this.tagName)
-        : (cache(this, "display", this.style.display), "none");
+      var el = $(this);
+      $['Expr']['hidden'](this) ? el.show() : el.hide();
     });
   };
   p['eq'] = function(i){
@@ -448,8 +448,7 @@ window['$'] = window['jquip'] = (function(){
 
   $['Expr'] = {
     'hidden': function(el){
-      return el.offsetWidth === 0 || el.offsetHeight == 0
-        || (($["css"] && $["css"](el,"display") || el.style.display) === "none");
+      return ($["css"] && $["css"](el,"display") || el.style.display) === "none";
     },
     'visible': function(el) {
       return !$['Expr']['hidden'](el);

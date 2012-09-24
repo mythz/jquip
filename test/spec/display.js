@@ -27,5 +27,12 @@
       el.show();
       expect(el.css('display')).toBe('inline-block');
     });
+
+    it('toggles display', function() {
+      el.toggle();
+      expect(el.css('display')).toBe('none');
+      el.toggle();
+      expect(el.css('display')).toBe('block');
+    });
   });
 }());
