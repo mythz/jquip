@@ -1,4 +1,4 @@
-/*jshint sub:true, regexdash:true, laxbreak: true*/
+/*jshint sub:true, regexdash:true, laxbreak: true, expr: true*/
 window['$'] = window['jquip'] = (function(){
   var win = window,
       queryShimCdn = "http://cdnjs.cloudflare.com/ajax/libs/sizzle/1.4.4/sizzle.min.js",
@@ -149,9 +149,9 @@ window['$'] = window['jquip'] = (function(){
     return slice.call(this, 0);
   };
   p['get'] = function(num){
-    return num == null
-      ? this['toArray']()
-      : (num < 0 ? this[this.length + num] : this[num]);
+    return isDefined(num)
+      ? (num < 0 ? this[this.length + num] : this[num])
+      : this['toArray']();
   };
   p['add'] = function(sel, ctx){
     var set = typeof sel == "string"
@@ -272,7 +272,7 @@ window['$'] = window['jquip'] = (function(){
     for(i=0, l=this.length; i<l; i++){
       len = ret.length;
       merge(ret, $(sel, this[i]));
-      if (i == 0){
+      if (i === 0){
         for(n = len; n < ret.length; n++)
           for(r = 0; r < len; r++)
             if (ret[r] === ret[n]){
@@ -296,7 +296,9 @@ window['$'] = window['jquip'] = (function(){
     return this.length > 0 && $(this[0]).filter(sel).length > 0;
   };
   p['remove'] = function(){
-    for(var i = 0, el; (el = this[i]) != null; i++) if (el.parentNode) el.parentNode.removeChild(el);
+    for(var i = 0, el; isDefined(el = this[i]); i++) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
     return this;
   };
   p['closest'] = function(sel, ctx) {
@@ -756,6 +758,7 @@ window['$'] = window['jquip'] = (function(){
   });
 
   function typeOf(o){ return o == null ? String(o) : class2type[toString.call(o)] || "object"; } $['type'] = typeOf;
+  function isDefined(o){ return o !== void 0; }
   function isS(o){ return typeof o == "string"; }
   function isO(o){ return typeof o == "object"; }
   function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $['isFunction'] = isF;

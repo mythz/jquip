@@ -143,6 +143,26 @@
       expect(ids(res)).toBe('foo');
     });
 
+    describe('get', function() {
+      var sel;
+      beforeEach(function() { sel = $('.a'); });
+
+      it('gets element by index', function() {
+        expect(sel.get(0).id).toBe('i1');
+      });
+
+      it('gets element by negative index', function() {
+        expect(sel.get(-1).id).toBe('i6');
+      });
+
+      it('gets all matched elements as clean array', function() {
+        var res = sel.get();
+        expect($.isArray(res)).toBe(true);
+        expect(res.length).toBe(5);
+      });
+
+    });
+
     describe('children', function() {
       var template = [
       '<div class="outer">',
