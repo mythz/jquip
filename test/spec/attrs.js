@@ -21,10 +21,12 @@
     });
 
     it('sets property of all selected elements', function() {
-      var root = jquip('<div><i>a</i><i>b</i><i>c</i></div>');
-      root.find('i').prop('innerText', 'x');
+      var root = jquip('<div><i>a</i><i>b</i><i>c</i></div>'),
+          els = root.find('i').prop('foo', 'x');
 
-      expect(root.text()).toBe('xxx');
+      expect(els[0].foo).toBe('x');
+      expect(els[1].foo).toBe('x');
+      expect(els[2].foo).toBe('x');
     });
 
 

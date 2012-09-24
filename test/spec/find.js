@@ -119,7 +119,7 @@
       spyOn(console, 'warn');
       var res = $('<p>foo</p> <p><i class="yo">bar</i></p>').find('.yo')
       expect(res.length).toBe(1);
-      expect(res[0].innerText).toBe('bar');
+      expect(res[0].innerHTML).toBe('bar');
       expect(console.warn).not.toHaveBeenCalled();
     });
 

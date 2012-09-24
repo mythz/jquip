@@ -51,11 +51,11 @@
       var clones = els.clone();
       clones.html('x')
 
-      expect(els[0].innerText).toBe('1')
-      expect(els[1].innerText).toBe('2')
+      expect(els[0].innerHTML).toBe('1')
+      expect(els[1].innerHTML).toBe('2')
 
-      expect(clones[0].innerText).toBe('x')
-      expect(clones[1].innerText).toBe('x')
+      expect(clones[0].innerHTML).toBe('x')
+      expect(clones[1].innerHTML).toBe('x')
     });
   });
 }());
