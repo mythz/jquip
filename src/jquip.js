@@ -320,29 +320,30 @@ window['$'] = window['jquip'] = (function(){
     return this.ps(ret, "closest", sel);
   };
   p['val'] = function(setVal){
-    if (setVal == null) return (this[0] && this[0].value) || "";
+    if (!isDefined(setVal)) return (this[0] && this[0].value) || "";
     return this['each'](function(){
       this.value = setVal;
     });
   };
   p['html'] = function(setHtml){
-    if (setHtml == null) return (this[0] && this[0].innerHTML) || "";
+    if (!isDefined(setHtml)) return (this[0] && this[0].innerHTML) || "";
     return this['each'](function(){
       this.innerHTML = setHtml;
     });
   };
   p['text'] = function(val){
     var el = this[0], nt;
-    return typeof val == "undefined"
-      ? (el && (nt = el.nodeType)
+    return isDefined(val)
+      ? this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(val))
+      : (el && (nt = el.nodeType)
         ? ((nt === 1 || nt === 9)
-          ? (typeof el.textContent == "string" ? el.textContent : el.innerText.replace(rReturn, ''))
+          ? (isS(el.textContent) ? el.textContent : el.innerText.replace(rReturn, ''))
           : (nt === 3 || nt === 4) ? el.nodeValue : null)
-        : null)
-      : this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(val));
+        : null);
   };
   p['empty'] = function(){
-    for(var i = 0, el; (el = this[i]) != null; i++)
+    var i, el;
+    for(i = 0; isDefined(el = this[i]); i++)
       while (el.firstChild)
         el.removeChild(el.firstChild);
     return this;
@@ -431,11 +432,9 @@ window['$'] = window['jquip'] = (function(){
     });
   };
   p['prop'] = function(name, setVal) {
-    if (typeof setVal === "undefined")
-      return this[0] && this[0][name];
-    return this.each(function() {
-      this[name] = setVal;
-    });
+    if (isDefined(setVal))
+      return this.each(function() { this[name] = setVal; });
+    return this[0] && this[0][name];
   };
   p['clone'] = function() {
     return $(this.map(function() { return this.cloneNode(true); }));
@@ -443,7 +442,7 @@ window['$'] = window['jquip'] = (function(){
   p['toggleClass'] = function(className, val) {
     return this['each'](function() {
       var el = $(this);
-      (typeof val === 'undefined' ? !el.hasClass(className) : val)
+      (isDefined(val) ? val : !el.hasClass(className))
         ? el.addClass(className) : el.removeClass(className);
     });
   };
@@ -491,7 +490,7 @@ window['$'] = window['jquip'] = (function(){
   function cache(el, name, val)
   {
     var id = el[expando];
-    if (typeof val === "undefined")
+    if (!isDefined(val))
       return id && _cache[id] && (name ? _cache[id][name] : _cache[id]);
 
     if (!id) id = el[expando] = jquid++;
@@ -508,13 +507,13 @@ window['$'] = window['jquip'] = (function(){
   }
   function make(arr, els){
     arr.length = (els && els.length || 0);
-    if (arr.length == 0) return arr;
+    if (arr.length === 0) return arr;
     for(var i = 0, l = els.length; i < l; i++)
       arr[i] = els[i];
     return arr;
   }
   function hasClass(els, cls){
-    var cls = " " + cls + " ";
+    cls = " " + cls + " ";
     for(var i = 0, l = els.length; i < l; i++)
       if (eqClass(els[i], cls))
         return true;
@@ -590,7 +589,7 @@ window['$'] = window['jquip'] = (function(){
   } $['loadScript'] = loadScript;
 
   /** @param {...string} var_args */
-  function warn(var_args){ win.console && win.console.warn(arguments) }
+  function warn(var_args){ win.console && win.console.warn(arguments); }
 
   $['each'] = function(o, cb, args){
     var k, i = 0, l = o.length, isObj = l === undefined || isF(o);
@@ -631,7 +630,7 @@ window['$'] = window['jquip'] = (function(){
           : (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
   }
   function filter(sel, els) {
-    return typeof sel === 'undefined' ? $(els) : $(els).filter(sel);
+    return isDefined(sel) ? $(els).filter(sel) : $(els);
   } $['filter'] = filter;
   function _indexOf(arr, val){
     if (arr == null) return -1;
@@ -670,11 +669,11 @@ window['$'] = window['jquip'] = (function(){
       return proxy;
     }
   };
-  function dir(el, dir, until){
-    var matched = [], cur = el[dir];
+  function dir(el, prop, until){
+    var matched = [], cur = el[prop];
     while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))){
       if (cur.nodeType === 1) matched.push(cur);
-      cur = cur[dir];
+      cur = cur[prop];
     }
     return matched;
   } $['dir'] = dir;
@@ -763,7 +762,7 @@ window['$'] = window['jquip'] = (function(){
   function isO(o){ return typeof o == "object"; }
   function isF(o){ return typeof o == "function" || typeOf(o) === "function"; } $['isFunction'] = isF;
   function isA(o){ return typeOf(o) === "array"; } $['isArray'] = Array.isArray || isA;
-  function isAL(o){ return !isS(o) && typeof o.length == 'number' }
+  function isAL(o){ return !isS(o) && typeof o.length == 'number'; }
   function isWin(o){ return o && typeof o == "object" && "setInterval" in o; } $['isWindow'] = isWin;
   function isNan(obj){ return obj == null || !rdigit.test(obj) || isNaN(obj); } $['isNaN'] = isNan;
   function isPlainObj(o){
@@ -883,7 +882,7 @@ window['$'] = window['jquip'] = (function(){
   contains = $['contains'] = docEl.contains
     ? function(a, b){
       return a !== b && (a.contains ? a.contains(b) : true); }
-    : function(){ return false };
+    : function(){ return false; };
   sortOrder = docEl.compareDocumentPosition
     ? (contains = function(a, b){ return !!(a.compareDocumentPosition(b) & 16); }) //assigning contains
       && function(a, b){
@@ -937,8 +936,8 @@ window['$'] = window['jquip'] = (function(){
     $['fn'][name] = function(until, sel){
       var ret = map(this, fn, until), args = slice.call(arguments);
       if (!runtil.test(name)) sel = until;
-      if (typeof sel == "string")
-                ret = filter(sel, ret);
+      if (isS(sel)) ret = filter(sel, ret);
+
       ret = this.length > 1 && !guaranteedUnique[name] ? unique(ret) : ret;
       if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
       return this.ps(ret, name, args.join(","));

@@ -5,6 +5,15 @@
       el = jquip('<div class="foo bar">');
     });
 
+    it('checks for a class', function() {
+      expect(el.hasClass('foo')).toBe(true);
+      expect(el.hasClass('bar')).toBe(true);
+    });
+
+    it('returns false if missing class', function() {
+      expect(el.hasClass('qux')).toBe(false);
+    });
+
     it('removes class if exists', function() {
       el.toggleClass('foo');
       expect(el.hasClass('foo')).toBe(false);
