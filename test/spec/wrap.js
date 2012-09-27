@@ -39,7 +39,7 @@
     it('wraps multiple nodes', function() {
       var list = $('<ul><li>1</li><li>2</li></ul>').appendTo('body');
       list.find('li').contents().wrap('<b>');
-      expect(list.html()).toBe('<li><b>1</b></li><li><b>2</b></li>');
+      expect(list.find('b').length).toBe(2);
 
       list.remove();
     });

@@ -38,13 +38,13 @@
 
     it('gets html of element', function() {
       var el = $('<div><i>Hello</i></div>');
-      expect(el.html()).toBe('<i>Hello</i>');
+      expect(el.html()).toMatch(/<i>Hello<\/i>/i);
     });
 
     it('sets html of element', function() {
       var el = $('<div><i>Hello</i></div>');
       el.html('<b>zing</b>');
-      expect(el.html()).toBe('<b>zing</b>');
+      expect(el.html()).toMatch(/<b>zing<\/b>/i);
     });
 
     describe('text', function() {
