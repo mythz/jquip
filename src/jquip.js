@@ -549,7 +549,7 @@ window['$'] = window['jquip'] = (function(){
       var el, rest = sel.substring(1);
       return ridSelector.test(sel) && ctx === doc
         ? ((el = doc.getElementById(rest)) ? [el] : [])
-        : slice.call(
+        : makeArray(
           rclassSelector.test(sel) && ctx.getElementsByClassName
             ? ctx.getElementsByClassName(rest)
             : rtagSelector.test(sel)

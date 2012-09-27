@@ -103,7 +103,7 @@ $['plug']("events", function($){
     return this['each'](function(i, el){
       addEvt(el, evt, cb, sel, function(e){
         var target = e.target||e.srcElement, nodes = $['$$'](sel, el);
-        while (target && nodes.indexOf(target) < 0)
+        while (target && $['_indexOf'](nodes, target) < 0)
           target = target.parentNode;
         if (target && !(target === el) && !(target === document)){
           cb.call(target, $['extend'](createProxy(e||window.event), {
