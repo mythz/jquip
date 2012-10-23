@@ -141,19 +141,19 @@ window['$'] = window['jquip'] = (function(){
     }
   };
 
-  p['make'] = function(els){
+  $['fn']['make'] = function(els){
     make(this, els);
     return this;
   };
-  p['toArray'] = function() {
+  $['fn']['toArray'] = function() {
     return slice.call(this, 0);
   };
-  p['get'] = function(num){
+  $['fn']['get'] = function(num){
     return isDefined(num)
       ? (num < 0 ? this[this.length + num] : this[num])
       : this['toArray']();
   };
-  p['add'] = function(sel, ctx){
+  $['fn']['add'] = function(sel, ctx){
     var set = typeof sel == "string"
       ? $(sel, ctx)
       : makeArray(sel && sel.nodeType ? [sel] : sel),
@@ -163,13 +163,13 @@ window['$'] = window['jquip'] = (function(){
   function detached(el) {
     return !el || !el.parentNode || el.parentNode.nodeType == 11;
   }
-  p['each'] = function(fn){
+  $['fn']['each'] = function(fn){
       if (!isF(fn)) return this;
       for(var i = 0, l = this.length; i < l; i++)
         fn.call(this[i], i, this[i]);
       return this;
   };
-  p['attr'] = function(name, val){
+  $['fn']['attr'] = function(name, val){
     var el = this[0];
     return (isS(name) && val === undefined)
           ? attr(el, name)
@@ -185,31 +185,31 @@ window['$'] = window['jquip'] = (function(){
       }
     });
   };
-  p['removeAttr'] = function(name){
+  $['fn']['removeAttr'] = function(name){
     return this['each'](function(){
       this.removeAttribute(name);
     });
   };
-  p['data'] = function(name, setVal){
+  $['fn']['data'] = function(name, setVal){
     return  (setVal === undefined)
             ? data(this[0], name)
             : this['each'](function(){
         data(this, name, setVal);
       });
   };
-  p['append'] = function(){
+  $['fn']['append'] = function(){
     return this.dm(arguments, true, function(el){
       if (this.nodeType === 1)
         this.appendChild(el);
     });
   };
-  p['prepend'] = function(){
+  $['fn']['prepend'] = function(){
     return this.dm(arguments, true, function(el){
       if (this.nodeType === 1)
         this.insertBefore(el, this.firstChild);
     });
   };
-  p['before'] = function(){
+  $['fn']['before'] = function(){
     if (this[0] && this[0].parentNode) {
       return this.dm(arguments, false, function(el){
         this.parentNode.insertBefore(el, this);
@@ -217,7 +217,7 @@ window['$'] = window['jquip'] = (function(){
     }
     return this;
   };
-  p['after'] = function(){
+  $['fn']['after'] = function(){
     if (this[0] && this[0].parentNode){
       return this.dm(arguments, false, function(el){
         this.parentNode.insertBefore(el, this.nextSibling);
@@ -225,42 +225,42 @@ window['$'] = window['jquip'] = (function(){
     }
     return this;
   };
-  p['hide'] = function(){
+  $['fn']['hide'] = function(){
     return this['each'](function(){
       cache(this, "display", this.style.display);
       this.style.display = "none";
     });
   };
-  p['show'] = function(){
+  $['fn']['show'] = function(){
     return this['each'](function(){
       this.style.display = cache(this, "display") || display(this.tagName);
     });
   };
-  p['toggle'] = function(){
+  $['fn']['toggle'] = function(){
     return this['each'](function(){
       var el = $(this);
-      $['Expr']['hidden'](this) ? el.show() : el.hide();
+      $['Expr']['hidden'](this) ? el['show']() : el['hide']();
     });
   };
-  p['eq'] = function(i){
+  $['fn']['eq'] = function(i){
     return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
   };
-  p['first'] = function(){
+  $['fn']['first'] = function(){
     return this['eq'](0);
   };
-  p['last'] = function(){
+  $['fn']['last'] = function(){
     return this['eq'](-1);
   };
-  p['slice'] = function(){
+  $['fn']['slice'] = function(){
     return this.ps(slice.apply(this, arguments),
       "slice", slice.call(arguments).join(","));
   };
-  p['map'] = function(cb) {
+  $['fn']['map'] = function(cb) {
     return this.ps(map(this, function(el, i) {
       return cb.call(el, i, el);
     }));
   };
-  p['find'] = function(sel){
+  $['fn']['find'] = function(sel){
     var self = this, i, l;
     if (!isS(sel)){
       return $(sel).filter(function(){
@@ -283,25 +283,25 @@ window['$'] = window['jquip'] = (function(){
     }
     return ret;
   };
-  p['not'] = function(sel){
+  $['fn']['not'] = function(sel){
     return this.ps(winnow(this, sel, false), "not", sel);
   };
-  p['filter'] = function(sel){
+  $['fn']['filter'] = function(sel){
     return this.ps(winnow(this, sel, true), "filter", sel);
   };
-  p['indexOf'] = function(val){
+  $['fn']['indexOf'] = function(val){
     return _indexOf(this, val);
   };
-  p['is'] = function(sel){
+  $['fn']['is'] = function(sel){
     return this.length > 0 && $(this[0]).filter(sel).length > 0;
   };
-  p['remove'] = function(){
+  $['fn']['remove'] = function(){
     for(var i = 0, el; isDefined(el = this[i]); i++) {
       if (el.parentNode) el.parentNode.removeChild(el);
     }
     return this;
   };
-  p['closest'] = function(sel, ctx) {
+  $['fn']['closest'] = function(sel, ctx) {
     var ret=[], i, l, cur;
     for (i=0, l=this.length; i<l; i++){
       cur = this[i];
@@ -319,19 +319,19 @@ window['$'] = window['jquip'] = (function(){
     ret = ret.length > 1 ? unique(ret) : ret;
     return this.ps(ret, "closest", sel);
   };
-  p['val'] = function(setVal){
+  $['fn']['val'] = function(setVal){
     if (!isDefined(setVal)) return (this[0] && this[0].value) || "";
     return this['each'](function(){
       this.value = setVal;
     });
   };
-  p['html'] = function(setHtml){
+  $['fn']['html'] = function(setHtml){
     if (!isDefined(setHtml)) return (this[0] && this[0].innerHTML) || "";
     return this['each'](function(){
       this.innerHTML = setHtml;
     });
   };
-  p['text'] = function(val){
+  $['fn']['text'] = function(val){
     var el = this[0], nt;
     return isDefined(val)
       ? this['empty']()['append']((el && el.ownerDocument || doc).createTextNode(val))
@@ -341,14 +341,14 @@ window['$'] = window['jquip'] = (function(){
           : (nt === 3 || nt === 4) ? el.nodeValue : null)
         : null);
   };
-  p['empty'] = function(){
+  $['fn']['empty'] = function(){
     var i, el;
     for(i = 0; isDefined(el = this[i]); i++)
       while (el.firstChild)
         el.removeChild(el.firstChild);
     return this;
   };
-  p['addClass'] = function(val){
+  $['fn']['addClass'] = function(val){
     var cls, i, l, el, setClass, c, cl;
     if (isF(val))
       return this['each'](function(j){
@@ -374,7 +374,7 @@ window['$'] = window['jquip'] = (function(){
     }
     return this;
   };
-  p['removeClass'] = function(val){
+  $['fn']['removeClass'] = function(val){
     var clss, i, l, el, cls, c, cl;
     if (isF(val)) return this['each'](function(j){
       $(this)['removeClass'](val.call(this, j, this.className));
@@ -396,20 +396,20 @@ window['$'] = window['jquip'] = (function(){
     }
     return this;
   };
-  p['hasClass'] = function(sel){
+  $['fn']['hasClass'] = function(sel){
     return hasClass(this, sel);
   };
-  p['fadeIn'] = function(){
+  $['fn']['fadeIn'] = function(){
     this['each'](function(){
       $(this)['show']();
     });
   };
-  p['fadeOut'] = function(){
+  $['fn']['fadeOut'] = function(){
     this['each'](function(){
       $(this)['hide']();
     });
   };
-  p['serializeArray'] = function() {
+  $['fn']['serializeArray'] = function() {
     return this['map'](function(){
       return this.elements ? makeArray(this.elements) : this;
     }).filter(function(){
@@ -424,26 +424,26 @@ window['$'] = window['jquip'] = (function(){
         : { name: el.name, value: val.replace(rCRLF, "\r\n") };
     }).get();
   };
-  p['wrap'] = function(wrapper) {
+  $['fn']['wrap'] = function(wrapper) {
     return this['each'](function() {
       var wrapperClone = $($(wrapper)[0].cloneNode(false));
-      $(this).before(wrapperClone);
-      wrapperClone.append($(this));
+      $(this)['before'](wrapperClone);
+      wrapperClone['append']($(this));
     });
   };
-  p['prop'] = function(name, setVal) {
+  $['fn']['prop'] = function(name, setVal) {
     if (isDefined(setVal))
-      return this.each(function() { this[name] = setVal; });
+      return this['each'](function() { this[name] = setVal; });
     return this[0] && this[0][name];
   };
-  p['clone'] = function() {
+  $['fn']['clone'] = function() {
     return $(this.map(function() { return this.cloneNode(true); }));
   };
-  p['toggleClass'] = function(className, val) {
+  $['fn']['toggleClass'] = function(className, val) {
     return this['each'](function() {
       var el = $(this);
-      (isDefined(val) ? val : !el.hasClass(className))
-        ? el.addClass(className) : el.removeClass(className);
+      (isDefined(val) ? val : !el['hasClass'](className))
+        ? el['addClass'](className) : el['removeClass'](className);
     });
   };
 
