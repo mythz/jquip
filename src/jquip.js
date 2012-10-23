@@ -302,7 +302,7 @@ window['$'] = window['jquip'] = (function(){
     return this;
   };
   p['closest'] = function(sel, ctx) {
-    var ret=[], i;
+    var ret=[], i, l, cur;
     for (i=0, l=this.length; i<l; i++){
       cur = this[i];
       while (cur){
@@ -740,9 +740,10 @@ window['$'] = window['jquip'] = (function(){
   function eqSI(str1, str2){
     return !str1 || !str2 ? str1 == str2 : str1.toLowerCase() === str2.toLowerCase();
   } $['eqSI'] = eqSI;
-  $['trim'] = trim = strim
-    ? function(text){ return text == null ? "" : strim.call(text); }
-    : function(text){ return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
+ trim = strim
+  ? function(text){ return text == null ? "" : strim.call(text); }
+  : function(text){ return text == null ? "" : text.toString().replace(trimLeft, "").replace(trimRight, ""); };
+  $['trim'] = trim;
   $['indexOf'] = $['inArray'] = function(el, arr){
     if (!arr) return -1;
     if (indexOf) return indexOf.call(arr, el);
