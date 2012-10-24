@@ -56,7 +56,7 @@ window['$'] = window['jquip'] = (function(){
 
   /**
    * @constructor
-   * @param {Object|Element|string|Array.<string>} sel
+   * @param {Object|Element|string|Array.<string>|function()} sel
    * @param {Object=} ctx
    */
   function J(sel, ctx){
@@ -95,6 +95,11 @@ window['$'] = window['jquip'] = (function(){
   }
 
   var ctors=[], plugins={}, jquid=1, _cache={_id:0}, _display = {}, p;
+
+  /**
+   * @param {Object|Element|string|Array.<string>} sel
+   * @param {Object=} ctx
+   */
   function $(sel, ctx){
     return new J(sel, ctx);
   }
@@ -487,6 +492,11 @@ window['$'] = window['jquip'] = (function(){
       return (_indexOf(sel, el) >= 0) === keep;
     });
   }
+  /**
+   * @param {Node} el
+   * @param {string} name
+   * @param {*=} val
+   * */
   function cache(el, name, val)
   {
     var id = el[expando];
@@ -537,7 +547,7 @@ window['$'] = window['jquip'] = (function(){
   } $['walk'] = walk;
 
   /**
-   * @param {string} html
+   * @param {string|Node} sel
    * @param {Object=} ctx
    * @param {Object=} qry
    * */
@@ -570,6 +580,11 @@ window['$'] = window['jquip'] = (function(){
     return (ctx = ctx || doc).querySelectorAll ? makeArray(ctx.querySelectorAll(sel)) : [];
   });
 
+  /**
+   * @param {string} url
+   * @param {function()} cb
+   * @param {boolean=} async
+   * */
   function loadScript(url, cb, async){
     var h = doc.head || doc.getElementsByTagName('head')[0] || docEl,
       s = doc.createElement('script'), rs;
@@ -611,6 +626,11 @@ window['$'] = window['jquip'] = (function(){
     }
     return o;
   };
+  /**
+   * @param {Object|Array} o
+   * @param {function(...)} fn
+   * @param {Object=} ctx
+   * */
   function _each(o, fn, ctx){
     if (o == null) return;
     if (nativeForEach && o.forEach === nativeForEach)
@@ -669,6 +689,11 @@ window['$'] = window['jquip'] = (function(){
       return proxy;
     }
   };
+  /**
+   * @param {Object} el
+   * @param {string} prop
+   * @param {function()=} until
+   * */
   function dir(el, prop, until){
     var matched = [], cur = el[prop];
     while (cur && cur.nodeType !== 9 && (until === undefined || cur.nodeType !== 1 || !$(cur).is(until))){
@@ -684,12 +709,22 @@ window['$'] = window['jquip'] = (function(){
       if (cur.nodeType === 1 && ++num === res) break;
     return cur;
   } $['nth'] = nth;
+
+  /**
+   * @param {Object} n
+   * @param {Object=} el
+   * */
   function sibling(n, el){
     var r = [];
     for(; n; n = n.nextSibling) if (n.nodeType === 1 && n !== el) r.push(n);
     return r;
   } $['sibling'] = sibling;
 
+  /**
+   * @param {Array} els
+   * @param {function(Node,number)} cb
+   * @param {*=} inv
+   * */
   function grep(els, cb, inv){
     var ret = [], retVal;
     inv = !!inv;
@@ -702,7 +737,7 @@ window['$'] = window['jquip'] = (function(){
   } $['grep'] = grep;
   /**
    * @param {Object} els
-   * @param {function} cb
+   * @param {function(...)} cb
    * @param {Object=} arg
    * */
   function map(els, cb, arg){
@@ -725,6 +760,12 @@ window['$'] = window['jquip'] = (function(){
     }
     return ret.concat.apply([], ret);
   } $['map'] = map;
+
+  /**
+   * @param {Node} el
+   * @param {string} name
+   * @param {*=} setVal
+   * */
   function data(el, name, setVal){
     if (!el) return {};
     var res = cache(el, name, setVal);
@@ -789,7 +830,11 @@ window['$'] = window['jquip'] = (function(){
     a1.length = i;
     return a1;
   } $['merge'] = merge;
-  function extend(){
+
+  /**
+   * @param {...} _
+   * */
+  function extend(_){
     var opt, name, src, copy, copyIsArr, clone, args = arguments,
       dst = args[0] || {}, i = 1, aLen = args.length, deep = false;
     if (typeof dst == "boolean"){ deep = dst; dst = args[1] || {}; i = 2; }
@@ -815,6 +860,11 @@ window['$'] = window['jquip'] = (function(){
     }
     return dst;
   } $['extend'] = $['fn']['extend'] = extend;
+
+  /**
+   * @param {Object|string|function()} arr
+   * @param {Array=} res
+   * */
   function makeArray(arr, res){
     var ret = res || [];
     if (arr != null){
@@ -871,6 +921,11 @@ window['$'] = window['jquip'] = (function(){
           frag.appendChild(ret[i]);
     return ret;
   }
+  /**
+   * @param {Object} a
+   * @param {Object} b
+   * @param {number=} ret
+   * */
   var sibChk = function(a, b, ret){
     if (a === b) return ret;
     var cur = a.nextSibling;
