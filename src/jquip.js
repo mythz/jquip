@@ -937,7 +937,7 @@ window['$'] = window['jquip'] = (function(){
     $['fn'][name] = function(until, sel){
       var ret = map(this, fn, until), args = slice.call(arguments);
       if (!runtil.test(name)) sel = until;
-      if (isS(sel)) ret = filter(sel, ret);
+      if (isS(sel)) ret = makeArray(filter(sel, ret));
 
       ret = this.length > 1 && !guaranteedUnique[name] ? unique(ret) : ret;
       if ((this.length > 1 || rmultiselector.test(sel)) && rparentsprev.test(name)) ret = ret.reverse();
