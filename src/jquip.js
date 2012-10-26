@@ -117,7 +117,7 @@ window['$'] = window['jquip'] = (function(){
             if (!first) return this;
           }
           for (i=0, l=this.length; i<l; i++)
-            cb.call(this[i],frag);
+			cb.call(this[i],(i == 0 ? frag : frag.cloneNode(true)));
         }
       }
       return this;
