@@ -225,6 +225,22 @@ window['$'] = window['jquip'] = (function(){
     }
     return this;
   };
+  p['replaceWith'] = function(val){
+    if (isF(val)) {
+      return this['each'](function(i) {
+        var self = $(this), old = self.html();
+        self.replaceWith( val.call(this, i, old) );
+      });
+    } else if (isS(val)) {
+      val = $(val).detach();
+    }
+    return this['each'](function() {
+        var next = this.nextSibling,
+            parent = this.parentNode;
+        parent.removeChild(this);
+        (next ? $(next).before(val) : $(parent).append(val));
+    });
+  };
   p['hide'] = function(){
     return this['each'](function(){
       cache(this, "display", this.style.display);
