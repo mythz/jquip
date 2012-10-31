@@ -226,20 +226,18 @@ window['$'] = window['jquip'] = (function(){
     return this;
   };
   p['replaceWith'] = function(val){
-    if (isF(val)) {
-      return this['each'](function(i) {
-        var self = $(this), old = self.html();
-        self.replaceWith( val.call(this, i, old) );
-      });
-    } else if (isS(val)) {
-      val = $(val).detach();
-    }
-    return this['each'](function() {
+    var self = this, isFunc = isF(val);
+    return this['each'](function(i) {
         var next = this.nextSibling,
-            parent = this.parentNode;
-        parent.removeChild(this);
-        (next ? $(next).before(val) : $(parent).append(val));
-    });
+            parent = this.parentNode,
+            value = isFunc ? val.call(this, i, this) : val;
+        if (parent && parent.nodeType != 11) {
+            parent.removeChild(this);
+            (next ? $(next).before(value) : $(parent).append(value));
+        } else { // detached
+            self[i] = $(value).clone()[0];
+        }
+      });
   };
   p['hide'] = function(){
     return this['each'](function(){
