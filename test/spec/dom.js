@@ -142,4 +142,45 @@
     });
   });
 
+  // $.replaceWith test suite
+  describe('jquip.replaceWith', function() {
+
+    it('Replaces an element by another one', function() {
+      emptyContainer.append(spanTheWorld);
+      $("span", emptyContainer).replaceWith(spanStar);
+      expect(emptyContainer.text()).toEqual("*");
+    });
+
+    it('Can replace target elements by some text', function() {
+      $(".target", twoTargets).replaceWith(" replaced ");
+      expect(twoTargets.text()).toEqual(" replaced  replaced ");
+    });
+
+    it('Elements already presents are removed from their original location', function() {
+      $(listWith3Items.children().first()).replaceWith(listWith3Items.children().last());
+      expect(listWith3Items.text()).toEqual("32");
+    });
+
+    it('Can be used with a function do dynamically generate content', function() {
+      $("li", listWith3Items).replaceWith(function(i, elt){
+          return $("<li>").text(Number($(this).text()) + 1);
+      });
+      expect(listWith3Items.text()).toEqual("234");
+    });
+
+    it('Works with top level disconnected content', function() {
+      var result = listWith3Items.replaceWith(function(i, elt){
+          return $("<ol>").append($(elt).children());
+      });
+      expect(result[0].tagName).toEqual("OL");
+    });
+
+    it('Replaces a parent with one of its children', function() {
+      var result = listWith3Items.replaceWith(listWith3Items.children().first());
+      expect(result[0].tagName).toEqual("LI");
+      expect(result.text()).toEqual("1");
+    });
+
+  });
+
 }(jquip));
