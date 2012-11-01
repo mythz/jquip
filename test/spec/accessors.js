@@ -51,17 +51,12 @@
       });
 
       it('writes attributes', function() {
-        var $header = $("<hgroup><h1>title</h1>\n\n<h2>subtitle</h2></hgroup>");
-        $header.children().each(function(i, elt){
-          var $elt = $(elt);
-          if (elt.tagName == "H1") {
-            $elt.attr("class", "big");
-          } else if (elt.tagName == "H2") {
-            $elt.attr("class", "medium");
-          }
-        });
-        expect($("h1.big",$header).length).toEqual(1);
-        expect($("h2.medium",$header).length).toEqual(1);
+        var $header = $("<div><h1>title</h1>\n\n<h2>subtitle</h2></div>");
+        var h1 = $header.children('h1').attr('alt', 'foo');
+        var h2 = $header.children('h2').attr('name', 'bar');
+
+        expect(h1[0].getAttribute('alt')).toEqual('foo');
+        expect(h2[0].getAttribute('name')).toEqual('bar');
       });
 
     });

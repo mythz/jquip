@@ -3,7 +3,7 @@
   var emptyContainer, spanTheWorld, twoTargets, listWith3Items;
 
   // Appendable test elements
-  var iWillBeIn  = " i will be in ",
+  var iWillBeIn  = "i will be in ",
     theWorld   = "the world",
     spanStar   = $('<span>*</span>'),
     fourthItem = $('<li>4</li>'),
@@ -22,7 +22,7 @@
   // $.append test suite
   describe('jquip.append', function() {
 
-    describe(' with unique targets ', function() {
+    describe('with unique targets', function() {
 
       it('Appends text to an empty container', function() {
         var result = emptyContainer.append(iWillBeIn);
@@ -36,31 +36,31 @@
 
       it('Appends a simple element to an empty container', function() {
         var result = emptyContainer.append(spanStar);
-        expect(result[0].childElementCount).toEqual(1);
-        expect(result.html()).toEqual("<span>*</span>");
+        expect(result.children().length).toEqual(1);
+        expect(result.text()).toEqual("*");
       });
 
       it('Appends a simple element to a text container', function() {
         var result = spanTheWorld.append(spanStar);
-        expect(result[0].childElementCount).toEqual(1);
-        expect(result.html()).toEqual(theWorld + "<span>*</span>");
+        expect(result.children().length).toEqual(1);
+        expect(result.html().toLowerCase()).toEqual(theWorld + "<span>*</span>");
       });
 
       it('Appends a simple element to the end of a container with existing items', function() {
         var result = listWith3Items.append(fourthItem);
-        expect(result[0].childElementCount).toEqual(4);
-        expect(result.html()).toEqual("<li>1</li><li>2</li><li>3</li><li>4</li>");
+        expect(result.children().length).toEqual(4);
+        expect(result.text()).toEqual("1234");
       });
 
       it('Appends multiple elements to the end of a container with existing items', function() {
         var result = listWith3Items.append(fourthItem).append(fiveAndSix);
-        expect(result[0].childElementCount).toEqual(6);
-        expect(result.html()).toEqual("<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li>");
+        expect(result.children().length).toEqual(6);
+        expect(result.text()).toEqual("123456");
       });
 
     });
 
-    describe(' with multiple targets ', function() {
+    describe('with multiple targets', function() {
 
       it('Appends text to multiple containers', function() {
         var targets = twoTargets.children(".target").append(iWillBeIn);
@@ -84,46 +84,46 @@
   // $.prepend test suite
   describe('jquip.prepend', function() {
 
-    describe(' with unique targets ', function() {
+    describe('with unique targets', function() {
 
-      it('Appends text to an empty container', function() {
+      it('Prepends text to an empty container', function() {
         var result = emptyContainer.prepend(iWillBeIn);
         expect(result.text()).toEqual(iWillBeIn);
       });
 
-      it('Appends text to a text container', function() {
+      it('Prepends text to a text container', function() {
         var result = spanTheWorld.prepend(iWillBeIn);
         expect(result.text()).toEqual(iWillBeIn + theWorld);
       });
 
-      it('Appends a simple element to an empty container', function() {
+      it('Prepends a simple element to an empty container', function() {
         var result = emptyContainer.prepend(spanStar);
-        expect(result[0].childElementCount).toEqual(1);
-        expect(result.html()).toEqual("<span>*</span>");
+        expect(result.children().length).toEqual(1);
+        expect(result.html().toLowerCase()).toEqual("<span>*</span>");
       });
 
-      it('Appends a simple element to a text container', function() {
+      it('Prepends a simple element to a text container', function() {
         var result = spanTheWorld.prepend(spanStar);
-        expect(result[0].childElementCount).toEqual(1);
-        expect(result.html()).toEqual("<span>*</span>" + theWorld);
+        expect(result.children().length).toEqual(1);
+        expect(result.html().toLowerCase()).toEqual("<span>*</span>" + theWorld);
       });
 
-      it('Appends a simple element to the end of a container with existing items', function() {
+      it('Prepends a simple element to the end of a container with existing items', function() {
         var result = listWith3Items.prepend(fourthItem);
-        expect(result[0].childElementCount).toEqual(4);
-        expect(result.html()).toEqual("<li>4</li><li>1</li><li>2</li><li>3</li>");
+        expect(result.children().length).toEqual(4);
+        expect(result.text()).toEqual("4123");
       });
 
-      it('Appends multiple elements to the end of a container with existing items', function() {
+      it('Prepends multiple elements to the end of a container with existing items', function() {
         var result = listWith3Items.prepend(fourthItem).prepend(fiveAndSix);
-        expect(result[0].childElementCount).toEqual(6);
-        expect(result.html()).toEqual("<li>5</li><li>6</li><li>4</li><li>1</li><li>2</li><li>3</li>");
+        expect(result.children().length).toEqual(6);
+        expect(result.text()).toEqual("564123");
       });
     });
 
     describe(' with multiple targets ', function() {
 
-      it('Appends text to multiple containers', function() {
+      it('Prepends text to multiple containers', function() {
         var targets = twoTargets.children(".target").prepend(iWillBeIn);
         expect(targets.length).toEqual(2);
         targets.each(function() {
@@ -131,7 +131,7 @@
         });
       });
 
-      it('Appends a simple element to multiple containers', function() {
+      it('Prepends a simple element to multiple containers', function() {
         twoTargets.children(".target").prepend(spanStar);
         expect(twoTargets.find("span").length).toEqual(2);
         twoTargets.find("span").each(function() {
@@ -152,8 +152,8 @@
     });
 
     it('Can replace target elements by some text', function() {
-      $(".target", twoTargets).replaceWith(" replaced ");
-      expect(twoTargets.text()).toEqual(" replaced  replaced ");
+      $(".target", twoTargets).replaceWith("replaced");
+      expect(twoTargets.text()).toEqual("replacedreplaced");
     });
 
     it('Elements already presents are removed from their original location', function() {
