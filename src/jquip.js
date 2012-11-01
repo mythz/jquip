@@ -187,7 +187,7 @@ window['$'] = window['jquip'] = (function(){
   };
   p['removeAttr'] = function(name){
     return this['each'](function(){
-      this.removeAttribute(name);
+      if (this.nodeType == 1) this.removeAttribute(name);
     });
   };
   p['data'] = function(name, setVal){
@@ -639,9 +639,9 @@ window['$'] = window['jquip'] = (function(){
     }
   } $['_each'] = _each;
   function attr(el, name) {
-      return (el && el.nodeName === 'INPUT' && el.type === 'text' && name === 'value')
-          ? el.value
-          : (el ? (el.getAttribute(name) || (name in el ? el[name] : undefined)) : null);
+    if (!el || !el.getAttribute || !name) return; // text nodes or comment nodes don't have attributes
+    var ret = el.hasAttribute && el.hasAttribute(name) ? el.getAttribute(name) : el[name];
+    return (ret === null ? undefined : ret); // el.getAttribute inconsistently return null for non-defined attributes
   }
   function filter(sel, els) {
     return isDefined(sel) ? $(els).filter(sel) : $(els);
