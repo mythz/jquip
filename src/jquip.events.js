@@ -132,7 +132,7 @@ $['plug']("events", function($){
   };
 
   p['off'] = function(evt, sel, cb){
-    return typeof sel === 'string' ? this.undelegate(evt, sel, cb) : this.unbind(evt, cb);
+    return typeof sel === 'string' ? this.undelegate(sel, evt, cb) : this.unbind(evt, cb);
   };
     p['trigger'] = function (evt) {
         return this['each'](function () {
