@@ -122,7 +122,7 @@
         var spy = jasmine.createSpy('cb'),
             inner = $('<span>').appendTo(el);
 
-        el.on('span', 'click', spy);
+        el.on('click', 'span', spy);
         inner.click();
 
         expect(spy).toHaveBeenCalled();
@@ -132,8 +132,8 @@
         var spy = jasmine.createSpy('cb'),
             inner = $('<span>').appendTo(el);
 
-        el.on('span', 'click', spy);
-        el.off('span', 'click', spy);
+        el.on('click', 'span', spy);
+        el.off('click', 'span', spy);
         inner.click();
 
         expect(spy).not.toHaveBeenCalled();
@@ -144,10 +144,10 @@
             spy2 = jasmine.createSpy('cb2'),
             inner = $('<span>').appendTo(el);
 
-        el.on('span', 'click', spy);
-        el.on('span', 'click', spy2);
+        el.on('click', 'span', spy);
+        el.on('click', 'span', spy2);
 
-        el.off('span', 'click');
+        el.off('click', 'span');
         inner.click();
 
         expect(spy).not.toHaveBeenCalled();
