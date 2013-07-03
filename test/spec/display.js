@@ -34,5 +34,14 @@
       el.toggle();
       expect(el.css('display')).toBe('block');
     });
+
+    it('keeps display after being hidden twice', function() {
+      el.css('display', 'inline-block');
+      el.hide();
+      el.hide();
+      expect(el.css('display')).toBe('none');
+      el.show();
+      expect(el.css('display')).toBe('inline-block');
+    });
   });
 }());

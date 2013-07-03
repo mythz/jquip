@@ -241,6 +241,7 @@ window['$'] = window['jquip'] = (function(){
   };
   p['hide'] = function(){
     return this['each'](function(){
+      if (this.style.display == "none") return;
       cache(this, "display", this.style.display);
       this.style.display = "none";
     });
