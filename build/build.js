@@ -1,8 +1,7 @@
 #! /usr/bin/env node
 
-var fs = require("fs"),
-	jsp = require("uglify-js").parser,
-	pro = require("uglify-js").uglify;
+var fs = require("fs");
+var UglifyJS = require("uglify-js");
 
 String.prototype.startsWith = function (str){
 	return this.indexOf(str) === 0;
@@ -15,10 +14,7 @@ files.forEach(function(file) {
 	var srcPath = srcDir + '/' + file, 
 		targetPath = targetDir + '/' + file.replace('.js', '.min.js');
 	var js = fs.readFileSync(srcPath).toString('utf-8');
-	var ast = jsp.parse(js);
-	ast = pro.ast_mangle(ast);
-	ast = pro.ast_squeeze(ast);
-	var minJs = pro.gen_code(ast); 
+	var minJs = UglifyJS.minify(js, {fromString: true}).code; 
 	console.log("writing " + file);
 	if (file.startsWith("jquip") && !file.startsWith("jquip.q-"))
 	{
