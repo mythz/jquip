@@ -19,6 +19,33 @@
 
   beforeEach(initTargets);
 
+  // $.html test suite
+  describe('jquip.html', function() {
+
+    describe('with unique targets', function() {
+
+      it('Appends text to an empty container', function() {
+        var result = emptyContainer.html(iWillBeIn);
+        expect(result.text()).toEqual(iWillBeIn);
+      });
+
+      it('Replaces content by another jquip element', function() {
+        emptyContainer.html(spanTheWorld);
+        $("span", emptyContainer).html($(spanStar));
+        expect(emptyContainer.text()).toEqual("*");
+      });
+
+      it('Replaces content by another dom element', function() {
+        var domElement = document.createElement('P');
+        domElement.innerHTML = "the moon";
+        emptyContainer.html(spanTheWorld);
+        $("span", emptyContainer).html(domElement);
+        expect(emptyContainer.text()).toEqual("the moon");
+      });
+
+    });
+  });
+
   // $.append test suite
   describe('jquip.append', function() {
 
