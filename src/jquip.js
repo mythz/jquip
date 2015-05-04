@@ -107,7 +107,7 @@ window['$'] = window['jquip'] = (function(){
       var value = args[0], parent, frag, first, l, i;
       if (value){
         if (this[0]) {
-          if (!(frag = value.nodeType === 3 && value)){
+          if (!(frag = (value.nodeType === 1 || value.nodeType === 3) && value)){
             parent = value && value.parentNode;
             frag = parent && parent.nodeType === 11 && parent.childNodes.length === this.length
               ? parent
@@ -342,6 +342,8 @@ window['$'] = window['jquip'] = (function(){
   };
   p['html'] = function(setHtml){
     if (!isDefined(setHtml)) return (this[0] && this[0].innerHTML) || "";
+    if (!isS(setHtml))
+      return this.empty().append(setHtml);
     return this['each'](function(){
       this.innerHTML = setHtml;
     });

@@ -52,6 +52,11 @@ We would still like to hear feedback on issues/non-implemented core functionalit
 
 ## News
 
+### v.03.1
+
+  - Fixed `$().html` method to support DOM elements (for Backbone and other libraries)
+
+
 ### v.03
 
   - Intended to be last code change to significantly effect the size and API in the core jquip.js
