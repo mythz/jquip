@@ -166,7 +166,8 @@ window['$'] = window['jquip'] = (function(){
   p['each'] = function(fn){
       if (!isF(fn)) return this;
       for(var i = 0, l = this.length; i < l; i++)
-        fn.call(this[i], i, this[i]);
+        if ( fn.call(this[i], i, this[i]) === false )
+          break;
       return this;
   };
   p['attr'] = function(name, val){
