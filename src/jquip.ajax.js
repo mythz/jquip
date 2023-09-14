@@ -92,14 +92,15 @@ $['plug']("ajax", function ($) {
       var isPost = o['type'] == "POST" || o['type'] == "PUT";
       if( o['data'] && o['processData'] && typeof o['data'] == 'object' )
           data = $['formData'](o['data']);
-
+      
+      var d = url.indexOf('?') >= 0 ? '&' : '?'
       if (!isPost && data) {
-          url += "?" + data;
+          url += d + data;
           data = null;
           if(!cache)
             url=url+"&_="+(new Date().getTime());
       }else(!isPost && !cache)
-          url=url+"?_="+(new Date().getTime());
+          url+=d+"_="+(new Date().getTime());
       cache=null;
       xhr.open(o['type'], url);
 
